@@ -1,0 +1,33 @@
+{
+  "passed": true,
+  "initial_pose": [
+    -2.0,
+    -0.5
+  ],
+  "goal": [
+    -2.0,
+    0.5
+  ],
+  "lifecycle_states": {
+    "amcl": "active",
+    "map_server": "active",
+    "planner_server": "active",
+    "controller_server": "active",
+    "bt_navigator": "active"
+  },
+  "goal_accepted": true,
+  "navigation_wall_seconds": 8.603,
+  "action_status": 4,
+  "odometry_path_metres": 1.181,
+  "final_localized_pose": [
+    -1.8918922092422625,
+    0.48163722846751655
+  ],
+  "goal_error_metres": 0.11,
+  "elapsed_wall_seconds": 14.575,
+  "scan_messages": 68,
+  "valid_scan_messages": 68,
+  "clock_advanced_seconds": 13.488,
+  "odometry_samples": 375,
+  "evidence_saved_at": "2026-10-09T00:10:14.058948+03:30"
+}

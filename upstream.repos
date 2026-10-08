@@ -1,0 +1,11 @@
+# Source references observed on 2026-10-08. The initial demo uses apt binaries.
+repositories:
+  navigation2:
+    type: git
+    url: https://github.com/ros-navigation/navigation2.git
+    version: 645abd95f2be02a13ca539b29c2ddc065db34f89
+  nav2_minimal_turtlebot_simulation:
+    type: git
+    url: https://github.com/ros-navigation/nav2_minimal_turtlebot_simulation.git
+    version: f2e881b71061bd0569d5df449b43f9336dd62ff5
+
