@@ -1,0 +1,12 @@
+# The static cars are visual locations for future edge workers.
+# No application computation is offloaded by the scene launcher.
+enabled: false
+transport: ros2_dds
+link_model: application_level_emulation
+defaults:
+  publish_rate_hz: null
+  latency_ms: null
+  bandwidth_mbps: null
+  packet_loss_probability: null
+  coverage_radius_m: null
+# Supply rates and link parameters before enabling an actual transport experiment.

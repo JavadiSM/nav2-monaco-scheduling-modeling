@@ -6,7 +6,8 @@ pid_file="$project_dir/artifacts/demo.pid"
 demo_pid=$(cat "$pid_file")
 [[ "$demo_pid" =~ ^[0-9]+$ ]] || { echo 'Invalid demo PID file.' >&2; exit 1; }
 [[ -r /proc/$demo_pid/cmdline ]] || { echo 'The recorded demo has already exited.'; exit 0; }
-if ! tr '\0' ' ' < "/proc/$demo_pid/cmdline" | grep -q 'ros2 launch nav2_bringup tb3_simulation_launch.py'; then
+demo_command=$(tr '\0' ' ' < "/proc/$demo_pid/cmdline")
+if [[ "$demo_command" != *'ros2 launch nav2_bringup tb3_simulation_launch.py'* && "$demo_command" != *"ros2 launch $project_dir/launch/monaco.launch.py"* ]]; then
   echo 'The recorded PID belongs to another process; refusing to stop it.' >&2
   exit 1
 fi

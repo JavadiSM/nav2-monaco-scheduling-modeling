@@ -1,0 +1,37 @@
+{
+  "passed": true,
+  "full_course": false,
+  "communication_enabled": false,
+  "scheduler": "upstream_default",
+  "moving_vehicles": 1,
+  "static_edge_car_models": 19,
+  "test_initial_checkpoint": 9,
+  "requested_targets": 3,
+  "action_status": 4,
+  "missed_waypoints": [],
+  "final_estimated_pose": [
+    -8.341419780097445,
+    4.971731448362694
+  ],
+  "final_goal_error_m": 0.25208336885517646,
+  "minimum_estimated_distance_to_targets_m": [
+    0.14446965161187128,
+    0.08528700672486843,
+    0.25208336885517646
+  ],
+  "success_wall_time": 1791496969.3351707,
+  "start_wall_time": 1791496885.1533377,
+  "end_wall_time": 1791496969.338597,
+  "elapsed_wall_seconds": 84.185,
+  "valid_lidar_messages": 359,
+  "odometry_distance_m": 26.154437316915196,
+  "feedback_target_indices": [
+    0,
+    1,
+    2
+  ],
+  "backup_behaviors": 0,
+  "spin_behaviors": 0,
+  "wait_behaviors": 0,
+  "checkpoint_11_lead_m": 1.5
+}

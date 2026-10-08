@@ -5,7 +5,7 @@ source "$project_dir/scripts/environment.sh"
 mkdir -p "$project_dir/artifacts"
 if [[ -f "$project_dir/artifacts/demo.pid" ]]; then
   previous_pid=$(cat "$project_dir/artifacts/demo.pid")
-  if [[ "$previous_pid" =~ ^[0-9]+$ ]] && [[ -r /proc/$previous_pid/cmdline ]] && tr '\0' ' ' < "/proc/$previous_pid/cmdline" | grep -q 'ros2 launch nav2_bringup tb3_simulation_launch.py'; then
+  if [[ "$previous_pid" =~ ^[0-9]+$ ]] && [[ -r /proc/$previous_pid/cmdline ]] && tr '\0' ' ' < "/proc/$previous_pid/cmdline" | grep -q 'ros2 launch'; then
     echo 'This project demo is already running. Stop it with: bash scripts/stop_demo.sh' >&2
     exit 1
   fi

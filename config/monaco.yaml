@@ -1,0 +1,87 @@
+# Hand-designed approximation of the user's Monaco outline; units are metres.
+name: monaco_inspired_open_circuit
+pixel_scale: 0.07
+pixel_origin: [380, 210]
+road_width: 1.30
+map_resolution: 0.05
+barrier_height: 0.40
+start: [145, 164]
+finish: [119, 198]
+corners:
+  - {id: 1, name: Sainte Devote, point: [267, 92]}
+  - {id: 2, name: Beau Rivage, point: [393, 211]}
+  - {id: 3, name: Massenet, point: [480, 267]}
+  - {id: 4, name: Casino, point: [543, 201]}
+  - {id: 5, name: Mirabeau Haute, point: [648, 205]}
+  - {id: 6, name: Grand Hotel Hairpin, point: [600, 295]}
+  - {id: 7, name: Mirabeau Bas, point: [663, 238]}
+  - {id: 8, name: Portier, point: [692, 263]}
+  - {id: 9, name: Tunnel, point: [550, 330]}
+  - {id: 10, name: Nouvelle Chicane A, point: [379, 247]}
+  - {id: 11, name: Nouvelle Chicane B, point: [359, 242], checkpoint_lead_m: 1.50}
+  - {id: 12, name: Tabac, point: [252, 132]}
+  - {id: 13, name: Louis Chiron A, point: [199, 154]}
+  - {id: 14, name: Louis Chiron B, point: [188, 184]}
+  - {id: 15, name: Piscine A, point: [157, 218]}
+  - {id: 16, name: Piscine B, point: [135, 212]}
+  - {id: 17, name: La Rascasse Approach, point: [115, 263]}
+  - {id: 18, name: La Rascasse, point: [98, 318]}
+  - {id: 19, name: Antony Noghes, point: [55, 282]}
+# Intermediate shape anchors, interleaved with the named corners.
+shape:
+  - [145, 164]
+  - [211, 112]
+  - [248, 101]
+  - [267, 92]
+  - [282, 117]
+  - [329, 160]
+  - [368, 199]
+  - [393, 211]
+  - [438, 249]
+  - [480, 267]
+  - [505, 259]
+  - [523, 235]
+  - [529, 212]
+  - [543, 201]
+  - [603, 204]
+  - [648, 205]
+  - [650, 218]
+  - [612, 249]
+  - [592, 271]
+  - [600, 295]
+  - [623, 284]
+  - [646, 252]
+  - [663, 238]
+  - [692, 263]
+  - [686, 274]
+  - [625, 308]
+  - [582, 324]
+  - [550, 330]
+  - [503, 314]
+  - [452, 283]
+  - [403, 261]
+  - [379, 247]
+  - [373, 229]
+  - [359, 242]
+  - [344, 218]
+  - [302, 175]
+  - [274, 149]
+  - [252, 132]
+  - [228, 138]
+  - [199, 154]
+  - [187, 167]
+  - [188, 184]
+  - [174, 198]
+  - [157, 218]
+  - [135, 212]
+  - [126, 231]
+  - [115, 263]
+  - [93, 278]
+  - [90, 294]
+  - [98, 318]
+  - [78, 315]
+  - [56, 294]
+  - [55, 282]
+  - [75, 253]
+  - [98, 224]
+  - [119, 198]
