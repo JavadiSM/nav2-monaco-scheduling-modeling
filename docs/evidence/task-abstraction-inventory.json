@@ -1,0 +1,602 @@
+{
+  "inspection_date": "2026-10-09",
+  "baseline_commit": "3f11a7ec3bc02cd307f8d8a960be1d01046a2a60",
+  "kind": "facts_and_candidate_boundaries_only; no scheduler or CPU emulation implemented",
+  "runtime_package_versions": {
+    "nav2": "1.3.13",
+    "rclcpp": "28.1.22",
+    "tracetools": "8.2.6"
+  },
+  "configuration_sha256": {
+    "scenarios/monaco/nav2_params.yaml": "af600b86b37ebfa96faf020070d207e7b987679394b8f3f19ea0a06d1c775813",
+    "scenarios/monaco/racecar.sdf": "8d6d048a3a5873ab09dfbdb20a21ed2a0d1b588f6d2a48fcc97e869850940b02",
+    "scenarios/monaco/world.sdf": "434fb2acd695405d1cf707a1c619a76f24eee15749fd9239ac0e16cc7db79580",
+    "scenarios/monaco/navigate_through_poses.xml": "82475c2a954c5aa5236d422f9a20b1b4000c7a8478d6645424a4f3b3efd058b6",
+    "launch/monaco.launch.py": "cc2e235703a679a920233643535551830c46023f0befb1009ca53f07ba67b14c",
+    "scripts/drive_monaco.py": "99918aeea316aa7f49378c908ef092a7ef0171b8b149e4fd751dd948379a1fa8"
+  },
+  "candidate_real_work_units": [
+    {
+      "name": "control_iteration",
+      "nominal_frequency_hz": 20.0,
+      "nominal_period_ms": 50.0,
+      "release_clock_in_current_code": "host_WallRate",
+      "release_semantics": "loop_iteration_while_FollowPath_active; overload may skip nominal cycles",
+      "candidate_measurement_boundary": "ControllerServer.computeAndPublishVelocity / MPPI.computeVelocityCommands",
+      "notes": "Scope must specify wrapper, lock wait, visualization and helper noise thread separately.",
+      "measured_cpu_demand_ms": null,
+      "formal_deadline_ms": null,
+      "criticality": null,
+      "A15_cost_ms": null,
+      "A7_cost_ms": null,
+      "observed_max_cpu_demand_ms": null
+    },
+    {
+      "name": "local_costmap_update",
+      "nominal_frequency_hz": 5.0,
+      "nominal_period_ms": 200.0,
+      "release_clock_in_current_code": "host_WallRate",
+      "release_semantics": "dedicated_update_loop",
+      "candidate_measurement_boundary": "Costmap2DROS.updateMap",
+      "notes": "Publish frequency is different from compute update frequency; shared-state versions matter.",
+      "measured_cpu_demand_ms": null,
+      "formal_deadline_ms": null,
+      "criticality": null,
+      "A15_cost_ms": null,
+      "A7_cost_ms": null,
+      "observed_max_cpu_demand_ms": null
+    },
+    {
+      "name": "global_costmap_update",
+      "nominal_frequency_hz": 1.0,
+      "nominal_period_ms": 1000.0,
+      "release_clock_in_current_code": "host_WallRate",
+      "release_semantics": "dedicated_update_loop",
+      "candidate_measurement_boundary": "Costmap2DROS.updateMap",
+      "notes": "Publish frequency is different from compute update frequency; shared-state versions matter.",
+      "measured_cpu_demand_ms": null,
+      "formal_deadline_ms": null,
+      "criticality": null,
+      "A15_cost_ms": null,
+      "A7_cost_ms": null,
+      "observed_max_cpu_demand_ms": null
+    },
+    {
+      "name": "amcl_scan_callback",
+      "nominal_frequency_hz": null,
+      "nominal_period_ms": null,
+      "release_clock_in_current_code": "sim_timestamped_scan_and_TF_arrival",
+      "release_semantics": "subscription plus TF message filter; expensive update is motion/force conditional",
+      "candidate_measurement_boundary": "AmclNode.laserReceived; branch/filter/resample spans",
+      "notes": "Sensor period is 200 ms; no separate fixed T for heavy particle update.",
+      "measured_cpu_demand_ms": null,
+      "formal_deadline_ms": null,
+      "criticality": null,
+      "A15_cost_ms": null,
+      "A7_cost_ms": null,
+      "observed_max_cpu_demand_ms": null
+    },
+    {
+      "name": "planning_request",
+      "nominal_frequency_hz": 1.0,
+      "nominal_period_ms": 1000.0,
+      "release_clock_in_current_code": "host_chrono_high_resolution_clock_rate_limiter",
+      "release_semantics": "action_request_from_BT; limited rate, not exact periodic release",
+      "candidate_measurement_boundary": "PlannerServer.computePlanThroughPoses plus getPlan segments",
+      "notes": "Number of remaining goal segments changes; planning_time is elapsed ROS time, not CPU demand.",
+      "measured_cpu_demand_ms": null,
+      "formal_deadline_ms": null,
+      "criticality": null,
+      "A15_cost_ms": null,
+      "A7_cost_ms": null,
+      "observed_max_cpu_demand_ms": null
+    },
+    {
+      "name": "mppi_noise_generation",
+      "nominal_frequency_hz": null,
+      "nominal_period_ms": null,
+      "release_clock_in_current_code": "host_condition_variable",
+      "release_semantics": "triggered by optimizer iteration; background thread",
+      "candidate_measurement_boundary": "NoiseGenerator.generateNoisedControls / setNoisedControls",
+      "notes": "regenerate_noises=true in this scene; not covered by the main-thread CPU clock.",
+      "measured_cpu_demand_ms": null,
+      "formal_deadline_ms": null,
+      "criticality": null,
+      "A15_cost_ms": null,
+      "A7_cost_ms": null,
+      "observed_max_cpu_demand_ms": null
+    },
+    {
+      "name": "velocity_smoothing_tick",
+      "nominal_frequency_hz": 20.0,
+      "nominal_period_ms": 50.0,
+      "release_clock_in_current_code": "host_create_wall_timer",
+      "release_semantics": "periodic_callback_reading_cached_command",
+      "candidate_measurement_boundary": "VelocitySmoother.smootherTimer",
+      "notes": "Command subscription is a separate callback.",
+      "measured_cpu_demand_ms": null,
+      "formal_deadline_ms": null,
+      "criticality": null,
+      "A15_cost_ms": null,
+      "A7_cost_ms": null,
+      "observed_max_cpu_demand_ms": null
+    },
+    {
+      "name": "collision_check",
+      "nominal_frequency_hz": null,
+      "nominal_period_ms": null,
+      "release_clock_in_current_code": "smoothed_command_arrival",
+      "release_semantics": "message_callback_reading_scan_and_TF_state",
+      "candidate_measurement_boundary": "CollisionMonitor.cmdVelInCallbackStamped / cmdVelInCallbackUnstamped / process",
+      "notes": "Typical command rate follows smoothing; not an independent configured compute period.",
+      "measured_cpu_demand_ms": null,
+      "formal_deadline_ms": null,
+      "criticality": null,
+      "A15_cost_ms": null,
+      "A7_cost_ms": null,
+      "observed_max_cpu_demand_ms": null
+    },
+    {
+      "name": "bt_tick",
+      "nominal_frequency_hz": 100.0,
+      "nominal_period_ms": 10.0,
+      "release_clock_in_current_code": "host_WallRate",
+      "release_semantics": "active_navigation_tree_tick",
+      "candidate_measurement_boundary": "BehaviorTreeEngine.run / tree.tickOnce",
+      "notes": "Action workers may keep working outside the callback executor.",
+      "measured_cpu_demand_ms": null,
+      "formal_deadline_ms": null,
+      "criticality": null,
+      "A15_cost_ms": null,
+      "A7_cost_ms": null,
+      "observed_max_cpu_demand_ms": null
+    }
+  ],
+  "source_sensors": [
+    {
+      "name": "tb3_imu",
+      "type": "imu",
+      "nominal_frequency_hz": 200.0,
+      "clock": "Gazebo simulation time"
+    },
+    {
+      "name": "hls_lfcd_lds",
+      "type": "gpu_lidar",
+      "nominal_frequency_hz": 5.0,
+      "clock": "Gazebo simulation time"
+    },
+    {
+      "name": "intel_realsense_r200_depth",
+      "type": "depth",
+      "nominal_frequency_hz": 5.0,
+      "clock": "Gazebo simulation time"
+    }
+  ],
+  "odom_publish_frequency_hz": 30.0,
+  "physics_max_step_size_s": 0.003,
+  "workload_features": {
+    "MPPI": {
+      "batch_size": 2000,
+      "time_steps": 56,
+      "iteration_count": 1,
+      "model_dt": 0.05,
+      "regenerate_noises": true,
+      "visualize": true
+    },
+    "AMCL": {
+      "min_particles": 500,
+      "max_particles": 2000,
+      "max_beams": 120,
+      "update_min_d": 0.05,
+      "update_min_a": 0.05,
+      "resample_interval": 1
+    },
+    "global_map_pixels": [
+      1009,
+      446
+    ],
+    "local_costmap_metres": [
+      3,
+      3
+    ],
+    "costmap_resolution_m": 0.05
+  },
+  "existing_runtime_limits_not_formal_deadlines": {
+    "controller_costmap_wait_s": 0.3,
+    "planner_costmap_wait_s": 1.0,
+    "velocity_command_timeout_s": 1.0,
+    "collision_source_timeout_s": 1.0,
+    "progress_allowance_s": 10.0
+  },
+  "existing_lap_evidence": {
+    "passed": true,
+    "elapsed_wall_seconds": 322.197,
+    "signal_counts": {
+      "pose_samples": 1363,
+      "velocity_samples": 7653,
+      "target_events": 20
+    },
+    "contains_task_CPU_spans": false,
+    "contains_causal_job_graph": false
+  },
+  "tooling": {
+    "tracetools_installed": true,
+    "tracepoints_not_disabled_in_header": true,
+    "lttng_cli_installed": true,
+    "ros2_trace_CLI_available": false,
+    "LTTng_session_daemon_active_at_inspection": false,
+    "kernel_tracing_capability_tested": false,
+    "recorded_task_execution_trace_available": false
+  },
+  "offload_workers_active": false,
+  "CPU_target_calibration_available": false,
+  "runtime_graph_after_mission": {
+    "kind": "read_only_discovery_after_mission",
+    "scan_sample": {
+      "ranges_count": 360,
+      "intensities_count": 360,
+      "scan_time_s": 0.0,
+      "time_increment_s": 0.0,
+      "range_min_m": 9.999999747378752e-06,
+      "range_max_m": 20.0
+    },
+    "topics": [
+      {
+        "topic": "/scan",
+        "publishers": [
+          {
+            "node": "/ros_gz_bridge",
+            "type": "sensor_msgs/msg/LaserScan",
+            "depth": 0,
+            "reliability": "RELIABLE"
+          }
+        ],
+        "subscribers": [
+          {
+            "node": "/amcl",
+            "type": "sensor_msgs/msg/LaserScan",
+            "depth": 0,
+            "reliability": "BEST_EFFORT"
+          },
+          {
+            "node": "/collision_monitor",
+            "type": "sensor_msgs/msg/LaserScan",
+            "depth": 0,
+            "reliability": "BEST_EFFORT"
+          },
+          {
+            "node": "/local_costmap/local_costmap",
+            "type": "sensor_msgs/msg/LaserScan",
+            "depth": 0,
+            "reliability": "BEST_EFFORT"
+          },
+          {
+            "node": "/global_costmap/global_costmap",
+            "type": "sensor_msgs/msg/LaserScan",
+            "depth": 0,
+            "reliability": "BEST_EFFORT"
+          },
+          {
+            "node": "/rviz",
+            "type": "sensor_msgs/msg/LaserScan",
+            "depth": 0,
+            "reliability": "BEST_EFFORT"
+          }
+        ]
+      },
+      {
+        "topic": "/odom",
+        "publishers": [
+          {
+            "node": "/ros_gz_bridge",
+            "type": "nav_msgs/msg/Odometry",
+            "depth": 0,
+            "reliability": "RELIABLE"
+          }
+        ],
+        "subscribers": [
+          {
+            "node": "/controller_server",
+            "type": "nav_msgs/msg/Odometry",
+            "depth": 0,
+            "reliability": "BEST_EFFORT"
+          },
+          {
+            "node": "/bt_navigator",
+            "type": "nav_msgs/msg/Odometry",
+            "depth": 0,
+            "reliability": "BEST_EFFORT"
+          }
+        ]
+      },
+      {
+        "topic": "/tf",
+        "publishers": [
+          {
+            "node": "/ros_gz_bridge",
+            "type": "tf2_msgs/msg/TFMessage",
+            "depth": 0,
+            "reliability": "RELIABLE"
+          },
+          {
+            "node": "/robot_state_publisher",
+            "type": "tf2_msgs/msg/TFMessage",
+            "depth": 0,
+            "reliability": "RELIABLE"
+          },
+          {
+            "node": "/amcl",
+            "type": "tf2_msgs/msg/TFMessage",
+            "depth": 0,
+            "reliability": "RELIABLE"
+          }
+        ],
+        "subscribers": [
+          {
+            "node": "/amcl",
+            "type": "tf2_msgs/msg/TFMessage",
+            "depth": 0,
+            "reliability": "RELIABLE"
+          },
+          {
+            "node": "/transform_listener_impl_7fd754002010",
+            "type": "tf2_msgs/msg/TFMessage",
+            "depth": 0,
+            "reliability": "RELIABLE"
+          },
+          {
+            "node": "/smoother_server",
+            "type": "tf2_msgs/msg/TFMessage",
+            "depth": 0,
+            "reliability": "RELIABLE"
+          },
+          {
+            "node": "/transform_listener_impl_7fd720002080",
+            "type": "tf2_msgs/msg/TFMessage",
+            "depth": 0,
+            "reliability": "RELIABLE"
+          },
+          {
+            "node": "/route_server",
+            "type": "tf2_msgs/msg/TFMessage",
+            "depth": 0,
+            "reliability": "RELIABLE"
+          },
+          {
+            "node": "/behavior_server",
+            "type": "tf2_msgs/msg/TFMessage",
+            "depth": 0,
+            "reliability": "RELIABLE"
+          },
+          {
+            "node": "/collision_monitor",
+            "type": "tf2_msgs/msg/TFMessage",
+            "depth": 0,
+            "reliability": "RELIABLE"
+          },
+          {
+            "node": "/bt_navigator",
+            "type": "tf2_msgs/msg/TFMessage",
+            "depth": 0,
+            "reliability": "RELIABLE"
+          },
+          {
+            "node": "/docking_server",
+            "type": "tf2_msgs/msg/TFMessage",
+            "depth": 0,
+            "reliability": "RELIABLE"
+          },
+          {
+            "node": "/transform_listener_impl_5583c4cce270",
+            "type": "tf2_msgs/msg/TFMessage",
+            "depth": 0,
+            "reliability": "RELIABLE"
+          },
+          {
+            "node": "/transform_listener_impl_5583c556f4f0",
+            "type": "tf2_msgs/msg/TFMessage",
+            "depth": 0,
+            "reliability": "RELIABLE"
+          }
+        ]
+      },
+      {
+        "topic": "/plan",
+        "publishers": [
+          {
+            "node": "/planner_server",
+            "type": "nav_msgs/msg/Path",
+            "depth": 0,
+            "reliability": "RELIABLE"
+          },
+          {
+            "node": "/route_server",
+            "type": "nav_msgs/msg/Path",
+            "depth": 0,
+            "reliability": "RELIABLE"
+          }
+        ],
+        "subscribers": [
+          {
+            "node": "/rviz",
+            "type": "nav_msgs/msg/Path",
+            "depth": 0,
+            "reliability": "RELIABLE"
+          }
+        ]
+      },
+      {
+        "topic": "/cmd_vel_nav",
+        "publishers": [
+          {
+            "node": "/controller_server",
+            "type": "geometry_msgs/msg/Twist",
+            "depth": 0,
+            "reliability": "RELIABLE"
+          },
+          {
+            "node": "/behavior_server",
+            "type": "geometry_msgs/msg/Twist",
+            "depth": 0,
+            "reliability": "RELIABLE"
+          },
+          {
+            "node": "/behavior_server",
+            "type": "geometry_msgs/msg/Twist",
+            "depth": 0,
+            "reliability": "RELIABLE"
+          },
+          {
+            "node": "/behavior_server",
+            "type": "geometry_msgs/msg/Twist",
+            "depth": 0,
+            "reliability": "RELIABLE"
+          },
+          {
+            "node": "/behavior_server",
+            "type": "geometry_msgs/msg/Twist",
+            "depth": 0,
+            "reliability": "RELIABLE"
+          },
+          {
+            "node": "/behavior_server",
+            "type": "geometry_msgs/msg/Twist",
+            "depth": 0,
+            "reliability": "RELIABLE"
+          }
+        ],
+        "subscribers": [
+          {
+            "node": "/velocity_smoother",
+            "type": "geometry_msgs/msg/Twist",
+            "depth": 0,
+            "reliability": "RELIABLE"
+          }
+        ]
+      },
+      {
+        "topic": "/cmd_vel_smoothed",
+        "publishers": [
+          {
+            "node": "/velocity_smoother",
+            "type": "geometry_msgs/msg/Twist",
+            "depth": 0,
+            "reliability": "RELIABLE"
+          }
+        ],
+        "subscribers": [
+          {
+            "node": "/collision_monitor",
+            "type": "geometry_msgs/msg/Twist",
+            "depth": 0,
+            "reliability": "RELIABLE"
+          }
+        ]
+      },
+      {
+        "topic": "/cmd_vel",
+        "publishers": [
+          {
+            "node": "/collision_monitor",
+            "type": "geometry_msgs/msg/Twist",
+            "depth": 0,
+            "reliability": "RELIABLE"
+          },
+          {
+            "node": "/docking_server",
+            "type": "geometry_msgs/msg/Twist",
+            "depth": 0,
+            "reliability": "RELIABLE"
+          }
+        ],
+        "subscribers": [
+          {
+            "node": "/ros_gz_bridge",
+            "type": "geometry_msgs/msg/Twist",
+            "depth": 0,
+            "reliability": "RELIABLE"
+          }
+        ]
+      },
+      {
+        "topic": "/amcl_pose",
+        "publishers": [
+          {
+            "node": "/amcl",
+            "type": "geometry_msgs/msg/PoseWithCovarianceStamped",
+            "depth": 0,
+            "reliability": "RELIABLE"
+          }
+        ],
+        "subscribers": []
+      },
+      {
+        "topic": "/local_costmap/costmap",
+        "publishers": [
+          {
+            "node": "/local_costmap/local_costmap",
+            "type": "nav_msgs/msg/OccupancyGrid",
+            "depth": 0,
+            "reliability": "RELIABLE"
+          }
+        ],
+        "subscribers": [
+          {
+            "node": "/rviz",
+            "type": "nav_msgs/msg/OccupancyGrid",
+            "depth": 0,
+            "reliability": "RELIABLE"
+          }
+        ]
+      },
+      {
+        "topic": "/global_costmap/costmap",
+        "publishers": [
+          {
+            "node": "/global_costmap/global_costmap",
+            "type": "nav_msgs/msg/OccupancyGrid",
+            "depth": 0,
+            "reliability": "RELIABLE"
+          }
+        ],
+        "subscribers": [
+          {
+            "node": "/rviz",
+            "type": "nav_msgs/msg/OccupancyGrid",
+            "depth": 0,
+            "reliability": "RELIABLE"
+          }
+        ]
+      },
+      {
+        "topic": "/imu",
+        "publishers": [
+          {
+            "node": "/ros_gz_bridge",
+            "type": "sensor_msgs/msg/Imu",
+            "depth": 0,
+            "reliability": "RELIABLE"
+          }
+        ],
+        "subscribers": []
+      },
+      {
+        "topic": "/camera/image_raw",
+        "publishers": [],
+        "subscribers": []
+      }
+    ],
+    "reported_qos_depth_caveat": "Discovery reported depth 0; not a validated application queue size. Read source and trace buffer/overwrite behavior."
+  },
+  "pending_contracts": [
+    "job granularity",
+    "release/skip/drop and buffering policy",
+    "stateful sequencing and commit",
+    "C_i,h calibration/assumptions",
+    "preemption/migration model",
+    "core/server assignment",
+    "scheduler/transport overheads",
+    "D_i",
+    "criticality policy"
+  ]
+}

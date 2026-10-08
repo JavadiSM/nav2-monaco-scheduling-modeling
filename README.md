@@ -88,3 +88,7 @@ git push -u origin main
 - [Minimal TurtleBot simulation](https://github.com/ros-navigation/nav2_minimal_turtlebot_simulation)
 - [Gazebo Sim](https://github.com/gazebosim/gz-sim)
 - [ROS apt source configuration](https://github.com/ros-infrastructure/ros-apt-source)
+
+## Task abstraction investigation
+
+The [Persian technical study](docs/task-abstraction-study.fa.md) separates existing frequencies, triggers and timing fields from unmeasured CPU demand and proposes a causal job DAG and controlled virtual-time result delivery for modeled CPUs. [The inspection inventory](docs/evidence/task-abstraction-inventory.json) preserves configuration hashes and a read-only runtime graph snapshot. This is a design investigation; profiling, CPU calibration and custom scheduling are not implemented.
