@@ -24,7 +24,8 @@ def main():
         if len(windows) != 1:
             raise SystemExit('Select one Gazebo window explicitly with --window-id.')
         args.window_id = windows[0]
-    metadata = {'start_wall_time': time.time(), 'fps': 12, 'window_id': args.window_id, 'raw_file': 'monaco-race-raw.mp4'}
+    metadata = {'start_wall_time': time.time(), 'fps': 12, 'window_id': args.window_id, 'raw_file': 'monaco-smooth-race-raw.mp4', 'output_file': 'monaco-smooth-start-to-finish.mp4', 'scene_file': 'monaco-recorded-scenario.json'}
+    (artifacts / metadata['scene_file']).write_text((project / 'scenarios/monaco/scenario.json').read_text())
     (artifacts / 'monaco-recording.json').write_text(json.dumps(metadata, indent=2) + '\n')
     with (artifacts / 'monaco-recording.log').open('w') as capture_log:
         recorder = subprocess.Popen(['ffmpeg', '-y', '-hide_banner', '-loglevel', 'warning', '-f', 'x11grab', '-framerate', '12', '-window_id', args.window_id, '-video_size', '1600x900', '-i', os.environ['DISPLAY'], '-an', '-c:v', 'libx264', '-preset', 'ultrafast', '-crf', '22', '-pix_fmt', 'yuv420p', str(artifacts / metadata['raw_file'])], stdout=capture_log, stderr=subprocess.STDOUT)

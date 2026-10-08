@@ -55,22 +55,19 @@ def static_model(world, name, x=0, y=0, yaw=0):
     return ET.SubElement(model, 'link', name='body')
 
 
-def rounded(points, trim=0.45):
-    out = [points[0]]
-    for i in range(1, len(points) - 1):
-        p = points[i]
-        incoming, outgoing = p - points[i - 1], points[i + 1] - p
-        ni, no = np.linalg.norm(incoming), np.linalg.norm(outgoing)
-        length = min(trim, ni * 0.24, no * 0.24)
-        a, b = p - incoming / ni * length, p + outgoing / no * length
-        out.append(a)
-        for t in np.linspace(0, 1, 10)[1:]:
-            out.append((1 - t) ** 2 * a + 2 * (1 - t) * t * p + t * t * b)
-    out.append(points[-1])
-    sampled = [out[0]]
-    for a, b in zip(out, out[1:]):
-        steps = max(1, int(math.ceil(np.linalg.norm(b - a) / 0.12)))
-        sampled.extend(a + (b - a) * t for t in np.linspace(0, 1, steps + 1)[1:])
+def rounded(points, iterations=4):
+    """Chaikin corner cutting preserves straight sections and rounds turns."""
+    curve = np.array(points, dtype=float)
+    for _ in range(iterations):
+        q = 0.75 * curve[:-1] + 0.25 * curve[1:]
+        r = 0.25 * curve[:-1] + 0.75 * curve[1:]
+        pairs = np.empty((2 * len(q), 2))
+        pairs[0::2], pairs[1::2] = q, r
+        curve = np.vstack([points[0], pairs, points[-1]])
+    sampled = [curve[0]]
+    for a, b in zip(curve, curve[1:]):
+        steps = max(1, int(math.ceil(np.linalg.norm(b-a) / 0.12)))
+        sampled.extend(a+(b-a)*t for t in np.linspace(0,1,steps+1)[1:])
     return np.array(sampled)
 
 
@@ -114,7 +111,7 @@ def main():
     def world_point(pixel):
         return (np.array(pixel, dtype=float) - origin) * [scale, -scale]
     points = np.array([world_point(p) for p in config['shape']])
-    route = rounded(points)
+    route = rounded(points, int(config.get('curve_smoothing_iterations', 4)))
     distances = np.r_[0, np.cumsum(np.linalg.norm(np.diff(route, axis=0), axis=1))]
     res, width = config['map_resolution'], config['road_width']
     minimum = np.floor((route.min(axis=0) - 3) / res) * res
@@ -284,6 +281,20 @@ def main():
         inflation = params[name][name]['ros__parameters']['inflation_layer']
         inflation['inflation_radius'] = 0.34
         inflation['cost_scaling_factor'] = 5.0
+    localization = config['localization']
+    amcl = params['amcl']['ros__parameters']
+    for key in ['alpha1', 'alpha2', 'alpha3', 'alpha4', 'alpha5']:
+        amcl[key] = localization['odometry_alpha']
+    for key in ['max_beams', 'sigma_hit', 'update_min_d', 'update_min_a', 'z_hit', 'z_rand']:
+        amcl[key] = localization[key]
+    # Keep all upstream navigation / recovery nodes; only tune the mission rate.
+    bt_source = Path(get_package_share_directory('nav2_bt_navigator')) / 'behavior_trees/navigate_through_poses_w_replanning_and_recovery.xml'
+    bt = ET.parse(bt_source)
+    bt.getroot().insert(0, ET.Comment('Derived from nav2_bt_navigator NavigateThroughPoses BT (Apache-2.0); scenario replanning rate only.'))
+    for rate in bt.findall('.//RateController'):
+        rate.set('hz', str(config['mission_replan_hz']))
+    ET.indent(bt)
+    bt.write(output / 'navigate_through_poses.xml', encoding='unicode', xml_declaration=True)
     params['waypoint_follower']['ros__parameters']['stop_on_failure'] = True
     params['waypoint_follower']['ros__parameters']['wait_at_waypoint']['enabled'] = False
     params['planner_server']['ros__parameters']['GridBased']['allow_unknown'] = False

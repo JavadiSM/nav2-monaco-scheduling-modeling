@@ -1,0 +1,175 @@
+{
+  "passed": true,
+  "full_course": true,
+  "communication_enabled": false,
+  "scheduler": "upstream_default",
+  "mission_type": "continuous_navigate_through_poses",
+  "moving_vehicles": 1,
+  "static_edge_car_models": 19,
+  "requested_targets": 20,
+  "action_status": 4,
+  "nav2_error_code": 0,
+  "nav2_error_message": "",
+  "final_estimated_pose": [
+    -18.474429464684384,
+    0.6301722788181351
+  ],
+  "final_goal_error_m": 0.21342352177696813,
+  "minimum_estimated_distance_to_targets_m": [
+    0.14261462465819125,
+    0.030412621372756035,
+    0.10755692050598348,
+    0.10426983771609896,
+    0.06599723090286456,
+    0.14785996385906122,
+    0.08425218143665457,
+    0.044969237317666264,
+    0.09669255254110526,
+    0.026452084935350662,
+    0.08793405850037134,
+    0.06205763600992851,
+    0.02754148064448779,
+    0.025980843714309202,
+    0.09909011867279395,
+    0.04541121030372205,
+    0.03475920455328505,
+    0.13051840279256338,
+    0.13404544905798804,
+    0.21342352177696813
+  ],
+  "ordered_targets_passed": 20,
+  "checkpoint_pass_radius_m": 0.7,
+  "success_wall_time": 1791498232.5518196,
+  "start_wall_time": 1791497910.3584144,
+  "end_wall_time": 1791498232.5555863,
+  "elapsed_wall_seconds": 322.197,
+  "valid_lidar_messages": 1378,
+  "odometry_distance_m": 122.04981521226249,
+  "feedback_target_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+  ],
+  "navigation_recoveries": 0,
+  "target_events": [
+    {
+      "wall_time": 1791497914.555607,
+      "index": 0
+    },
+    {
+      "wall_time": 1791497937.0068192,
+      "index": 1
+    },
+    {
+      "wall_time": 1791497967.957918,
+      "index": 2
+    },
+    {
+      "wall_time": 1791497984.985415,
+      "index": 3
+    },
+    {
+      "wall_time": 1791498000.9567342,
+      "index": 4
+    },
+    {
+      "wall_time": 1791498019.0337346,
+      "index": 5
+    },
+    {
+      "wall_time": 1791498038.0631301,
+      "index": 6
+    },
+    {
+      "wall_time": 1791498052.853843,
+      "index": 7
+    },
+    {
+      "wall_time": 1791498059.1530626,
+      "index": 8
+    },
+    {
+      "wall_time": 1791498086.4743009,
+      "index": 9
+    },
+    {
+      "wall_time": 1791498120.0628538,
+      "index": 10
+    },
+    {
+      "wall_time": 1791498123.221275,
+      "index": 11
+    },
+    {
+      "wall_time": 1791498151.4999435,
+      "index": 12
+    },
+    {
+      "wall_time": 1791498160.83203,
+      "index": 13
+    },
+    {
+      "wall_time": 1791498167.069541,
+      "index": 14
+    },
+    {
+      "wall_time": 1791498174.351882,
+      "index": 15
+    },
+    {
+      "wall_time": 1791498177.4608204,
+      "index": 16
+    },
+    {
+      "wall_time": 1791498186.7405567,
+      "index": 17
+    },
+    {
+      "wall_time": 1791498198.0403566,
+      "index": 18
+    },
+    {
+      "wall_time": 1791498209.3505177,
+      "index": 19
+    }
+  ],
+  "gazebo_final_pose_xyz_m": [
+    -18.4455,
+    0.658731,
+    0.005007
+  ],
+  "gazebo_final_goal_error_m": 0.1727782834353894,
+  "final_localization_error_m": 0.040651131379932995,
+  "recovery_behavior_invocations": {
+    "spin": 0,
+    "backup": 0,
+    "wait": 0
+  },
+  "video": "artifacts/monaco-smooth-start-to-finish.mp4",
+  "scene_revision": "rounded_centerline_continuous_mission_simulation_amcl_profile",
+  "centreline_length_m": 125.96453522025038,
+  "shortest_drivable_path_m": 122.02733034279014,
+  "motion_observations": {
+    "observation": "odometry forward speed between 2 s after action feedback begins and 2 s before success",
+    "minimum_forward_speed_m_s": 0.21261739642663238,
+    "median_forward_speed_m_s": 0.4599999999996385,
+    "reverse_samples_below_minus_0_02_m_s": 0
+  }
+}

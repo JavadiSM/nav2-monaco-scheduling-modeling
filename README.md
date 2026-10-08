@@ -6,7 +6,7 @@ A ROS 2 / Nav2 simulation foundation for scheduling experiments. The current sce
 
 ## Current implementation
 
-The track is designed in this repository from a rough Monaco outline. The car uses the ready-made TurtleBot3 differential-drive dynamics, sensors and upstream Nav2 algorithms, with a racecar appearance. It is not an Ackermann racing-vehicle physics model. The ordered checkpoint mission uses Nav2's existing `FollowWaypoints` action.
+The track is designed in this repository from a rough Monaco outline. The car uses the ready-made TurtleBot3 differential-drive dynamics, sensors and upstream Nav2 algorithms, with a racecar appearance. It is not an Ackermann racing-vehicle physics model. The ordered checkpoint mission uses Nav2's existing `NavigateThroughPoses` action. All checkpoints and the finish are sent as one continuous mission; intermediate gates are pass-through targets. The track uses four iterations of Chaikin corner rounding, preserving straight stretches while smoothing turns.
 
 There is no custom scheduler, mixed-criticality mode switching, remote worker or task offloading yet. Parked edge cars are static Gazebo models. `config/edge_communication.yaml` reserves communication parameters without activating them. Native ROS dependencies are not, by themselves, a formally specified real-time DAG with WCETs, job deadlines and criticality levels.
 
@@ -36,7 +36,7 @@ In a second WSL terminal:
 bash scripts/run_monaco.sh
 ```
 
-The mission initializes AMCL at the actual starting pose, requests all checkpoints in order and verifies the action result, absence of missed targets and estimated proximity to every target. Results are written to `artifacts/monaco-run.json`. Restart the simulation before requesting another mission: this script initializes the car at the starting pose.
+The mission initializes AMCL at the actual starting pose, requests all checkpoints in order and verifies the action result, zero Nav2 error code and estimated proximity to every target in order. Results are written to `artifacts/monaco-run.json`. Restart the simulation before requesting another mission: this script initializes the car at the starting pose.
 
 To record the entire real Gazebo run instead of using the preceding mission command:
 
@@ -51,9 +51,9 @@ After a successful recorded mission, produce the video with a labeled map of the
 python3 scripts/render_monaco_video.py
 ```
 
-This writes `artifacts/monaco-start-to-finish.mp4`. The main view is the actual Gazebo recording. The inset is explicitly labeled as the AMCL estimated trajectory; target labels use recorded Nav2 feedback.
+This writes `artifacts/monaco-smooth-start-to-finish.mp4`. The main view is the actual Gazebo recording. The inset is explicitly labeled as the AMCL estimated trajectory; target labels use recorded Nav2 feedback.
 
-The recording wrapper requests the mission and stops capture after its result. It writes `artifacts/monaco-race-raw.mp4`, recording metadata and the mission report. Gazebo's window must retain its configured 1600 by 900 size during capture. A failed mission is reported as failed; a recording alone does not prove course completion.
+The recording wrapper requests the mission and stops capture after its result. It writes `artifacts/monaco-smooth-race-raw.mp4`, recording metadata, a frozen copy of the recorded scene and the mission report. The previous waypoint-run video is retained separately. Gazebo's window must retain its configured 1600 by 900 size during capture. A failed mission is reported as failed; a recording alone does not prove course completion.
 
 Stop the simulation with Ctrl+C or:
 
@@ -71,7 +71,7 @@ See `docs/resources-and-timing.md` for actual CPU, memory, scheduling and speed 
 
 The original official TurtleBot sandbox remains available through `scripts/launch_demo.sh` and `scripts/verify_demo.sh`. Its installation and successful navigation were recorded in `docs/setup-report.md`.
 
-The generated racecar description, baseline Nav2 parameter file and Gazebo GUI template retain their upstream Apache-2.0 attribution in `scenarios/monaco/NOTICE.md` and `LICENSE.upstream`. Original project scripts and track design use the root MIT license.
+The generated racecar description, baseline Nav2 parameter file, pass-through behavior tree and Gazebo GUI template retain their upstream Apache-2.0 attribution in `scenarios/monaco/NOTICE.md` and `LICENSE.upstream`. Original project scripts and track design use the root MIT license.
 
 ## Publish later
 

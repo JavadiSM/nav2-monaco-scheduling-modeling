@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Request upstream Nav2 FollowWaypoints; do not implement a controller."""
+"""Request continuous upstream Nav2 NavigateThroughPoses; do not implement a controller."""
 import argparse
 import json
 import math
@@ -10,7 +10,7 @@ import subprocess
 from action_msgs.msg import GoalStatus
 from geometry_msgs.msg import PoseStamped, PoseWithCovarianceStamped
 from lifecycle_msgs.srv import GetState
-from nav2_msgs.action import FollowWaypoints
+from nav2_msgs.action import NavigateThroughPoses
 from nav_msgs.msg import Odometry
 import rclpy
 from rclpy.action import ActionClient
@@ -30,13 +30,17 @@ class Lap(Node):
         self.pose = None
         self.pose_samples, self.target_events = [], []
         self.last_feedback = -1
+        self.targets = []
+        self.max_recoveries = 0
+        self.velocity_samples = []
+        self.ordered_targets_passed = 0
         qos = QoSProfile(depth=1, reliability=ReliabilityPolicy.RELIABLE, durability=DurabilityPolicy.TRANSIENT_LOCAL)
         self.markers = self.create_publisher(MarkerArray, '/monaco/markers', qos)
         self.initial = self.create_publisher(PoseWithCovarianceStamped, '/initialpose', 10)
         self.create_subscription(PoseWithCovarianceStamped, '/amcl_pose', self.on_pose, qos)
         self.create_subscription(Odometry, '/odom', self.on_odom, qos_profile_sensor_data)
         self.create_subscription(LaserScan, '/scan', self.on_scan, qos_profile_sensor_data)
-        self.action = ActionClient(self, FollowWaypoints, '/follow_waypoints')
+        self.action = ActionClient(self, NavigateThroughPoses, '/navigate_through_poses')
         self.show_markers(0)
 
     def on_pose(self, msg):
@@ -44,10 +48,15 @@ class Lap(Node):
         self.pose = [p.x, p.y]
         self.poses.append(self.pose)
         self.pose_samples.append({'wall_time': time.time(), 'x': p.x, 'y': p.y})
+        if self.targets and self.ordered_targets_passed < len(self.targets):
+            target = self.targets[self.ordered_targets_passed]
+            if math.dist(self.pose, [target['x'], target['y']]) <= 0.70:
+                self.ordered_targets_passed += 1
 
     def on_odom(self, msg):
         p = msg.pose.pose.position
         self.path.append([p.x, p.y])
+        self.velocity_samples.append({'wall_time': time.time(), 'vx': msg.twist.twist.linear.x, 'wz': msg.twist.twist.angular.z})
 
     def on_scan(self, msg):
         self.scans += int(any(math.isfinite(v) and msg.range_min <= v <= msg.range_max for v in msg.ranges))
@@ -105,14 +114,17 @@ class Lap(Node):
         self.markers.publish(array)
 
     def feedback(self, msg):
-        index = msg.feedback.current_waypoint
-        if index != self.last_feedback:
+        feedback = msg.feedback
+        self.max_recoveries = max(self.max_recoveries, int(feedback.number_of_recoveries))
+        completed = len(self.targets) - int(feedback.number_of_poses_remaining)
+        index = min(len(self.targets) - 1, max(0, completed))
+        if index > self.last_feedback:
             self.last_feedback = index
             self.feedback_indices.append(index)
             self.target_events.append({'wall_time': time.time(), 'index': index})
-            self.show_markers(index)
-            total = len(self.scene['checkpoints']) + 1
-            print(f'Nav2 target {index + 1}/{total}; completed preceding checkpoint targets: {index}', flush=True)
+            absolute = self.targets[index].get('id', len(self.scene['checkpoints']) + 1) - 1
+            self.show_markers(absolute)
+            print(f'Continuous Nav2 target {index + 1}/{len(self.targets)}; recoveries: {self.max_recoveries}', flush=True)
 
 
 def main():
@@ -133,7 +145,7 @@ def main():
     start_wall_time = time.time()
     start = time.monotonic()
     handle = None
-    report = {'passed': False, 'full_course': args.limit == 0 and args.from_checkpoint == 0, 'communication_enabled': False, 'scheduler': 'upstream_default', 'moving_vehicles': 1, 'static_edge_car_models': len(scene['servers'])}
+    report = {'passed': False, 'full_course': args.limit == 0 and args.from_checkpoint == 0, 'communication_enabled': False, 'scheduler': 'upstream_default', 'mission_type': 'continuous_navigate_through_poses', 'moving_vehicles': 1, 'static_edge_car_models': len(scene['servers'])}
     try:
         if not node.until(lambda: node.scans >= 5 and len(node.path) >= 5, 90):
             raise RuntimeError('No live LiDAR / odometry data.')
@@ -150,24 +162,26 @@ def main():
         p = scene['start']
         initial.pose.pose.position.x, initial.pose.pose.position.y = p['x'], p['y']
         initial.pose.pose.orientation.z, initial.pose.pose.orientation.w = math.sin(p['yaw'] / 2), math.cos(p['yaw'] / 2)
-        initial.pose.covariance[0] = initial.pose.covariance[7] = 0.02
-        initial.pose.covariance[35] = 0.01
+        initial.pose.covariance[0] = initial.pose.covariance[7] = 0.0025
+        initial.pose.covariance[35] = 0.0025
         for _ in range(8):
             initial.header.stamp = node.get_clock().now().to_msg()
             node.initial.publish(initial)
             node.until(lambda: False, 0.2)
         if not node.until(lambda: node.pose is not None, 30):
             raise RuntimeError('AMCL localization is unavailable.')
-        for name in ['controller_server', 'planner_server', 'waypoint_follower', 'bt_navigator']:
+        for name in ['controller_server', 'planner_server', 'bt_navigator']:
             if not node.until(lambda: node.lifecycle_active(name), 45):
                 raise RuntimeError(f'{name} is not active.')
         if not node.action.wait_for_server(timeout_sec=15):
-            raise RuntimeError('Upstream FollowWaypoints is unavailable.')
+            raise RuntimeError('Upstream NavigateThroughPoses is unavailable.')
         targets = (scene['checkpoints'] + [scene['finish']])[args.from_checkpoint:]
         if args.limit:
             targets = targets[:args.limit]
         report['requested_targets'] = len(targets)
-        goal = FollowWaypoints.Goal()
+        node.targets = targets
+        goal = NavigateThroughPoses.Goal()
+        goal.behavior_tree = str(project / 'scenarios/monaco/navigate_through_poses.xml')
         for target in targets:
             p = PoseStamped()
             p.header.frame_id = 'map'
@@ -177,29 +191,32 @@ def main():
             goal.poses.append(p)
         future = node.action.send_goal_async(goal, feedback_callback=node.feedback)
         if not node.until(future.done, 15):
-            raise RuntimeError('FollowWaypoints acknowledgement timed out.')
+            raise RuntimeError('NavigateThroughPoses acknowledgement timed out.')
         handle = future.result()
         if not handle.accepted:
-            raise RuntimeError('FollowWaypoints was rejected.')
+            raise RuntimeError('NavigateThroughPoses was rejected.')
         print('Upstream Nav2 accepted the checkpoint mission.', flush=True)
         result = handle.get_result_async()
         if not node.until(result.done, args.timeout):
             raise RuntimeError('Course timeout.')
         message = result.result()
         report['action_status'] = message.status
-        report['missed_waypoints'] = [int(item.index) if hasattr(item, 'index') else str(item) for item in message.result.missed_waypoints]
-        if message.status != GoalStatus.STATUS_SUCCEEDED or message.result.missed_waypoints:
-            raise RuntimeError(f'Nav2 course failed; status={message.status}, missed={report["missed_waypoints"]}')
+        report['nav2_error_code'] = int(message.result.error_code)
+        report['nav2_error_message'] = message.result.error_msg
+        if message.status != GoalStatus.STATUS_SUCCEEDED or message.result.error_code:
+            raise RuntimeError(f'Nav2 course failed; status={message.status}, error={message.result.error_msg}')
         node.until(lambda: False, 1)
         report['final_estimated_pose'] = node.pose
         report['final_goal_error_m'] = math.dist(node.pose, [targets[-1]['x'], targets[-1]['y']])
         distances = [min(math.dist(p, [cp['x'], cp['y']]) for p in node.poses) for cp in targets]
         report['minimum_estimated_distance_to_targets_m'] = distances
-        if report['final_goal_error_m'] > 0.40 or any(distance > 0.65 for distance in distances):
+        report['ordered_targets_passed'] = node.ordered_targets_passed
+        report['checkpoint_pass_radius_m'] = 0.70
+        if report['final_goal_error_m'] > 0.40 or any(distance > 0.70 for distance in distances) or node.ordered_targets_passed != len(targets):
             raise RuntimeError('Action succeeded but checkpoint proximity verification failed.')
         report['passed'] = True
         report['success_wall_time'] = time.time()
-        node.show_markers(min(len(scene['checkpoints']), len(targets)))
+        node.show_markers(min(len(scene['checkpoints']), args.from_checkpoint + len(targets)))
     except (Exception, KeyboardInterrupt) as error:
         report['error'] = str(error) or 'Interrupted.'
         if handle is not None and rclpy.ok():
@@ -212,12 +229,14 @@ def main():
         report['valid_lidar_messages'] = node.scans
         report['odometry_distance_m'] = sum(math.dist(a, b) for a, b in zip(node.path, node.path[1:]))
         report['feedback_target_indices'] = node.feedback_indices
+        report['navigation_recoveries'] = node.max_recoveries
+        report['velocity_samples'] = node.velocity_samples
         report['pose_samples'] = node.pose_samples
         report['target_events'] = node.target_events
         report['localized_trace'] = node.poses[::max(1, len(node.poses) // 1500)]
         output.parent.mkdir(parents=True, exist_ok=True)
         output.write_text(json.dumps(report, indent=2) + '\n')
-        print(json.dumps({k: v for k, v in report.items() if k not in ['localized_trace', 'pose_samples', 'target_events']}, indent=2), flush=True)
+        print(json.dumps({k: v for k, v in report.items() if k not in ['localized_trace', 'pose_samples', 'target_events', 'velocity_samples']}, indent=2), flush=True)
         node.destroy_node()
         rclpy.try_shutdown()
     return 0 if report['passed'] else 1

@@ -32,7 +32,7 @@ Current navigation settings:
 | LiDAR | 5 Hz in simulation time |
 | Odometry | 30 Hz in simulation time |
 | BT loop | 10 ms configured loop interval |
-| Global planning requests | Event-driven, normally throttled to approximately 1 Hz during navigation by the default BT; `expected_planner_frequency=20` is an overrun-warning threshold, not a 20 Hz timer |
+| Global planning requests | Event-driven, throttled to 1 Hz by the scenario NavigateThroughPoses BT (installed template: 0.333 Hz; separate NavigateToPose BT: 1 Hz); `expected_planner_frequency=20` is an overrun-warning threshold, not a 20 Hz timer |
 
 The smaller physics limit caps commanded forward speed at 0.46 m/s. Increasing velocity requires coordinating the controller, smoother, drive plugin and acceleration limits, then checking corner behavior, sensor updates and tracking. Speed, task release rates, resource capacities and communication should be held equal across scheduling baselines; otherwise the comparison changes several variables at once.
 
@@ -44,4 +44,4 @@ Sources: [Microsoft WSL settings](https://learn.microsoft.com/en-us/windows/wsl/
 
 Gazebo currently models physical motion and sensors; application computation executes on the laptop. A later experiment can model each edge CPU with a core count, service-time model per real Nav2 job, ready queue and communication delays. Results computed on the laptop must be buffered until the modeled finish and transmission events; inserting sleep after a result has already been consumed would not enforce the experiment. The custom scheduler chooses eligible jobs and virtual resources while tracking per-core availability, deadlines and remaining execution time. Timing attributed to a Cortex-A15 must be measured/calibrated or explicitly declared an assumption. Laptop compute time is distinct from the modeled service time. If the laptop is slower than the modeled resource, virtual time or offline/replayed execution is needed rather than pretending a wall-clock result arrived sooner.
 
-This layer is not implemented by the setup. It requires integration at actual callback/worker boundaries so result delivery, shared-state updates and downstream releases obey the model. Sequential FollowWaypoints currently slows at each separate target; a later common pass-through mission can use upstream NavigateThroughPoses to avoid treating each checkpoint as an independent stop. That mission choice must be identical across scheduling baselines.
+This layer is not implemented by the setup. It requires integration at actual callback/worker boundaries so result delivery, shared-state updates and downstream releases obey the model. The current common pass-through mission uses upstream NavigateThroughPoses to avoid treating each checkpoint as an independent stop. The older sequential FollowWaypoints run is retained as setup evidence. That mission choice must be identical across scheduling baselines.

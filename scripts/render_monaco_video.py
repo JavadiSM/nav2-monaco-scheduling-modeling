@@ -25,7 +25,8 @@ def main():
     if (width, height) != (1600, 900):
         raise SystemExit('Zoom calibration requires the configured 1600x900 top-down view.')
     fps = cap.get(cv2.CAP_PROP_FPS)
-    scene = json.loads((project / 'scenarios/monaco/scenario.json').read_text())
+    scene_path = artifacts / metadata['scene_file'] if 'scene_file' in metadata else project / 'scenarios/monaco/scenario.json'
+    scene = json.loads(scene_path.read_text())
     route = np.array(scene['centreline'])
     lower, upper = route.min(axis=0)-1.2, route.max(axis=0)+1.2
     scale = min(380/(upper[0]-lower[0]), 196/(upper[1]-lower[1]))
@@ -40,7 +41,7 @@ def main():
     events = report['target_events']
     event_times = np.array([e['wall_time'] for e in events])
     success_time = report.get('success_wall_time', metadata['end_wall_time'] - 2.0)
-    output = artifacts / 'monaco-start-to-finish.mp4'
+    output = artifacts / metadata.get('output_file', 'monaco-start-to-finish.mp4')
     encoder = subprocess.Popen(['ffmpeg', '-y', '-hide_banner', '-loglevel', 'warning', '-f', 'rawvideo', '-pix_fmt', 'bgr24', '-s', f'{width}x{height}', '-r', str(fps), '-i', '-', '-an', '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '21', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', str(output)], stdin=subprocess.PIPE)
     frame_number = 0
     try:

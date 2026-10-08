@@ -3,7 +3,7 @@ mode: trinary
 resolution: 0.05
 origin:
 - -25.75
-- -11.350000000000001
+- -11.25
 - 0.0
 negate: 0
 occupied_thresh: 0.65

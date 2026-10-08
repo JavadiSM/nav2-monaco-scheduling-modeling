@@ -22,3 +22,5 @@ The full Apache-2.0 license is included in `LICENSE.upstream`.
 These upstream-derived files are not covered by the root project MIT license.
 The original track design, map, checkpoint placement and project scripts are
 covered by the root MIT license.
+
+`navigate_through_poses.xml` is derived from the installed Navigation2 `nav2_bt_navigator/behavior_trees/navigate_through_poses_w_replanning_and_recovery.xml` (Apache-2.0). Only its replanning RateController parameter is changed to 1 Hz; the upstream navigation and recovery nodes are retained.
