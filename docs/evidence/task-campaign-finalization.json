@@ -1,0 +1,23 @@
+{
+  "verified_utc": "2026-10-09T05:31:25.179488+00:00",
+  "simulation_cutoff_iso": "2026-10-09T09:00:00+03:30",
+  "manifest_status": "finished",
+  "campaign_ended_iso": "2026-10-09T08:59:54.391575+03:30",
+  "main_attempts": 59,
+  "main_successful_laps": 57,
+  "main_aborted_missions": [
+    "run-047"
+  ],
+  "main_cutoff_truncated_missions": [
+    "run-059"
+  ],
+  "remaining_owned_simulation_processes": [],
+  "scenario_configuration_hashes_unchanged": {
+    "scenarios/monaco/nav2_params.yaml": true,
+    "scenarios/monaco/world.sdf": true,
+    "scenarios/monaco/racecar.sdf": true,
+    "scenarios/monaco/navigate_through_poses.xml": true
+  },
+  "final_manifest_sha256": "3a1116a1057545576800af3498a360249d15173bd4e5250a57995bcc737c200c",
+  "original_csvs_preserved": true
+}

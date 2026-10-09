@@ -1,0 +1,41 @@
+{
+  "verified_utc": "2026-10-09T05:40:41.869465+00:00",
+  "report_status": "FINAL",
+  "attempts_all_cohorts": 67,
+  "successful_laps_all_cohorts": 64,
+  "main_successful_laps": 57,
+  "retained_incomplete_attempts": 3,
+  "primary_tasks": 11,
+  "primary_class_counts": {
+    "periodic_implementation": 5,
+    "aperiodic_under_established_contract": 6
+  },
+  "pooled_mean_and_sample_std_reconstructed_from_per_run_statistics": true,
+  "per_run_table_covers_all_main_successful_laps": true,
+  "malformed_rows_in_main_successful_trials": 0,
+  "unbound_callbacks_in_main_successful_trials": 0,
+  "main_recorded_spans": 269558570,
+  "main_framework_callback_jobs": 255210883,
+  "observed_phase_dag": {
+    "vertices": 32,
+    "edges": 38,
+    "edge_types": {
+      "observed_same_thread_order": 28,
+      "recorded_version_dependency": 4,
+      "recorded_trigger_dependency": 2,
+      "matched_message_dependency": 2,
+      "matched_callback_input": 2
+    },
+    "independently_topologically_sorted": true,
+    "edge_timestamps_nondecreasing": true
+  },
+  "final_pdf_pages": 17,
+  "final_pdf_pages_visually_inspected": [
+    3,
+    4,
+    11,
+    16
+  ],
+  "raw_evidence_audit": "task-original-evidence-audit.json",
+  "cutoff_audit": "task-campaign-finalization.json"
+}

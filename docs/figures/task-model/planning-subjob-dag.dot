@@ -1,0 +1,13 @@
+digraph G { graph [rankdir=TB; bgcolor="white"; pad="0.25"; nodesep="0.30"; ranksep="0.45"]; node [shape=box; style="rounded,filled"; fillcolor="#edf3fb"; fontname="DejaVu Sans"; fontsize=11]; edge [fontname="DejaVu Sans"; fontsize=9; color="#4d6681"];
+request [label="Planning request #100117"];
+seg0 [label="Sequential segments 1\u20135\n1: event #100120; C=1.661 ms; 330 poses\n2: event #100125; C=2.149 ms; 476 poses\n3: event #100160; C=1.898 ms; 285 poses\n4: event #100193; C=1.627 ms; 257 poses\n5: event #100210; C=1.629 ms; 288 poses"];
+request -> seg0;
+seg5 [label="Sequential segments 6\u201310\n6: event #100246; C=1.558 ms; 277 poses\n7: event #100287; C=1.245 ms; 219 poses\n8: event #100294; C=1.132 ms; 95 poses\n9: event #100307; C=1.364 ms; 428 poses\n10: event #100352; C=1.339 ms; 531 poses"];
+seg0 -> seg5;
+seg10 [label="Sequential segments 11\u201315\n11: event #100357; C=1.231 ms; 43 poses\n12: event #100381; C=1.374 ms; 442 poses\n13: event #100389; C=1.395 ms; 156 poses\n14: event #100424; C=1.101 ms; 88 poses\n15: event #100447; C=1.202 ms; 120 poses"];
+seg5 -> seg10;
+seg15 [label="Sequential segments 16\u201320\n16: event #100452; C=1.138 ms; 55 poses\n17: event #100475; C=1.704 ms; 140 poses\n18: event #100499; C=1.431 ms; 170 poses\n19: event #100516; C=1.924 ms; 133 poses\n20: event #100542; C=1.909 ms; 314 poses"];
+seg10 -> seg15;
+result [label="Concatenate path / action result"];
+seg15 -> result;
+}

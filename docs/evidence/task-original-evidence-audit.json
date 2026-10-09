@@ -1,0 +1,44 @@
+{
+  "audit": "Original raw files exist and have the byte counts sealed in each run metadata; SHA-256 values remain in the original metadata (not rehashed by this audit).",
+  "cohorts": {
+    "causal-pilot-20261009": {
+      "attempts": 1,
+      "successes": 1,
+      "status": "finished"
+    },
+    "full-20261009": {
+      "attempts": 2,
+      "successes": 2,
+      "status": "finished"
+    },
+    "full-v2-20261009": {
+      "attempts": 59,
+      "successes": 57,
+      "status": "finished"
+    },
+    "overnight-20261009": {
+      "attempts": 3,
+      "successes": 3,
+      "status": "finished"
+    },
+    "pilot-20261009": {
+      "attempts": 1,
+      "successes": 0,
+      "status": "finished"
+    },
+    "pilot-fixed-20261009": {
+      "attempts": 1,
+      "successes": 1,
+      "status": "finished"
+    }
+  },
+  "raw_files_checked": 386,
+  "raw_bytes": 57692937089,
+  "missing_or_size_mismatch": [],
+  "main_successful_recovery_counts": [
+    0
+  ],
+  "main_active_wall_mean_s": 321.8190535145965,
+  "main_active_wall_std_s": 9.995361394325132,
+  "main_distance_mean_m": 122.01177134921194
+}

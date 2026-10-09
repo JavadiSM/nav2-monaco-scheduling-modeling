@@ -1,0 +1,16 @@
+subjob,parent_activation_context,samples,mean_inclusive_CPU_ms,sample_CPU_std_ms
+amcl_filter_update,amcl_scan_callback (conditional branch),77028,3.615,0.741
+amcl_particle_publication,amcl_scan_callback,77028,0.160,0.068
+collision_check_stamped,collision_check,366193,0.607,0.206
+layered_costmap_update,local_costmap_update or global_costmap_update (keep actors distinct),110055,0.733,0.231
+mppi_control_sequence_update,mppi_optimize,366220,0.995,0.219
+mppi_critic_scoring,mppi_optimize,366220,1.618,0.367
+mppi_noise_copy,mppi_noised_trajectories,366220,0.360,0.206
+mppi_noise_reset,initialization / reset context; see recorded parent,58,0.239,0.079
+mppi_noise_trigger,mppi_noised_trajectories,366220,0.037,0.028
+mppi_noised_trajectories,mppi_optimize,366220,3.995,0.905
+mppi_optimize,mppi_velocity_commands,366220,6.636,1.227
+mppi_velocity_commands,control_iteration,366220,7.336,1.353
+planning_segment,planning_request,205342,2.277,0.543
+rate_sleep,cyclic loop wait; not an independent computational task,2306348,0.032,0.053
+velocity_command_stamped_callback,velocity_command_callback,366272,0.005,0.010

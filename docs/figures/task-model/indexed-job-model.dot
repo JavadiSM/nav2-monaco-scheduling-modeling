@@ -1,0 +1,13 @@
+digraph G { graph [rankdir=TB; bgcolor="white"; pad="0.25"; nodesep="0.30"; ranksep="0.45"]; node [shape=box; style="rounded,filled"; fillcolor="#edf3fb"; fontname="DejaVu Sans"; fontsize=11]; edge [fontname="DejaVu Sans"; fontsize=9; color="#4d6681"];
+scan [label="S_j: scan generation"]; gate [label="TF eligibility gate\nexact readiness not measured"];
+ loc [label="A_j: AMCL conditional update"]; map [label="L_m: local map commit\nversion m"];
+ copy [label="C_k: read noise version n"]; calc [label="C_k: trajectories + critics\ncontrol-sequence update"];
+ trigger [label="C_k: noise-ready commit"]; nextnoise [label="N_(n+1): generation + commit\nseparate thread"];
+ pub [label="C_k: publish command"]; copy2 [label="C_(k+1): read committed noise"];
+ store [label="U_l: command reception + store"]; tick [label="V_h: timer reads held sample"];
+ check [label="X_h: collision check + publish"]; nextscan [label="S_(j+1): future world sample"];
+ scan -> gate; gate -> loc; gate -> map; map -> calc;
+ copy -> trigger; trigger -> nextnoise; trigger -> calc; copy -> calc; calc -> pub;
+ nextnoise -> copy2; pub -> store; store -> tick; tick -> check; check -> nextscan;
+ 
+}

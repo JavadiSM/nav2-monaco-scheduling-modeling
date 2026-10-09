@@ -1,0 +1,27 @@
+digraph G { graph [rankdir=TB; bgcolor="white"; pad="0.25"; nodesep="0.30"; ranksep="0.45"]; node [shape=box; style="rounded,filled"; fillcolor="#edf3fb"; fontname="DejaVu Sans"; fontsize=11]; edge [fontname="DejaVu Sans"; fontsize=9; color="#4d6681"];
+world [label="Gazebo dynamics + sensors\nSIM clock / 3 ms physics step"; fillcolor="#e6f3e9"];
+ scan [label="LiDAR source\n5 Hz / 200 ms SIM"];
+ odom [label="Odometry source\n30 Hz / 33.333 ms SIM"];
+ amcl [label="AMCL scan + TF gate\nA; conditional filter update"];
+ tf [label="TF state\nmap -> odom / odom -> base"];
+ lm [label="Local grid update\n5 Hz / 200 ms HOST"];
+ gm [label="Global grid update\n1 Hz / 1 s HOST"];
+ bt [label="BT tick\n100 Hz / 10 ms HOST"];
+ plan [label="NavFn planning action\nA; 1 Hz BT limiter"];
+ path [label="FollowPath path install\nA; action result/goal"];
+ ctrl [label="Control + MPPI\n20 Hz / 50 ms HOST"];
+ noise [label="Noise helper thread\nA; trigger/coalescing"];
+ input [label="Command input callback\nA; cache command"];
+ smooth [label="Velocity timer\n20 Hz / 50 ms HOST"];
+ collision [label="Collision callback\nA; latest scan + TF"];
+ viz [label="RViz visualization\n/plan / maps / trajectories"; fillcolor="#eeeeee"];
+ world -> scan; world -> odom; scan -> amcl; amcl -> tf; odom -> tf;
+ scan -> lm; scan -> gm; scan -> collision; tf -> lm; tf -> gm; tf -> plan; tf -> ctrl; tf -> collision;
+ odom -> ctrl; odom -> bt; bt -> plan [label="action request"]; gm -> plan [label="shared grid + mutex"];
+ plan -> path [label="action path; not /plan"]; path -> ctrl; lm -> ctrl [label="shared grid + mutex"];
+ ctrl -> noise [label="trigger"]; noise -> ctrl [label="previous committed noise"];
+ ctrl -> input [label="/cmd_vel_nav"]; input -> smooth [label="held sample; no 1:1 guarantee"];
+ smooth -> collision [label="/cmd_vel_smoothed"]; collision -> world [label="/cmd_vel via bridge"];
+ plan -> viz [label="/plan"]; lm -> viz; gm -> viz; ctrl -> viz;
+ 
+}

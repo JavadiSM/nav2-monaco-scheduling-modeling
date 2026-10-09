@@ -1,0 +1,55 @@
+{
+  "incidents": [
+    {
+      "cohort": "full-v2-20261009",
+      "run": "run-047",
+      "classification": "mission_aborted",
+      "action_status": 6,
+      "observed_failure": "FollowPath goal acknowledgement timeout in the navigation behavior tree; navigate_through_poses then aborted.",
+      "root_cause": "Not established; no CPU/DDS/OS cause inferred from the timeout alone.",
+      "evidence": "artifacts/task-profiling/full-v2-20261009/run-047/launch.log",
+      "evidence_lines": [
+        622,
+        623,
+        624
+      ],
+      "mission_active_wall_s": 189.754040778,
+      "distance_m": 71.23816117139627,
+      "feedback_target_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "recoveries": 0,
+      "handling": "Raw evidence preserved; excluded from successful full-lap pooled means; unchanged fresh missions run-048 and run-049 succeeded.",
+      "shutdown_note": "Lifecycle/bond/forced child termination messages after SIGINT are shutdown events, not the initiating mission failure."
+    },
+    {
+      "cohort": "full-v2-20261009",
+      "run": "run-059",
+      "classification": "administratively_truncated_at_cutoff",
+      "observed_failure": "Runner stopped its simulation group at the cutoff safety margin; the active navigation action then aborted during shutdown.",
+      "root_cause": "Intentional experiment cutoff, not classified as a spontaneous navigation failure.",
+      "evidence": "artifacts/task-profiling/full-v2-20261009/run-059/metadata.json",
+      "stop_reason": "cutoff safety margin (stop before 09:00)",
+      "mission_active_wall_s": 94.030864583,
+      "distance_m": 35.35053872411361,
+      "feedback_target_indices": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "recoveries": 0,
+      "handling": "Retained as a separate partial attempt; excluded from successful complete-lap means."
+    }
+  ]
+}
