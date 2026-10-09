@@ -1,4 +1,4 @@
-# Nav2 Monaco — Real-Time Scheduling and Modeling
+# Nav2 Monaco - Real-Time Scheduling and Modeling
 
 A ROS 2 / Nav2 testbed for **modeling task scheduling on heterogeneous vehicle and edge resources, and comparing scheduling algorithms**. The goal is to study how scheduling affects navigation while keeping the route and navigation algorithms fixed.
 
@@ -16,7 +16,7 @@ The current implementation includes extracted task parameters, explicit job depe
 
 ## Complete navigation run
 
-**4× playback — displayed four times faster than the recorded run.**
+**4× playback - displayed four times faster than the recorded run.**
 
 Actual Gazebo footage from start to finish: approximately 0.75 m behind the vehicle on the left, and a fixed overview on the right.
 
