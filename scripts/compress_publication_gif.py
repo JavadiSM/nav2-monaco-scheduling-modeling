@@ -35,7 +35,7 @@ def main():
     with Image.open(source) as image:
         source_dimensions = list(image.size)
     output.parent.mkdir(parents=True, exist_ok=True)
-    workspace = ROOT / 'artifacts/media-compression'
+    workspace = ROOT / 'build/media-compression'
     workspace.mkdir(parents=True, exist_ok=True)
     filters = f'setpts=(PTS-STARTPTS)/{args.speed},fps={args.fps},scale={args.width}:-2:flags=lanczos'
     with tempfile.TemporaryDirectory(prefix='gif-', dir=workspace) as temporary:
@@ -73,7 +73,8 @@ def main():
         width=args.width, sampled_fps=args.fps, palette_colors=args.colors,
         dither=args.dither, full_interval_preserved=True, **stats)
     evidence['size_reduction_percent'] = 100 * (1 - evidence['publication_bytes'] / evidence['source_bytes'])
-    (ROOT / 'docs/evidence/gif-compression.json').write_text(json.dumps(evidence, indent=2)+'\n')
+    manifest = ROOT/'docs/evidence/gif-compression.json' if output == (ROOT/'docs/media/dual-view-4x.gif').resolve() else output.with_suffix('.json')
+    manifest.write_text(json.dumps(evidence, indent=2)+'\n')
     print(json.dumps(evidence, indent=2), flush=True)
 
 

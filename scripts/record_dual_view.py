@@ -15,9 +15,9 @@ def windows():
     return set(p.stdout.split())
 
 def main():
-    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--seconds',type=float,default=20);parser.add_argument('--full-course',action='store_true');parser.add_argument('--timeout',type=float,default=1200)
+    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--fleet',action='store_true');parser.add_argument('--seconds',type=float,default=20);parser.add_argument('--full-course',action='store_true');parser.add_argument('--timeout',type=float,default=1200)
     args=parser.parse_args(); owned=[]; handles=[]
-    out=ROOT/'artifacts/dual-view';out.mkdir(parents=True,exist_ok=True)
+    out=ROOT/('artifacts/fleet/capture' if args.fleet else 'artifacts/dual-view');out.mkdir(parents=True,exist_ok=True)
     media=ROOT/'docs/media';media.mkdir(parents=True,exist_ok=True)
     if not os.environ.get('DISPLAY'):raise SystemExit('Source scripts/environment.sh first')
     if windows():raise SystemExit('Close existing Gazebo windows before this isolated capture')
@@ -34,12 +34,14 @@ def main():
         h=(out/(name+'.log')).open('w');handles.append(h)
         p=subprocess.Popen(cmd,cwd=ROOT,stdout=h,stderr=subprocess.STDOUT,start_new_session=True)
         owned.append(p);return p
-    evidence={'world_changed':False,'capture_type':'actual_Gazebo_pixels','source_gif':'artifacts/dual-view/dual-view.gif',
+    evidence={'world_changed':args.fleet, 'world_change_scope':'local starting apron only' if args.fleet else 'none','capture_type':'actual_Gazebo_pixels','source_gif':str((out/'dual-view.gif').relative_to(ROOT)),
               'left':'rigid third-person, 0.75 m behind in vehicle local x; height offset 0.25 m',
               'right':'fixed existing overview', 'scheduler_coupled_to_robot':False,
               'note':'Camera/motion demonstration; local FIFO is separately replayed from measured tasks.'}
+    mission_command = ['python3', str(ROOT/'scripts/run_monaco_fleet.py')] if args.fleet else ['bash', str(ROOT/'scripts/run_monaco.sh')]
+    evidence['moving_vehicles']=4 if args.fleet else 1
     try:
-        launch(['ros2','launch',str(ROOT/'launch/monaco.launch.py'),'gui:=false'],'launch')
+        launch(['ros2','launch',str(ROOT/'launch/monaco.launch.py'),'gui:=false','fleet:='+str(args.fleet).lower()],'launch')
         time.sleep(12)
         ids={}
         for label in ('overview','chase'):
@@ -69,7 +71,7 @@ def main():
         for label in ('chase','overview'):
             command+=['-thread_queue_size','512','-f','x11grab','-framerate','6','-window_id',ids[label],'-video_size','1600x900','-t',str(capture_seconds),'-i',os.environ['DISPLAY']]
         views=("[0:v]setpts=PTS-STARTPTS,scale=640:360,drawtext=text='Third person - 0.75 m behind':x=12:y=12:fontcolor=white:box=1:boxcolor=black@0.7[a];"
-               "[1:v]setpts=PTS-STARTPTS,scale=640:360,drawtext=text='Fixed overview - unchanged track':x=12:y=12:fontcolor=white:box=1:boxcolor=black@0.7[b];[a][b]hstack")
+               "[1:v]setpts=PTS-STARTPTS,scale=640:360,drawtext=text='Fixed overview':x=12:y=12:fontcolor=white:box=1:boxcolor=black@0.7[b];[a][b]hstack")
         command+=['-t',str(capture_seconds),'-filter_complex_threads','1']
         if args.full_course:
             temporary=out/'full-course-capture.mkv'
@@ -79,13 +81,14 @@ def main():
                 try:
                     time.sleep(1)
                     if recorder.poll() is not None:raise RuntimeError('Capture did not start')
-                    mission=launch(['bash',str(ROOT/'scripts/run_monaco.sh'),'--timeout',str(args.timeout)],'mission')
+                    mission=launch(mission_command+['--timeout',str(args.timeout)],'mission')
                     mission.wait(timeout=args.timeout+30)
                     time.sleep(2)
                 finally:
                     if recorder.poll() is None:recorder.send_signal(signal.SIGINT)
                     recorder.wait(timeout=40)
-            report=json.loads((ROOT/'artifacts/monaco-run.json').read_text())
+            report_path = ROOT/('artifacts/fleet/mission/summary.json' if args.fleet else 'artifacts/monaco-run.json')
+            report=json.loads(report_path.read_text())
             if mission.returncode or not report.get('passed') or not report.get('full_course'):
                 raise RuntimeError('Mission did not finish successfully; local recording retained')
             (out/'full-course-mission.json').write_text(json.dumps(report,indent=2)+'\n')
@@ -103,16 +106,24 @@ def main():
                 for frame in range(image.n_frames):image.seek(frame);image.load()
             temporary.unlink()
         else:
-            mission=launch(['bash',str(ROOT/'scripts/run_monaco.sh'),'--timeout','120'],'mission')
-            time.sleep(7)
             command+=['-filter_complex',views+',split[c][d];[c]palettegen=stats_mode=diff[p];[d][p]paletteuse=dither=bayer:bayer_scale=3',
                 '-loop','0',str(out/'dual-view.gif')]
             with (out/'capture.log').open('w') as log:
-                subprocess.run(command,stdout=log,stderr=subprocess.STDOUT,check=True,timeout=args.seconds+60)
+                recorder=subprocess.Popen(command,stdout=log,stderr=subprocess.STDOUT)
+                try:
+                    time.sleep(1)
+                    if recorder.poll() is not None:raise RuntimeError('Capture did not start')
+                    mission=launch(mission_command+['--timeout',str(max(args.seconds+90,120))],'mission')
+                    recorder.wait(timeout=args.seconds+60)
+                    if recorder.returncode:raise RuntimeError('Capture failed')
+                finally:
+                    if recorder.poll() is None:
+                        recorder.send_signal(signal.SIGINT)
+                        recorder.wait(timeout=40)
         from PIL import Image
         with Image.open(out/'dual-view.gif') as im:
             evidence['frames']=im.n_frames;evidence['dimensions']=list(im.size)
-            im.seek(min(120 if args.full_course else 18,im.n_frames-1));im.convert('RGB').save(media/'dual-view-frame.png')
+            im.seek(min(120 if args.full_course else 18,im.n_frames-1));im.convert('RGB').save(out/'preview.png' if args.fleet else media/'dual-view-frame.png')
         evidence['window_ids']=ids;evidence['requested_duration_s']=None if args.full_course else args.seconds
         evidence['mission_completed_during_clip']=mission.poll()==0
     finally:
@@ -121,10 +132,15 @@ def main():
                 try:os.killpg(p.pid,signal.SIGINT)
                 except ProcessLookupError:pass
         time.sleep(2)
+        # A launch leader may exit while its children still occupy its group.
         for p in reversed(owned):
-            if p.poll() is None:
-                try:os.killpg(p.pid,signal.SIGTERM)
-                except ProcessLookupError:pass
+            try:os.killpg(p.pid,signal.SIGTERM)
+            except ProcessLookupError:pass
+        time.sleep(2)
+        for p in reversed(owned):
+            try:os.killpg(p.pid,signal.SIGKILL)
+            except ProcessLookupError:pass
+            p.wait(timeout=5)
         for h in handles:h.close()
         (out/'capture-evidence.json').write_text(json.dumps(evidence,indent=2)+'\n')
     print(json.dumps(evidence,indent=2))

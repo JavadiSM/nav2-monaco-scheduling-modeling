@@ -1,6 +1,6 @@
 # Local heterogeneous task execution
 
-The accepted scene is frozen. Eleven primary Nav2 work units use their exact 95%-ECDF assumed WCET from 57 complete missions. The executable model schedules concrete job dependencies on the vehicle's one A7 and one A15; server templates retain two A7 and two A15. The first baseline is local, nonpreemptive ready FIFO. The scheduler interprets dependencies and thermal pauses, but does not yet delay actual ROS callback results or control Gazebo motion.
+The accepted scene is frozen. Eleven primary Nav2 work units use their exact 95%-ECDF assumed WCET from 57 complete missions. The executable model schedules concrete job dependencies on the vehicle's one A7 and one A15; server templates retain two A7 and two A15. The first baseline is local, nonpreemptive ready FIFO. The replay in this document is independent of ROS. The separate [live bridge](live-bridge.en.md) now applies these budgets to actual Nav2 outputs and advances Gazebo on the same 0.001 s clock. The current bridge uses one red vehicle and a 2 s live Gantt window.
 
 ## Timing and equivalent work
 
@@ -64,7 +64,7 @@ The scene manifest pins the accepted map, geometry, checkpoints, robot descripti
 
 The published [4× full-course two-camera GIF](media/dual-view-4x.gif) contains actual Gazebo pixels, with an approximately 0.75 m rear camera on the left and the original overview on the right. The current two-camera run completed all 20 ordered targets in 353.887 s of mission wall time, with zero recoveries and Nav2 error code 0. It demonstrates the camera and vehicle motion; the separate offline scheduler plot is not claimed to have controlled that motion. Camera following uses [Gazebo GUI's tracking interfaces](https://github.com/gazebosim/gz-gui/blob/gz-gui8/src/plugins/camera_tracking/CameraTracking.cc).
 
-All nine existing MP4s were converted at 5 frames/s, preserving the full time interval, validated frame by frame, then removed as requested. Their GIFs remain in ignored `artifacts/`, with a conversion manifest; the selected compact 4× GIF and real screenshots are retained in `docs/media/` for publication. Future recording conversion is `python3 scripts/convert_recordings_to_gif.py --remove-mp4`. Rendering from older recording metadata can use its sibling GIF when the MP4 was removed.
+All nine existing MP4s were converted at 5 frames/s, preserving the full time interval, validated frame by frame, then removed as requested. Redundant GIFs and conversion metadata are retained in ignored local archives; the selected compact 4× GIF and real screenshots are retained in `docs/media/` for publication. Future recording conversion is `python3 scripts/convert_recordings_to_gif.py --remove-mp4`. Rendering from older recording metadata can use its sibling GIF when the MP4 was removed.
 
 The 1461 sampled centreline vertices include 23 outside every 5 m coverage disk; observed geometric coverage ranges from zero to five servers. This sample count is not a distance-weighted coverage percentage. The map is preserved; uncovered locations simply have no eligible remote endpoint.
 

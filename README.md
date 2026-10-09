@@ -4,9 +4,9 @@ A ROS 2 / Nav2 testbed for **modeling task scheduling on heterogeneous vehicle a
 
 This is a **personal project**, driven by my interest in real-time systems and robotics. It uses **Navigation2 (Nav2)** and the upstream minimal TurtleBot simulation for navigation, sensors and differential-drive dynamics, with a custom circuit and vehicle appearance.
 
-The map is **inspired by the overall shape of the Formula 1 Monaco circuit**. Its dimensions and details are adapted for this simulation. One moving vehicle visits 19 checkpoints and the finish; 19 static blue server cabinets with antennas mark edge locations.
+The map is **inspired by the overall shape of the Formula 1 Monaco circuit**. Its dimensions and details are adapted for this simulation. In the default scene, one moving vehicle visits 19 checkpoints and the finish; 19 static blue server cabinets with antennas mark edge locations.
 
-The current implementation includes extracted task parameters, explicit job dependencies, A7/A15 compute and thermal models, and a standalone local FIFO baseline. Connecting modeled completion times to the running ROS system and comparing additional scheduling algorithms are the next steps.
+The current implementation includes extracted task parameters, explicit job dependencies, A7/A15 compute and thermal models, and a local FIFO baseline coupled to one running Nav2 stack through a 1 ms lockstep bridge. Comparing additional scheduling algorithms and enabling edge offloading are the next steps.
 
 ## Circuit dimensions
 
@@ -20,17 +20,27 @@ The current implementation includes extracted task parameters, explicit job depe
 
 Compact GIF (approximately 13.5 MB), retaining the full start-to-finish interval. Actual Gazebo footage: approximately 0.75 m behind the vehicle on the left, and a fixed overview on the right.
 
-Verified mission: **20/20 ordered targets**, **353.9 s** mission wall time and **zero recoveries**.
+Verified single-vehicle mission: **20/20 ordered targets**, **353.9 s** mission wall time and **zero recoveries**. This recording predates the live scheduling bridge.
 
 ![Complete run at four times playback speed](docs/media/dual-view-4x.gif)
 
 ## Initial FIFO scheduling example
 
-**Standalone model replay.** This Gantt shows a short initial interval on the vehicle's A7 and A15, using the selected 95%-ECDF execution budgets. Children wait for their selected parents to finish. This replay runs independently of the navigation footage above; live ROS integration is the next stage.
+**Standalone model replay.** This Gantt shows a short initial interval on the vehicle's A7 and A15, using the selected 95%-ECDF execution budgets. Children wait for their selected parents to finish. This replay runs independently of the navigation footage above. The live bridge has its own applied scheduling evidence below.
 
 ![Initial local FIFO replay detail](docs/figures/task-fifo/local-fifo-detail.png)
 
 [Full 0.586 s Gantt](docs/figures/task-fifo/local-fifo-gantt.png) · [Selected job DAG](docs/figures/task-fifo/selected-job-dag.svg) · [Task model and equations](docs/task-execution.en.md)
+
+## Live local scheduling bridge
+
+One red vehicle produces jobs from actual Nav2 callback entries. Its modeled processor has one A7 and one A15. Ready FIFO selects the core that has been idle longest; selected parents must complete before a child starts. Real calculation holds simulation time, while Q95 execution budgets, output delivery and whole-device thermal suspension run on the common **0.001 s** clock. The live Gantt uses **2 s** windows alongside the rear-following camera and fixed overview.
+
+A **30 s** active trial verified **36,078** matching physics/hardware steps, **1,944** actual jobs and **1,680** selected dependency edges, with no validation errors. The vehicle traveled **11.49 m** without a navigation abort in that interval. This is a bounded bridge test; full-lap completion under the live scheduler is still unverified. Pink regions are whole-device cooling.
+
+![Applied live FIFO schedule](docs/figures/live-bridge/applied-gantt.png)
+
+[Bridge semantics, limitations and reproduction](docs/live-bridge.en.md) · [Validation results](docs/figures/live-bridge/validation.json)
 
 ## Main tools
 
@@ -38,7 +48,8 @@ Verified mission: **20/20 ordered targets**, **353.9 s** mission wall time and *
 | --- | --- |
 | ROS 2 Jazzy and Navigation2 | Robot communication, localization, planning and control |
 | Gazebo Harmonic and RViz | Physics, sensors and visualization |
-| Python, NumPy and Matplotlib | Task models, scheduling replay and scientific figures |
+| Python, NumPy and Matplotlib | Hardware models, live scheduling and scientific figures |
+| C++17, Gazebo Transport and Unix sockets | Native Nav2 output gates and acknowledged physics stepping |
 | FFmpeg | Dual-camera recording and GIF generation |
 | Ubuntu 24.04, WSL2 and WSLg | Development and graphical simulation environment |
 
@@ -52,5 +63,7 @@ bash scripts/launch_monaco.sh
 # In a second terminal:
 bash scripts/run_monaco.sh
 ```
+
+An optional [four-vehicle preview](docs/four-vehicle-preview.en.md) adds a transverse starting row on a locally widened apron.
 
 See the [project guide](docs/project-guide.en.md) for setup, recording, measurements and upstream attribution. The simulation builds on [Navigation2](https://github.com/ros-navigation/navigation2) and its [minimal TurtleBot simulation](https://github.com/ros-navigation/nav2_minimal_turtlebot_simulation).

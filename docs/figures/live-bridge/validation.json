@@ -1,0 +1,77 @@
+{
+  "trial": "artifacts/live-bridge/single-1ms-live-01",
+  "step_s": 0.001,
+  "sim_s": 36.078,
+  "host_s": 220.83216771900334,
+  "jobs": 1944,
+  "modeled_completions": 1942,
+  "completed_counts": {
+    "local_costmap_update": 149,
+    "bt_tick": 484,
+    "planning_request": 49,
+    "velocity_smoothing_tick": 265,
+    "controller_path_install": 48,
+    "control_iteration": 196,
+    "velocity_command_callback": 196,
+    "mppi_noise_generation": 195,
+    "collision_check": 180,
+    "global_costmap_update": 30,
+    "amcl_scan_callback": 150
+  },
+  "clock_pairs_verified": 36078,
+  "dependency_edges_verified": 1680,
+  "dependency_types": {
+    "bt_tick -> planning_request": 49,
+    "planning_request -> controller_path_install": 48,
+    "local_costmap_update -> control_iteration": 196,
+    "controller_path_install -> control_iteration": 196,
+    "control_iteration -> mppi_noise_generation": 196,
+    "velocity_command_callback -> velocity_smoothing_tick": 264,
+    "velocity_smoothing_tick -> collision_check": 168,
+    "planning_request -> global_costmap_update": 30,
+    "mppi_noise_generation -> control_iteration": 195,
+    "control_iteration -> velocity_command_callback": 142,
+    "global_costmap_update -> planning_request": 30,
+    "local_costmap_update -> local_costmap_update": 148,
+    "planning_request -> planning_request": 18
+  },
+  "readiness_times_verified": 1943,
+  "selected_path_parents_verified": 48,
+  "selected_BT_goal_parents_verified": 49,
+  "budgets_verified": 1942,
+  "FIFO_assignments_verified": 1943,
+  "validation_errors": [],
+  "cooling_entries": 117,
+  "cooling_exits": 117,
+  "exact_DDS_source_bindings": 311,
+  "payload_or_UUID_bindings": 97,
+  "unresolved_or_external_inputs": 66,
+  "moving_odometry_segments_during_cooling": {
+    "0": 655
+  },
+  "trace_sha256": "190e7bcd04179d4819cece020ddc2ffa98eb6b6071cde1506acf931ef35012b4",
+  "outcome": "Intentional finite trial; no full-lap completion is claimed.",
+  "common_start": {
+    "origin_sim_s": 6.078,
+    "race_s": 30.0,
+    "goal_acceptance_ticks": [
+      6078
+    ],
+    "first_core_start_ticks": {
+      "0": 6078
+    }
+  },
+  "vehicles": {
+    "red": {
+      "passed": false,
+      "action_status": null,
+      "nav2_error_code": null,
+      "odometry_distance_m": 11.489099730883636,
+      "ordered_targets_passed": 1,
+      "navigation_recoveries": 0,
+      "scheduler": "live_local_FIFO_oldest_idle_core",
+      "error": "Interrupted."
+    }
+  },
+  "navigation_failed": false
+}

@@ -1,0 +1,163 @@
+{
+  "analysis_only": true,
+  "new_simulations_launched": false,
+  "behavior_changes_applied": false,
+  "epoch_host_s": 1791537915.5028958,
+  "clock": "HOST wall-clock at AMCL callback receipt and ROS log emission",
+  "interpolation_step_s": 0.1,
+  "max_interpolation_bracket_s": 1.0,
+  "localization_is_ground_truth": false,
+  "physical_contact_recorded": false,
+  "pairwise_statistics": {
+    "red-blue": {
+      "minimum_amcl_distance_m": 0.895891139244652,
+      "minimum_elapsed_host_s": 19.857758045196533,
+      "valid_samples": 684,
+      "total_samples": 1195,
+      "first_below_m": {
+        "0.44": null,
+        "0.3": null,
+        "0.265": null,
+        "0.2": null
+      }
+    },
+    "red-white": {
+      "minimum_amcl_distance_m": 0.8387217479953645,
+      "minimum_elapsed_host_s": 24.69487500190735,
+      "valid_samples": 631,
+      "total_samples": 917,
+      "first_below_m": {
+        "0.44": null,
+        "0.3": null,
+        "0.265": null,
+        "0.2": null
+      }
+    },
+    "red-green": {
+      "minimum_amcl_distance_m": 1.253405925723327,
+      "minimum_elapsed_host_s": 36.39062309265137,
+      "valid_samples": 666,
+      "total_samples": 946,
+      "first_below_m": {
+        "0.44": null,
+        "0.3": null,
+        "0.265": null,
+        "0.2": null
+      }
+    },
+    "blue-white": {
+      "minimum_amcl_distance_m": 0.813835371225314,
+      "minimum_elapsed_host_s": 24.994874715805054,
+      "valid_samples": 539,
+      "total_samples": 917,
+      "first_below_m": {
+        "0.44": null,
+        "0.3": null,
+        "0.265": null,
+        "0.2": null
+      }
+    },
+    "blue-green": {
+      "minimum_amcl_distance_m": 0.7962705268877812,
+      "minimum_elapsed_host_s": 33.25774526596069,
+      "valid_samples": 556,
+      "total_samples": 945,
+      "first_below_m": {
+        "0.44": null,
+        "0.3": null,
+        "0.265": null,
+        "0.2": null
+      }
+    },
+    "white-green": {
+      "minimum_amcl_distance_m": 0.17655801397806192,
+      "minimum_elapsed_host_s": 71.69483017921448,
+      "valid_samples": 564,
+      "total_samples": 917,
+      "first_below_m": {
+        "0.44": 29.694870233535767,
+        "0.3": 62.094839334487915,
+        "0.265": 62.19483923912048,
+        "0.2": 71.69483017921448
+      }
+    }
+  },
+  "vehicle_results": {
+    "red": {
+      "passed": false,
+      "ordered_targets_passed": 2,
+      "requested_targets": 20,
+      "odometry_distance_m": 25.754206488688023,
+      "navigation_recoveries": 0,
+      "elapsed_wall_seconds": 144.289,
+      "error": "Interrupted.",
+      "accept_offset_host_s": 0.0,
+      "accept_sim_s": 25.071,
+      "amcl_samples": 283
+    },
+    "blue": {
+      "passed": false,
+      "ordered_targets_passed": 0,
+      "requested_targets": 20,
+      "odometry_distance_m": 7.829002219325071,
+      "navigation_recoveries": 17,
+      "elapsed_wall_seconds": 135.287,
+      "error": "Nav2 course failed; status=6, error=",
+      "accept_offset_host_s": 3.07320959,
+      "accept_sim_s": 26.439,
+      "amcl_samples": 135
+    },
+    "white": {
+      "passed": false,
+      "ordered_targets_passed": 1,
+      "requested_targets": 20,
+      "odometry_distance_m": 9.259962622166192,
+      "navigation_recoveries": 16,
+      "elapsed_wall_seconds": 107.807,
+      "error": "Nav2 course failed; status=6, error=",
+      "accept_offset_host_s": 3.59299749,
+      "accept_sim_s": 26.658,
+      "amcl_samples": 131
+    },
+    "green": {
+      "passed": false,
+      "ordered_targets_passed": 1,
+      "requested_targets": 20,
+      "odometry_distance_m": 9.470915371923667,
+      "navigation_recoveries": 17,
+      "elapsed_wall_seconds": 110.255,
+      "error": "Nav2 course failed; status=6, error=",
+      "accept_offset_host_s": 2.932257158,
+      "accept_sim_s": 26.373,
+      "amcl_samples": 136
+    }
+  },
+  "first_planning_failure_elapsed_host_s": 67.41356706619263,
+  "event_counts": {
+    "control_warning": 20,
+    "planning_failure": 44,
+    "spin": 6,
+    "backup": 3,
+    "halt_result_error": 3
+  },
+  "accepted_goal_spread_host_s": 3.59299749,
+  "custom_compute_scheduler_coupled": false,
+  "missing": [
+    "Gazebo contact events",
+    "Gazebo ground-truth poses and orientations",
+    "raw LaserScan and costmap history",
+    "collision monitor state",
+    "command publish/take timestamps",
+    "per-thread CPU/runtime and OS run-queue trace",
+    "synchronized capture-start timestamp"
+  ],
+  "source_sha256": {
+    "artifacts/fleet/mission/red.json": "150d08d7a8d956d918860c32a201330bd90276cee7df70f9fcdfb5b33943d881",
+    "artifacts/fleet/mission/blue.json": "253f22989a2e1003bf46941fe3df81a2dc6100f9f5244fb45f50b511deea0043",
+    "artifacts/fleet/mission/white.json": "72cf4753f27de38ea64f8ab3d33fb4ac83b4e5bbe44d57b20aeaa79aa120a99b",
+    "artifacts/fleet/mission/green.json": "7cfb068f17f5f6f2bb55155e137cb2bcbfd399a5a5c138e10c3406600b7874ab",
+    "artifacts/fleet/capture/launch.log": "de745bc1805326b7123d1bd3dbda0688b58e2aa3a444242bcfa382d40780f28e",
+    "artifacts/fleet/capture/capture-evidence.json": "9e8953e0e52ec9a0377e1dac0c1a8630e29c7b9d1e9a49cf0724a64f45091ba3",
+    "artifacts/fleet/capture/dual-view.gif": "5e4a8b4a03832fe78f013a2f9e94fcbf0d7f1d8e1422b80164cfe42fa1045f8e"
+  }
+}

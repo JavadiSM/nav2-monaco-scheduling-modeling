@@ -1,0 +1,14 @@
+# Four-car mode; the frozen single-car scene remains available.
+start_grid:
+  width_m: 2.6
+  row_s_m: 0.8
+  rear_extension_m: 0.9
+  wide_until_s_m: 1.8
+  merge_at_s_m: 5.8
+  lateral_offsets_m:
+    blue: -0.9
+    red: -0.3
+    white: 0.3
+    green: 0.9
+nav2:
+  action_ack_timeout_ms: 1000

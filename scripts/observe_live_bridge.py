@@ -1,0 +1,48 @@
+#!/usr/bin/env python3
+"""Record actual ROS odometry/commands with their simulation clock, without publishing."""
+import argparse,csv,time
+from pathlib import Path
+import rclpy
+from rclpy.node import Node
+from rclpy.qos import qos_profile_sensor_data
+from nav_msgs.msg import Odometry
+from geometry_msgs.msg import Twist
+from rosgraph_msgs.msg import Clock
+from lifecycle_msgs.srv import GetState
+import json
+
+def main():
+    parser=argparse.ArgumentParser();parser.add_argument('--output',type=Path,required=True);parser.add_argument('--ready-file',type=Path);parser.add_argument('--vehicles',type=int,default=1);args=parser.parse_args()
+    rclpy.init();node=Node('live_bridge_observer');sim=[0];subs=[]
+    with args.output.open('w',newline='',buffering=1) as output:
+        writer=csv.writer(output);writer.writerow(['host_mono_ns','sim_ns','device','topic','x','y','vx','wz'])
+        subs.append(node.create_subscription(Clock,'/clock',lambda m:sim.__setitem__(0,m.clock.sec*10**9+m.clock.nanosec),10))
+        for device,color in enumerate(('red','blue','white','green')[:args.vehicles]):
+            ns='' if color=='red' else '/'+color
+            def odom(m,d=device):writer.writerow([time.monotonic_ns(),m.header.stamp.sec*10**9+m.header.stamp.nanosec,d,'odom',m.pose.pose.position.x,m.pose.pose.position.y,m.twist.twist.linear.x,m.twist.twist.angular.z])
+            def command(m,d=device):writer.writerow([time.monotonic_ns(),sim[0],d,'cmd_vel','','',m.linear.x,m.angular.z])
+            subs.append(node.create_subscription(Odometry,ns+'/odom',odom,qos_profile_sensor_data))
+            for topic in ('cmd_vel_nav','cmd_vel_smoothed','cmd_vel'):
+                def command(m,d=device,t=topic):writer.writerow([time.monotonic_ns(),sim[0],d,t,'','',m.linear.x,m.angular.z])
+                subs.append(node.create_subscription(Twist,ns+'/'+topic,command,10))
+        clients={};futures={};states={}
+        if args.ready_file:
+            for color in ('red','blue','white','green')[:args.vehicles]:
+                ns='' if color=='red' else '/'+color
+                for name in ('amcl','controller_server','planner_server','bt_navigator','velocity_smoother','collision_monitor'):
+                    topic=ns+'/'+name+'/get_state';clients[topic]=node.create_client(GetState,topic)
+            def check_ready():
+                for topic,client in clients.items():
+                    f=futures.get(topic)
+                    if f and f.done():
+                        try:states[topic]=f.result().current_state.label
+                        except Exception:states[topic]='unavailable'
+                        futures.pop(topic,None)
+                    if topic not in futures and client.service_is_ready():futures[topic]=client.call_async(GetState.Request())
+                args.ready_file.with_suffix('.json').write_text(json.dumps(states,indent=2)+'\n')
+                if len(states)==len(clients) and all(s=='active' for s in states.values()):args.ready_file.touch()
+            node.create_timer(.5,check_ready)
+        try:rclpy.spin(node)
+        except KeyboardInterrupt:pass
+        finally:node.destroy_node();rclpy.try_shutdown()
+if __name__=='__main__':main()

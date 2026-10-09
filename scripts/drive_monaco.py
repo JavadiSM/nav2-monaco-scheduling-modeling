@@ -6,6 +6,7 @@ import math
 from pathlib import Path
 import time
 import subprocess
+import sys
 
 from action_msgs.msg import GoalStatus
 from geometry_msgs.msg import PoseStamped, PoseWithCovarianceStamped
@@ -22,8 +23,9 @@ from visualization_msgs.msg import Marker, MarkerArray
 
 
 class Lap(Node):
-    def __init__(self, scene):
-        super().__init__('monaco_checkpoint_mission', parameter_overrides=[Parameter('use_sim_time', value=True)])
+    def __init__(self, scene, namespace=''):
+        self.topic = lambda name: '/' + '/'.join(x for x in (namespace.strip('/'), name.lstrip('/')) if x)
+        super().__init__('monaco_checkpoint_mission', namespace=namespace, parameter_overrides=[Parameter('use_sim_time', value=True)])
         self.scene = scene
         self.scans = 0
         self.path, self.poses, self.feedback_indices = [], [], []
@@ -35,12 +37,12 @@ class Lap(Node):
         self.velocity_samples = []
         self.ordered_targets_passed = 0
         qos = QoSProfile(depth=1, reliability=ReliabilityPolicy.RELIABLE, durability=DurabilityPolicy.TRANSIENT_LOCAL)
-        self.markers = self.create_publisher(MarkerArray, '/monaco/markers', qos)
-        self.initial = self.create_publisher(PoseWithCovarianceStamped, '/initialpose', 10)
-        self.create_subscription(PoseWithCovarianceStamped, '/amcl_pose', self.on_pose, qos)
-        self.create_subscription(Odometry, '/odom', self.on_odom, qos_profile_sensor_data)
-        self.create_subscription(LaserScan, '/scan', self.on_scan, qos_profile_sensor_data)
-        self.action = ActionClient(self, NavigateThroughPoses, '/navigate_through_poses')
+        self.markers = self.create_publisher(MarkerArray, self.topic('/monaco/markers'), qos)
+        self.initial = self.create_publisher(PoseWithCovarianceStamped, self.topic('/initialpose'), 10)
+        self.create_subscription(PoseWithCovarianceStamped, self.topic('/amcl_pose'), self.on_pose, qos)
+        self.create_subscription(Odometry, self.topic('/odom'), self.on_odom, qos_profile_sensor_data)
+        self.create_subscription(LaserScan, self.topic('/scan'), self.on_scan, qos_profile_sensor_data)
+        self.action = ActionClient(self, NavigateThroughPoses, self.topic('/navigate_through_poses'))
         self.show_markers(0)
 
     def on_pose(self, msg):
@@ -70,7 +72,7 @@ class Lap(Node):
         return bool(predicate())
 
     def lifecycle_active(self, name):
-        client = self.create_client(GetState, f'/{name}/get_state')
+        client = self.create_client(GetState, self.topic(f'/{name}/get_state'))
         try:
             if not client.wait_for_service(timeout_sec=2):
                 return False
@@ -129,6 +131,11 @@ class Lap(Node):
 
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument('--fleet-color', choices=('red','blue','white','green'))
+    parser.add_argument('--namespace', default='')
+    parser.add_argument('--bridge-ready-file',type=Path,help='Optional gate after initialization, before sending the mission.')
+    parser.add_argument('--start-offset', type=float, default=0.)
+    parser.add_argument('--robot-name', default='racecar')
     parser.add_argument('--timeout', type=float, default=1500)
     parser.add_argument('--output', type=Path, help='Optional per-experiment report destination.')
     parser.add_argument('--limit', type=int, default=0, help='Optional initial checkpoints only, for a short check.')
@@ -139,20 +146,30 @@ def main():
     project = Path(__file__).resolve().parents[1]
     scene = json.loads((project / 'scenarios/monaco/scenario.json').read_text())
     output = args.output or project / ('artifacts/monaco-checkpoint-test.json' if args.from_checkpoint else 'artifacts/monaco-run.json')
+    if args.fleet_color:
+        sys.path.insert(0, str(project))
+        import yaml
+        from tools.monaco_start_grid import grid_pose
+        grid = yaml.safe_load((project/'config/monaco_fleet.yaml').read_text())['start_grid']
+        scene['start'] = grid_pose(scene, args.fleet_color, grid)
+    elif args.start_offset:
+        sys.path.insert(0, str(project))
+        from tools.monaco_fleet import route_pose
+        scene['start'] = route_pose(scene, args.start_offset)
     if args.from_checkpoint:
         scene['start'] = scene['checkpoints'][args.from_checkpoint - 1]
     rclpy.init()
-    node = Lap(scene)
+    node = Lap(scene, args.namespace)
     start_wall_time = time.time()
     start = time.monotonic()
     handle = None
-    report = {'passed': False, 'full_course': args.limit == 0 and args.from_checkpoint == 0, 'communication_enabled': False, 'scheduler': 'upstream_default', 'mission_type': 'continuous_navigate_through_poses', 'moving_vehicles': 1, 'static_edge_car_models': len(scene['servers'])}
+    report = {'passed': False, 'full_course': args.limit == 0 and args.from_checkpoint == 0, 'communication_enabled': False, 'scheduler': 'upstream_default', 'mission_type': 'continuous_navigate_through_poses', 'moving_vehicles': 1, 'namespace': args.namespace, 'model_name': args.robot_name, 'static_edge_car_models': len(scene['servers'])}
     try:
         if not node.until(lambda: node.scans >= 5 and len(node.path) >= 5, 90):
             raise RuntimeError('No live LiDAR / odometry data.')
         if args.from_checkpoint:
             p = scene['start']
-            request = f'name: "racecar" position {{ x: {p["x"]} y: {p["y"]} z: 0.01 }} orientation {{ z: {math.sin(p["yaw"] / 2)} w: {math.cos(p["yaw"] / 2)} }}'
+            request = f'name: "{args.robot_name}" position {{ x: {p["x"]} y: {p["y"]} z: 0.01 }} orientation {{ z: {math.sin(p["yaw"] / 2)} w: {math.cos(p["yaw"] / 2)} }}'
             moved = subprocess.run(['gz', 'service', '-s', '/world/monaco/set_pose', '--reqtype', 'gz.msgs.Pose', '--reptype', 'gz.msgs.Boolean', '--timeout', '5000', '--req', request], capture_output=True, text=True, timeout=8)
             if moved.returncode or 'data: true' not in moved.stdout:
                 raise RuntimeError('Gazebo test repositioning failed.')
@@ -190,6 +207,16 @@ def main():
             p.pose.position.x, p.pose.position.y = target['x'], target['y']
             p.pose.orientation.z, p.pose.orientation.w = math.sin(target['yaw'] / 2), math.cos(target['yaw'] / 2)
             goal.poses.append(p)
+        start_socket=None
+        if args.bridge_ready_file:
+            import socket,struct
+            sys.path.insert(0,str(project));from tools.live_bridge.broker import runtime_paths,PACKET,START_READY,START_ACK
+            start_socket=socket.socket(socket.AF_UNIX,socket.SOCK_SEQPACKET)
+            start_socket.connect(runtime_paths(args.bridge_ready_file.parent)[0])
+            device=('red','blue','white','green').index(args.fleet_color or 'red')
+            start_socket.sendall(PACKET.pack(START_READY,device,0,0,0,0,0))
+            reply=PACKET.unpack(start_socket.recv(PACKET.size));report['common_start_sim_ns']=reply[2]
+            report['scheduler']='live_local_FIFO_oldest_idle_core'
         report['goal_send_mono_ns'] = time.monotonic_ns()
         report['goal_send_epoch_ns'] = time.time_ns()
         future = node.action.send_goal_async(goal, feedback_callback=node.feedback)
@@ -198,6 +225,9 @@ def main():
         handle = future.result()
         if not handle.accepted:
             raise RuntimeError('NavigateThroughPoses was rejected.')
+        if start_socket:
+            start_socket.sendall(PACKET.pack(START_ACK,device,0,0,0,0,0))
+            reply=PACKET.unpack(start_socket.recv(PACKET.size));report['goal_accepted_broker_sim_ns']=reply[2];start_socket.close()
         report['goal_accepted_mono_ns'] = time.monotonic_ns()
         report['goal_accepted_sim_ns'] = node.get_clock().now().nanoseconds
         print('Upstream Nav2 accepted the checkpoint mission.', flush=True)
@@ -234,6 +264,7 @@ def main():
         report['end_wall_time'] = time.time()
         report['end_mono_ns'] = time.monotonic_ns()
         report['elapsed_wall_seconds'] = round(time.monotonic() - start, 3)
+        report['ordered_targets_passed'] = node.ordered_targets_passed
         report['valid_lidar_messages'] = node.scans
         report['odometry_distance_m'] = sum(math.dist(a, b) for a, b in zip(node.path, node.path[1:]))
         report['feedback_target_indices'] = node.feedback_indices
