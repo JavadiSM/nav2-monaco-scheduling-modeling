@@ -1,0 +1,27 @@
+digraph G {
+graph [rankdir=LR, bgcolor="#f6f8fc", pad="0.35", nodesep="0.35", ranksep="0.6", label="Selected job DAG | atomic modeled completion | all time labels in seconds", labelloc=t, fontsize=19];
+node [shape=box, style="rounded,filled", fontname="DejaVu Sans", fontsize=10, fillcolor="white", color="#66758b"];
+n0 [label="J5[0]  Collision\nCref=0.0009203 s | aperiodic\nA7: 0.0005751875 s | A15: 0.0002556389 s"];
+n1 [label="J4[0]  Command\nCref=1.74e-05 s | aperiodic\nA7: 1.0875e-05 s | A15: 4.833333e-06 s"];
+n5 -> n1;
+n2 [label="J4[1]  Command\nCref=1.74e-05 s | aperiodic\nA7: 1.0875e-05 s | A15: 4.833333e-06 s"];
+n6 -> n2;
+n3 [label="tau4[0]  Smooth timer\nCref=0.0002771 s | T=0.05 s\nA7: 0.0001731875 s | A15: 7.697222e-05 s"];
+n4 [label="J6[0]  Path install\nCref=0.0004197 s | aperiodic\nA7: 0.0002623125 s | A15: 0.0001165833 s"];
+n5 [label="tau1[0]  Control\nCref=0.0100682 s | T=0.05 s\nA7: 0.006292625 s | A15: 0.002796722 s"];
+n14 -> n5;
+n8 -> n5;
+n6 [label="tau1[1]  Control\nCref=0.0100682 s | T=0.05 s\nA7: 0.006292625 s | A15: 0.002796722 s"];
+n14 -> n6;
+n9 -> n6;
+n7 [label="J1[0]  Planner\nCref=0.0490757 s | aperiodic\nA7: 0.03067231 s | A15: 0.01363214 s"];
+n8 [label="J3[0]  Noise\nCref=0.0047086 s | aperiodic\nA7: 0.002942875 s | A15: 0.001307944 s"];
+n9 [label="J3[1]  Noise\nCref=0.0047086 s | aperiodic\nA7: 0.002942875 s | A15: 0.001307944 s"];
+n5 -> n9;
+n10 [label="J3[2]  Noise\nCref=0.0047086 s | aperiodic\nA7: 0.002942875 s | A15: 0.001307944 s"];
+n6 -> n10;
+n11 [label="J2[0]  AMCL scan\nCref=0.0064535 s | aperiodic\nA7: 0.004033437 s | A15: 0.001792639 s"];
+n12 [label="tau3[0]  Global map\nCref=0.0013906 s | T=1 s\nA7: 0.000869125 s | A15: 0.0003862778 s"];
+n13 [label="tau5[0]  BT tick\nCref=0.0010347 s | T=0.01 s\nA7: 0.0006466875 s | A15: 0.0002874167 s"];
+n14 [label="tau2[0]  Local map\nCref=0.0014484 s | T=0.2 s\nA7: 0.00090525 s | A15: 0.0004023333 s"];
+}

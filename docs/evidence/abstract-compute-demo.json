@@ -1,0 +1,55 @@
+{
+  "synthetic_demo": true,
+  "ros_connected": false,
+  "task_graph_connected": false,
+  "jobs": [
+    {
+      "job_id": 1,
+      "device_id": 0,
+      "core_id": 1,
+      "demand_mcycles": 3600,
+      "start_s": 0.0,
+      "finish_s": 12.975,
+      "active_time_s": 0.9999999999999983,
+      "executed_mcycles": 3599.9999999999845
+    },
+    {
+      "job_id": 2,
+      "device_id": 0,
+      "core_id": 0,
+      "demand_mcycles": 3600,
+      "start_s": 0.0,
+      "finish_s": 17.914999999999992,
+      "active_time_s": 2.2499999999999893,
+      "executed_mcycles": 3599.9999999999836
+    },
+    {
+      "job_id": 3,
+      "device_id": 1,
+      "core_id": 0,
+      "demand_mcycles": 80,
+      "start_s": 0.0,
+      "finish_s": 0.09999999999999999,
+      "active_time_s": 0.09999999999999999,
+      "executed_mcycles": 79.99999999999997
+    }
+  ],
+  "vehicle_cooling_entries": 65,
+  "vehicle_cooling_recoveries": 65,
+  "cooling_equilibrium_c": {
+    "vehicle": [
+      55.04752426184867,
+      55.07094480041213
+    ],
+    "server": [
+      55.047193885958016,
+      55.04752155384571,
+      55.06700338771143,
+      55.06641569896566
+    ]
+  },
+  "actual_device_core_counts": {
+    "vehicle": 2,
+    "server": 4
+  }
+}

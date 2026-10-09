@@ -14,5 +14,5 @@ if ! dpkg-query -W ros2-apt-source >/dev/null 2>&1; then
 fi
 locale-gen en_US.UTF-8
 apt-get -o Acquire::Retries=3 -o Acquire::http::Timeout=30 update
-apt-get install -y ros-jazzy-desktop ros-jazzy-navigation2 ros-jazzy-nav2-bringup ros-jazzy-nav2-minimal-tb3-sim ros-jazzy-ros-gz ros-dev-tools gh mesa-utils x11-utils xdotool imagemagick ffmpeg python3-numpy python3-scipy python3-opencv python3-matplotlib python3-pil python3-yaml
+apt-get install -y ros-jazzy-desktop ros-jazzy-navigation2 ros-jazzy-nav2-bringup ros-jazzy-nav2-minimal-tb3-sim ros-jazzy-ros-gz ros-dev-tools gh mesa-utils x11-utils xdotool imagemagick ffmpeg python3-numpy python3-scipy python3-opencv python3-matplotlib python3-pil python3-yaml graphviz
 echo 'ROS2_WAREHOUSE_INSTALL_COMPLETE'

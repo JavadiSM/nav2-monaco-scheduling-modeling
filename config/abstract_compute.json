@@ -1,0 +1,109 @@
+{
+  "schema_version": 1,
+  "core_types": {
+    "A7": {
+      "name": "Cortex-A7",
+      "family": "ARM_LP",
+      "eta": 1.0,
+      "frequency_range_mhz": [
+        800,
+        1600
+      ],
+      "l": 5,
+      "voltage_range_v": [
+        0.9,
+        1.1
+      ],
+      "power": {
+        "reference_active_range_w": [
+          0.2,
+          0.5
+        ],
+        "reference_intercept_w": 0.15,
+        "reference_activity_slope_w": 0.4,
+        "leakage_ref_w": 0.05,
+        "leakage_gamma_per_k": 0.015,
+        "idle_w": 0.05,
+        "cooling_power_w": 0.005,
+        "dvfs_scaling_mode": "voltage_frequency",
+        "effective_switching_capacitance_f": null
+      },
+      "thermal": {
+        "capacitance_range_j_per_k": [
+          0.08,
+          0.12
+        ],
+        "ambient_resistance_range_k_per_w": [
+          5.0,
+          7.0
+        ]
+      },
+      "max_voltage_v": 1.1
+    },
+    "A15": {
+      "name": "Cortex-A15",
+      "family": "ARM_HP",
+      "eta": 1.8,
+      "frequency_range_mhz": [
+        1000,
+        2000
+      ],
+      "l": 5,
+      "voltage_range_v": [
+        1.1,
+        1.3
+      ],
+      "power": {
+        "reference_active_range_w": [
+          0.8,
+          2.0
+        ],
+        "reference_intercept_w": 0.55,
+        "reference_activity_slope_w": 1.55,
+        "leakage_ref_w": 0.15,
+        "leakage_gamma_per_k": 0.02,
+        "idle_w": 0.15,
+        "cooling_power_w": 0.015,
+        "dvfs_scaling_mode": "voltage_frequency",
+        "effective_switching_capacitance_f": null
+      },
+      "thermal": {
+        "capacitance_range_j_per_k": [
+          0.12,
+          0.18
+        ],
+        "ambient_resistance_range_k_per_w": [
+          4.0,
+          6.0
+        ]
+      },
+      "max_voltage_v": 1.3
+    }
+  },
+  "device_classes": {
+    "vehicle": {
+      "lp_cores": 1,
+      "hp_cores": 1
+    },
+    "server": {
+      "lp_cores": 2,
+      "hp_cores": 2
+    }
+  },
+  "scheduler_policy": "ready_hi_then_plan_rank_nonpreemptive",
+  "thermal": {
+    "ambient_temperature_c": 55.0,
+    "reference_temperature_c": 35.0,
+    "max_temperature_c": 55.6,
+    "balance_temperature_c": 55.45,
+    "thermal_epoch_ms": 100.0,
+    "coupling_base_conductance_range_w_per_k": [
+      0.07,
+      0.11
+    ],
+    "coupling_distance_attenuation": 0.8,
+    "control_epoch_s": 0.005
+  },
+  "physical_seed": 81371,
+  "thermal_configuration_status": "confirmed"
+}

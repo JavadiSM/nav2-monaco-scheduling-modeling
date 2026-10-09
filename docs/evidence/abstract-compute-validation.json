@@ -1,0 +1,11 @@
+{
+  "tests_run": 34,
+  "failures": 0,
+  "errors": 0,
+  "passed": true,
+  "seeded_invariant_test_jobs": 4500,
+  "ros_connected": false,
+  "task_graph_connected": true,
+  "live_ros_result_gating": false,
+  "execution_clock": "virtual seconds"
+}

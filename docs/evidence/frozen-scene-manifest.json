@@ -1,0 +1,17 @@
+{
+  "policy": "Freeze geometry, navigation and physics. User-authorized server visual restyling is the sole world-content exception.",
+  "files": {
+    "config/monaco.yaml": "e048b019eea9b1bc927eae82a7e33e1dcc7ac4d6ef3afe764b0d611ca40a72c0",
+    "scenarios/monaco/layout.png": "4e42146eb480919d547b36705798495d775e87b9007a73f53155d3bf372360bc",
+    "scenarios/monaco/LICENSE.upstream": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+    "scenarios/monaco/map.pgm": "5e08c8cd1724c5876f7855ba51dd60519a4422e11543f67b7687e993de881e3c",
+    "scenarios/monaco/map.yaml": "dcde78558e024b2bf2713be6eba59efef8be475c81c308674934e19070417a98",
+    "scenarios/monaco/nav2_params.yaml": "af600b86b37ebfa96faf020070d207e7b987679394b8f3f19ea0a06d1c775813",
+    "scenarios/monaco/navigate_through_poses.xml": "82475c2a954c5aa5236d422f9a20b1b4000c7a8478d6645424a4f3b3efd058b6",
+    "scenarios/monaco/NOTICE.md": "417debd1be53963d27bd668b214f9ebc8a09829edf1cca73d206f1e09a5bc1c2",
+    "scenarios/monaco/racecar.sdf": "8d6d048a3a5873ab09dfbdb20a21ed2a0d1b588f6d2a48fcc97e869850940b02",
+    "scenarios/monaco/racecar.urdf": "03336beec8558bc67f2d1879bcd0fe0da0fecce8e284c8211454f156ed627ce0",
+    "scenarios/monaco/scenario.json": "18c3795c994e4e2973247a56ea4dad4ff5eb623db2654fa16d08db62cf1cc8b9",
+    "scenarios/monaco/world.sdf": "60486aef1622fc29443bb694b7232d2737c523dd141adf1aa476144073bcee64"
+  }
+}

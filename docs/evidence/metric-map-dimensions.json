@@ -1,0 +1,45 @@
+{
+  "units": "metres",
+  "frame": "ROS map",
+  "map_resolution_m_per_pixel": 0.05,
+  "map_pixels": [
+    1009,
+    446
+  ],
+  "map_extent_m": {
+    "xmin": -25.75,
+    "xmax": 24.700000000000003,
+    "ymin": -11.25,
+    "ymax": 11.05
+  },
+  "map_width_m": 50.45,
+  "map_height_m": 22.3,
+  "centreline_bounds_m": {
+    "xmin": -22.717187500000005,
+    "xmax": 21.666914062500005,
+    "ymin": -8.247968750000002,
+    "ymax": 8.029218750000002
+  },
+  "centreline_span_x_m": 44.38410156250001,
+  "centreline_span_y_m": 16.277187500000004,
+  "road_width_m": 1.3,
+  "centreline_length_m": 125.96453522025038,
+  "shortest_drivable_path_m": 122.02733034279014,
+  "start_finish_direct_distance_m": 2.9961308382645777,
+  "start": {
+    "x": -16.410725416388626,
+    "y": 3.250943611330176,
+    "yaw": 0.667306134978364,
+    "s": 0.05
+  },
+  "finish": {
+    "x": -18.32026696856702,
+    "y": 0.7777647055836955,
+    "yaw": 0.8913825213871167,
+    "s": 125.88453522025038
+  },
+  "parked_endpoint_count": 19,
+  "coverage_radius_assigned": true,
+  "coverage_radius_m": 5.0,
+  "communication_cost_s": 0.0
+}

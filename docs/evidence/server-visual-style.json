@@ -1,0 +1,16 @@
+{
+  "server_count": 19,
+  "visual_only": true,
+  "collision_geometry_unchanged": true,
+  "all_non_visual_world_content_unchanged": true,
+  "positions_unchanged": true,
+  "occupancy_map_unchanged": true,
+  "cabinet_dimensions_m": [
+    0.66,
+    0.44,
+    1.25
+  ],
+  "antenna_top_m": 1.8275,
+  "original_world_sha256": "434fb2acd695405d1cf707a1c619a76f24eee15749fd9239ac0e16cc7db79580",
+  "styled_world_sha256": "60486aef1622fc29443bb694b7232d2737c523dd141adf1aa476144073bcee64"
+}

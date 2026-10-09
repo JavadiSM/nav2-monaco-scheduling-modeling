@@ -1,0 +1,116 @@
+[
+  {
+    "source": "docs/media/full-course.gif",
+    "variants": [
+      {
+        "speed": 1.0,
+        "file": "docs/media/full-course.gif",
+        "frames": 1619,
+        "duration_s": 323.8,
+        "dimensions": [
+          960,
+          540
+        ],
+        "actual_speed": 1.0,
+        "encoded_images_unchanged": true,
+        "sha256": "248e1746c376afee24dbe9c5cbd5b0be34344eb6522b086c67fea9cb8320c162"
+      },
+      {
+        "speed": 2.0,
+        "file": "docs/media/full-course-2x.gif",
+        "frames": 1619,
+        "duration_s": 161.9,
+        "dimensions": [
+          960,
+          540
+        ],
+        "actual_speed": 2.0,
+        "encoded_images_unchanged": true,
+        "sha256": "7763b815f2b8b617f3c350b0c0d4251e7e428e60667872f8fd5e77d899428222"
+      },
+      {
+        "speed": 3.0,
+        "file": "docs/media/full-course-3x.gif",
+        "frames": 1619,
+        "duration_s": 107.93,
+        "dimensions": [
+          960,
+          540
+        ],
+        "actual_speed": 3.000092652645233,
+        "encoded_images_unchanged": true,
+        "sha256": "996a801cf521a6f861c13075bccd31b0ec8242d8884b2f33bcd9a3fd4a0654f4"
+      },
+      {
+        "speed": 4.0,
+        "file": "docs/media/full-course-4x.gif",
+        "frames": 1619,
+        "duration_s": 80.95,
+        "dimensions": [
+          960,
+          540
+        ],
+        "actual_speed": 4.0,
+        "encoded_images_unchanged": true,
+        "sha256": "4c809d70b009b2de456a2cf5ec046f0f5bb0469dbfbd9126243e87d8fe3662c1"
+      }
+    ]
+  },
+  {
+    "source": "docs/media/dual-view.gif",
+    "variants": [
+      {
+        "speed": 1.0,
+        "file": "docs/media/dual-view.gif",
+        "frames": 2154,
+        "duration_s": 359.0,
+        "dimensions": [
+          1280,
+          360
+        ],
+        "actual_speed": 1.0,
+        "encoded_images_unchanged": true,
+        "sha256": "024d82d7a32346e3b16798f9c8aa984b2c1396e3b403538668ef749cccbec315"
+      },
+      {
+        "speed": 2.0,
+        "file": "docs/media/dual-view-2x.gif",
+        "frames": 2154,
+        "duration_s": 179.5,
+        "dimensions": [
+          1280,
+          360
+        ],
+        "actual_speed": 2.0,
+        "encoded_images_unchanged": true,
+        "sha256": "62ce9538867b36fb021677100e744fdcebf7e921879784c2c2fd49a429ba38cd"
+      },
+      {
+        "speed": 3.0,
+        "file": "docs/media/dual-view-3x.gif",
+        "frames": 2154,
+        "duration_s": 119.67,
+        "dimensions": [
+          1280,
+          360
+        ],
+        "actual_speed": 2.999916436868054,
+        "encoded_images_unchanged": true,
+        "sha256": "20ecab38d4b09fe74afb343491d2e33a0dba924fa20ecafb21d5a207c7131872"
+      },
+      {
+        "speed": 4.0,
+        "file": "docs/media/dual-view-4x.gif",
+        "frames": 2154,
+        "duration_s": 89.75,
+        "dimensions": [
+          1280,
+          360
+        ],
+        "actual_speed": 4.0,
+        "encoded_images_unchanged": true,
+        "sha256": "9214075c70a3a6067d10cbd5de5ebf7f4a9ca92a2d37342c8e90277c7ba1b76c"
+      }
+    ]
+  }
+]

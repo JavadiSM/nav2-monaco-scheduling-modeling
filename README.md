@@ -1,96 +1,56 @@
-# ROS 2 Scheduling in Heterogeneous Edge Environments
+# Nav2 Monaco — Real-Time Scheduling and Modeling
 
-Local repository: `ros2-heterogeneous-edge-warehouse-scheduling`
+A ROS 2 / Nav2 testbed for **modeling task scheduling on heterogeneous vehicle and edge resources, and comparing scheduling algorithms**. The goal is to study how scheduling affects navigation while keeping the route and navigation algorithms fixed.
 
-A ROS 2 / Nav2 simulation foundation for scheduling experiments. The current scene is an open circuit inspired by Monaco: one moving car visits 19 turn-entry checkpoints, then a finish gate. Nineteen parked cars mark future edge-server locations. The simulator runs on Ubuntu 24.04 / WSL2 with ROS 2 Jazzy, Gazebo Harmonic and RViz.
+This is a **personal project**, driven by my interest in real-time systems and robotics. It uses **Navigation2 (Nav2)** and the upstream minimal TurtleBot simulation for navigation, sensors and differential-drive dynamics, with a custom circuit and vehicle appearance.
 
-## Current implementation
+The map is **inspired by the overall shape of the Formula 1 Monaco circuit**. Its dimensions and details are adapted for this simulation. One moving vehicle visits 19 checkpoints and the finish; 19 static blue server cabinets with antennas mark edge locations.
 
-The track is designed in this repository from a rough Monaco outline. The car uses the ready-made TurtleBot3 differential-drive dynamics, sensors and upstream Nav2 algorithms, with a racecar appearance. It is not an Ackermann racing-vehicle physics model. The ordered checkpoint mission uses Nav2's existing `NavigateThroughPoses` action. All checkpoints and the finish are sent as one continuous mission; intermediate gates are pass-through targets. The track uses four iterations of Chaikin corner rounding, preserving straight stretches while smoothing turns.
+The current implementation includes extracted task parameters, explicit job dependencies, A7/A15 compute and thermal models, and a standalone local FIFO baseline. Connecting modeled completion times to the running ROS system and comparing additional scheduling algorithms are the next steps.
 
-There is no custom scheduler, mixed-criticality mode switching, remote worker or task offloading yet. Parked edge cars are static Gazebo models. `config/edge_communication.yaml` reserves communication parameters without activating them. Native ROS dependencies are not, by themselves, a formally specified real-time DAG with WCETs, job deadlines and criticality levels.
+## Circuit dimensions
 
-## Install
+**Map: 50.45 × 22.30 m · Road width: 1.30 m · Centreline: approximately 125.96 m**
 
-On Ubuntu 24.04:
+![Metric circuit map](docs/figures/metric-map/circuit-dimensions.png)
+
+## Complete navigation run
+
+**4× playback — displayed four times faster than the recorded run.**
+
+Actual Gazebo footage from start to finish: approximately 0.75 m behind the vehicle on the left, and a fixed overview on the right.
+
+Verified mission: **20/20 ordered targets**, **353.9 s** mission wall time and **zero recoveries**.
+
+![Complete run at four times playback speed](docs/media/dual-view-4x.gif)
+
+## Initial FIFO scheduling example
+
+**Standalone model replay.** This Gantt shows a short initial interval on the vehicle's A7 and A15, using the selected 95%-ECDF execution budgets. Children wait for their selected parents to finish. This replay runs independently of the navigation footage above; live ROS integration is the next stage.
+
+![Initial local FIFO replay detail](docs/figures/task-fifo/local-fifo-detail.png)
+
+[Full 0.586 s Gantt](docs/figures/task-fifo/local-fifo-gantt.png) · [Selected job DAG](docs/figures/task-fifo/selected-job-dag.svg) · [Task model and equations](docs/task-execution.en.md)
+
+## Main tools
+
+| Tool | Use |
+| --- | --- |
+| ROS 2 Jazzy and Navigation2 | Robot communication, localization, planning and control |
+| Gazebo Harmonic and RViz | Physics, sensors and visualization |
+| Python, NumPy and Matplotlib | Task models, scheduling replay and scientific figures |
+| FFmpeg | Dual-camera recording and GIF generation |
+| Ubuntu 24.04, WSL2 and WSLg | Development and graphical simulation environment |
+
+## Run locally
+
+Ubuntu 24.04 / WSL2 with ROS 2 Jazzy, Gazebo Harmonic and WSLg:
 
 ```bash
 sudo bash scripts/install_wsl.sh
-```
-
-WSLg is required for graphical windows. The installer uses official ROS repositories and adds the Python packages used by the scene generator.
-
-## Run the circuit
-
-In a WSL terminal at the repository root:
-
-```bash
 bash scripts/launch_monaco.sh
-```
-
-This regenerates the world and map from `config/monaco.yaml`, launches Gazebo and RViz, spawns one moving car and loads upstream Nav2. The car initially waits at the start gate.
-
-In a second WSL terminal:
-
-```bash
+# In a second terminal:
 bash scripts/run_monaco.sh
 ```
 
-The mission initializes AMCL at the actual starting pose, requests all checkpoints in order and verifies the action result, zero Nav2 error code and estimated proximity to every target in order. Results are written to `artifacts/monaco-run.json`. Restart the simulation before requesting another mission: this script initializes the car at the starting pose.
-
-To record the entire real Gazebo run instead of using the preceding mission command:
-
-```bash
-source scripts/environment.sh
-python3 scripts/record_monaco.py
-```
-
-After a successful recorded mission, produce the video with a labeled map of the recorded position:
-
-```bash
-python3 scripts/render_monaco_video.py
-```
-
-This writes `artifacts/monaco-smooth-start-to-finish.mp4`. The main view is the actual Gazebo recording. The inset is explicitly labeled as the AMCL estimated trajectory; target labels use recorded Nav2 feedback.
-
-The recording wrapper requests the mission and stops capture after its result. It writes `artifacts/monaco-smooth-race-raw.mp4`, recording metadata, a frozen copy of the recorded scene and the mission report. The previous waypoint-run video is retained separately. Gazebo's window must retain its configured 1600 by 900 size during capture. A failed mission is reported as failed; a recording alone does not prove course completion.
-
-Stop the simulation with Ctrl+C or:
-
-```bash
-bash scripts/stop_demo.sh
-```
-
-The graphical camera shows the entire track; yellow gates are checkpoints, green is start, red is finish, and blue cars are parked edge locations. RViz displays the map, planning and checkpoint labels.
-
-The simulation-only focused test `bash scripts/run_monaco.sh --from-checkpoint 9 --limit 3` repositions the car at checkpoint 9 and checks targets 10–12; it writes a separate report and is not a full race.
-
-## Configuration and evidence
-
-See `docs/resources-and-timing.md` for actual CPU, memory, scheduling and speed settings. See `docs/monaco-scenario.md` for geometry, changes to scenario parameters, communication options and validation. `scenarios/monaco/layout.png` is a design overview; actual screenshots and recordings are stored separately under ignored `artifacts/`.
-
-The original official TurtleBot sandbox remains available through `scripts/launch_demo.sh` and `scripts/verify_demo.sh`. Its installation and successful navigation were recorded in `docs/setup-report.md`.
-
-The generated racecar description, baseline Nav2 parameter file, pass-through behavior tree and Gazebo GUI template retain their upstream Apache-2.0 attribution in `scenarios/monaco/NOTICE.md` and `LICENSE.upstream`. Original project scripts and track design use the root MIT license.
-
-## Publish later
-
-Everything is local Git; no GitHub login is required. Create an empty public repository named `ros2-heterogeneous-edge-warehouse-scheduling`, then use your account:
-
-```bash
-git remote add origin https://github.com/YOUR_USERNAME/ros2-heterogeneous-edge-warehouse-scheduling.git
-git push -u origin main
-```
-
-## Upstream projects
-
-- [Navigation2](https://github.com/ros-navigation/navigation2)
-- [Minimal TurtleBot simulation](https://github.com/ros-navigation/nav2_minimal_turtlebot_simulation)
-- [Gazebo Sim](https://github.com/gazebosim/gz-sim)
-- [ROS apt source configuration](https://github.com/ros-infrastructure/ros-apt-source)
-
-## Task abstraction investigation
-
-The [Persian technical study](docs/task-abstraction-study.fa.md) separates existing frequencies, triggers and timing fields from unmeasured CPU demand and proposes a causal job DAG and controlled virtual-time result delivery for modeled CPUs. [The inspection inventory](docs/evidence/task-abstraction-inventory.json) preserves configuration hashes and a read-only runtime graph snapshot. The original inventory is a pre-measurement snapshot. Instrumented task profiling is now implemented; CPU target calibration and custom scheduling remain deferred. The [English real-time report](docs/task-model.en.md), [PDF](docs/task-model.en.pdf), [task statistics](docs/evidence/task-characterization-table.csv), [per-run statistics](docs/evidence/task-characterization-per-run.csv), and [profiling protocol](docs/task-profiling.en.md) separate configured activation contracts from measured CPU demand and empirical intervals. The final campaign stopped before the authorized 09:00 Tehran cutoff on 2026-10-09: 59 main-cohort attempts produced 57 successful full laps, one navigation abort and one intentional cutoff truncation. The [cutoff audit](docs/evidence/task-campaign-finalization.json) verifies shutdown and unchanged scenario hashes; the [incident record](docs/evidence/task-campaign-incidents.json) separates navigation failure from administrative truncation.
-
-The scheduling inputs are now [extracted parameters](docs/extracted-parameters.en.md) ([PDF](docs/extracted-parameters.en.pdf), [CSV](docs/evidence/extracted-parameters.csv), [JSON](docs/evidence/extracted-parameters.json)). The user-selected model WCET is the exact inverse empirical CDF at 95%, computed from all jobs of 57 complete missions; it is an assumed budget, not a certified bound. New diagrams use seconds and show C for every primary task and nominal T for periodic tasks. The [book-style model DAG](docs/figures/extracted-parameters/book-style-task-dag.svg) declares atomic result delivery; the [measured dependency graph](docs/figures/extracted-parameters/verified-job-dependencies.svg) removes CPU-order edges. Unlisted infrastructure remains pass-through background work for the initial scheduler. Reproduce without simulation: `python3 scripts/extract_task_parameters.py`.
+See the [project guide](docs/project-guide.en.md) for setup, recording, measurements and upstream attribution. The simulation builds on [Navigation2](https://github.com/ros-navigation/navigation2) and its [minimal TurtleBot simulation](https://github.com/ros-navigation/nav2_minimal_turtlebot_simulation).

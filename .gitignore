@@ -8,3 +8,10 @@ __pycache__/
 *.db3
 *.mcap
 
+
+# Runtime logs and private local audit material.
+*.log
+*.log.*
+*.pid
+.private/
+.audit/

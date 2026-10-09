@@ -10,7 +10,7 @@ if [[ -f "$project_dir/artifacts/demo.pid" ]]; then
     exit 1
   fi
 fi
-python3 "$project_dir/scripts/generate_monaco.py"
+python3 "$project_dir/scripts/verify_frozen_scene.py"
 python3 "$project_dir/scripts/make_rviz_config.py" "$project_dir/artifacts/monaco.rviz"
 python3 - "$project_dir/artifacts/monaco.rviz" <<'PY'
 import sys, yaml

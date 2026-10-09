@@ -1,0 +1,166 @@
+{
+  "passed": true,
+  "full_course": true,
+  "communication_enabled": false,
+  "scheduler": "upstream_default",
+  "mission_type": "continuous_navigate_through_poses",
+  "moving_vehicles": 1,
+  "static_edge_car_models": 19,
+  "requested_targets": 20,
+  "goal_send_mono_ns": 42119438924933,
+  "goal_send_epoch_ns": 1791532398138607255,
+  "goal_accepted_mono_ns": 42119444288898,
+  "goal_accepted_sim_ns": 29034000000,
+  "action_result_mono_ns": 42468619806724,
+  "action_result_sim_ns": 300402000000,
+  "action_status": 4,
+  "nav2_error_code": 0,
+  "nav2_error_message": "",
+  "final_estimated_pose": [
+    -18.490629772144565,
+    0.6062367556185634
+  ],
+  "final_goal_error_m": 0.24175467412656698,
+  "minimum_estimated_distance_to_targets_m": [
+    0.12786606866804187,
+    0.021856381220352387,
+    0.10090078084144992,
+    0.11488959387482028,
+    0.10189139020004048,
+    0.1196064119874369,
+    0.07874938384180741,
+    0.0908748779283279,
+    0.11638814931938767,
+    0.02360655979534619,
+    0.09914496498332737,
+    0.06581207005291624,
+    0.02272443216514779,
+    0.025342225908900878,
+    0.12073134004734257,
+    0.024796219751101613,
+    0.04065299023754629,
+    0.14745033206265817,
+    0.13806727336657304,
+    0.24175467412656698
+  ],
+  "ordered_targets_passed": 20,
+  "checkpoint_pass_radius_m": 0.7,
+  "success_wall_time": 1791532748.3340268,
+  "start_wall_time": 1791532394.4495816,
+  "end_wall_time": 1791532748.3370159,
+  "end_mono_ns": 42469637339011,
+  "elapsed_wall_seconds": 353.887,
+  "valid_lidar_messages": 1376,
+  "odometry_distance_m": 121.98720589862666,
+  "feedback_target_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+  ],
+  "navigation_recoveries": 0,
+  "target_events": [
+    {
+      "wall_time": 1791532398.4675193,
+      "index": 0
+    },
+    {
+      "wall_time": 1791532422.90083,
+      "index": 1
+    },
+    {
+      "wall_time": 1791532454.9247775,
+      "index": 2
+    },
+    {
+      "wall_time": 1791532476.420813,
+      "index": 3
+    },
+    {
+      "wall_time": 1791532494.5411098,
+      "index": 4
+    },
+    {
+      "wall_time": 1791532513.602473,
+      "index": 5
+    },
+    {
+      "wall_time": 1791532534.7633064,
+      "index": 6
+    },
+    {
+      "wall_time": 1791532551.649657,
+      "index": 7
+    },
+    {
+      "wall_time": 1791532557.95269,
+      "index": 8
+    },
+    {
+      "wall_time": 1791532588.5934908,
+      "index": 9
+    },
+    {
+      "wall_time": 1791532626.4277003,
+      "index": 10
+    },
+    {
+      "wall_time": 1791532628.5435417,
+      "index": 11
+    },
+    {
+      "wall_time": 1791532659.871734,
+      "index": 12
+    },
+    {
+      "wall_time": 1791532670.3225977,
+      "index": 13
+    },
+    {
+      "wall_time": 1791532676.5755851,
+      "index": 14
+    },
+    {
+      "wall_time": 1791532684.9161713,
+      "index": 15
+    },
+    {
+      "wall_time": 1791532689.0752788,
+      "index": 16
+    },
+    {
+      "wall_time": 1791532698.3674262,
+      "index": 17
+    },
+    {
+      "wall_time": 1791532710.714821,
+      "index": 18
+    },
+    {
+      "wall_time": 1791532724.0955772,
+      "index": 19
+    }
+  ],
+  "raw_sample_counts": {
+    "velocity_samples": 7644,
+    "pose_samples": 1359,
+    "localized_trace": 1359
+  },
+  "local_full_report_sha256": "d18cb95e35374a905838b453d0eb189abe8b9a87a403e192b0901c1e6caf4574"
+}

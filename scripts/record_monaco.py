@@ -44,6 +44,13 @@ def main():
                 except subprocess.TimeoutExpired:
                     recorder.terminate()
                     recorder.wait(timeout=5)
+    from convert_recordings_to_gif import convert
+    temporary_video = artifacts / metadata['raw_file']
+    gif_path = temporary_video.with_suffix('.gif')
+    convert(temporary_video, gif_path)
+    temporary_video.unlink()
+    metadata['raw_file'] = gif_path.name
+    metadata['output_file'] = Path(metadata['output_file']).with_suffix('.gif').name
     metadata['end_wall_time'] = time.time()
     metadata['mission_exit_code'] = mission.returncode
     (artifacts / 'monaco-recording.json').write_text(json.dumps(metadata, indent=2) + '\n')

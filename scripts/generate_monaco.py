@@ -327,4 +327,6 @@ def main():
 
 
 if __name__ == '__main__':
+    if (Path(__file__).resolve().parents[1] / 'docs/evidence/frozen-scene-manifest.json').exists():
+        raise SystemExit('The accepted scene is frozen. Use the existing assets; do not regenerate the circuit.')
     main()

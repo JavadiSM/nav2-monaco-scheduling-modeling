@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "reference": {
+    "frequency_mhz": 1000.0,
+    "performance_eta": 1.0,
+    "status": "virtual_normalization_not_measured_laptop_cycles"
+  },
+  "budget": "C_model_s_exact_empirical_CDF_95",
+  "period_policy": "configured_HOST_wall_seconds_unchanged_on_target",
+  "aperiodic_policy": "explicit_arrivals_or_recorded_arrivals_no_invented_period",
+  "dependency_policy": "explicit_job_parents_atomic_completion",
+  "dispatch_policy": "ready_FIFO_oldest_idle_core_nonpreemptive",
+  "placement": "vehicle_only",
+  "communication": {"coverage_radius_m": 5.0, "cost_s": 0.0, "enabled": false}
+}

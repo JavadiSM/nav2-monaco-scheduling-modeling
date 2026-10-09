@@ -18,11 +18,14 @@ def main():
     metadata = json.loads((artifacts / 'monaco-recording.json').read_text())
     if not report.get('passed') or not report.get('full_course'):
         raise SystemExit('A successful full-course report is required for this completed-course video.')
-    cap = cv2.VideoCapture(str(artifacts / metadata['raw_file']))
+    source_file = artifacts / metadata['raw_file']
+    if not source_file.exists():
+        source_file = source_file.with_suffix('.gif')
+    cap = cv2.VideoCapture(str(source_file))
     if not cap.isOpened():
         raise SystemExit('Recorded Gazebo video could not be opened.')
     width, height = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    if (width, height) != (1600, 900):
+    if (width, height) not in ((1600, 900), (960, 540)):
         raise SystemExit('Zoom calibration requires the configured 1600x900 top-down view.')
     fps = cap.get(cv2.CAP_PROP_FPS)
     scene_path = artifacts / metadata['scene_file'] if 'scene_file' in metadata else project / 'scenarios/monaco/scenario.json'
@@ -41,14 +44,17 @@ def main():
     events = report['target_events']
     event_times = np.array([e['wall_time'] for e in events])
     success_time = report.get('success_wall_time', metadata['end_wall_time'] - 2.0)
-    output = artifacts / metadata.get('output_file', 'monaco-start-to-finish.mp4')
-    encoder = subprocess.Popen(['ffmpeg', '-y', '-hide_banner', '-loglevel', 'warning', '-f', 'rawvideo', '-pix_fmt', 'bgr24', '-s', f'{width}x{height}', '-r', str(fps), '-i', '-', '-an', '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '21', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', str(output)], stdin=subprocess.PIPE)
+    output = (artifacts / metadata.get('output_file', 'monaco-start-to-finish.gif')).with_suffix('.gif')
+    width, height = 1600, 900
+    encoder = subprocess.Popen(['ffmpeg', '-y', '-hide_banner', '-loglevel', 'warning', '-f', 'rawvideo', '-pix_fmt', 'bgr24', '-s', f'{width}x{height}', '-r', str(fps), '-i', '-', '-an', '-filter_complex_threads', '1', '-filter_complex', 'fps=5,scale=960:540,split[a][b];[a]palettegen=stats_mode=diff[p];[b][p]paletteuse=dither=bayer:bayer_scale=3', '-loop', '0', str(output)], stdin=subprocess.PIPE)
     frame_number = 0
     try:
         while True:
             ok, frame = cap.read()
             if not ok:
                 break
+            if frame.shape[:2] != (900,1600):
+                frame = cv2.resize(frame, (1600,900))
             wall_time = metadata['start_wall_time'] + frame_number / fps
             x, y = np.interp(wall_time, times, xs), np.interp(wall_time, times, ys)
             index = np.searchsorted(event_times, wall_time, side='right') - 1
