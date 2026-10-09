@@ -11,12 +11,16 @@ ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT))
 from tools.abstract_compute.task_model import load_tasks,TaskSpec
 from tools.abstract_compute.hardware import load_platform
 from tools.live_bridge.engine import TASK_NAMES
+from tools.live_bridge.dvfs import validate_job_execution
+from tools.live_bridge.policies import ReadyFIFOOldestIdle
 
 def main():
     p=argparse.ArgumentParser();p.add_argument('trial',type=Path);p.add_argument('--output',type=Path,default=ROOT/'docs/figures/live-bridge');args=p.parse_args()
     trial=args.trial.resolve();out=args.output;out.mkdir(parents=True,exist_ok=True)
     t=json.loads((trial/'trace.json').read_text());jobs={j['job_id']:j for j in t['jobs']};dt=t['step_s'];step_ns=round(dt*1e9);end=round(t['sim_seconds']/dt)
     dual=t.get('schema',1)>=2
+    fifo=t.get('scheduling_policy_id',ReadyFIFOOldestIdle.name)==ReadyFIFOOldestIdle.name
+    piecewise=t.get('execution_accounting')=='piecewise_DVFS_equivalent_work'
     tasks=({name:TaskSpec(**row) for name,row in t['task_parameters'].items()} if dual and t.get('task_parameters') else load_tasks(trial/'task-parameters.json' if (trial/'task-parameters.json').exists() else None,dual=dual));devices=load_platform(trial/'hardware-config.json' if (trial/'hardware-config.json').exists() else None,device_classes=('vehicle',)*len(t['hardware']));errors=[];intervals={d:[] for d in devices};opened={}
     for e in t['events']:
         if e['kind']=='cooling_start':opened[e['device_id']]=e['tick']
@@ -43,7 +47,10 @@ def main():
             deps+=1;edge_types[jobs[pid]['task']+' -> '+j['task']]+=1
             if jobs[pid]['finish_tick'] is None or jobs[pid]['finish_tick']>a:errors.append('Early child '+str(j['job_id']))
         occupancy[d,c].append((a,j['finish_tick'] or end,j['job_id']))
-        if b is not None:
+        if piecewise:
+            errors.extend(validate_job_execution(j,tasks[j['task']],devices[d].cores[c],dt,mask[d],end))
+            budgets+=b is not None
+        elif b is not None:
             budgets+=1;actual=b-a-int(prefix[d][b]-prefix[d][a]);spec=tasks[j['task']];core=devices[d].cores[c];duration=(spec.reference_work(j['selected_budget_s'])/(core.dvfs_level().frequency_mhz*core.core_type.performance_eta)) if dual else spec.execution_s(core);expected=math.ceil(duration/dt-1e-9)
             if actual!=expected:errors.append(f'Budget {j["job_id"]}: {actual} != {expected}')
         f=j['finish_tick']
@@ -70,14 +77,16 @@ def main():
     for key,rows in occupancy.items():
         rows.sort()
         if any(a[1]>b[0] for a,b in zip(rows,rows[1:])):errors.append('Core overlap '+str(key))
-    ready={};idle={(d,c):0 for d in devices for c in (0,1)};busy={};assignments=0
+    ready={};idle={(d,c):0 for d,device in devices.items() for c in device.cores};busy={};assignments=0
     for e in t['events']:
         kind=e['kind'];jid=e.get('job_id')
         if kind=='ready':ready[jid]=(e['eligible_tick'],jobs[jid]['release_tick'],jid)
         elif kind=='start':
-            j=jobs[jid];d,c=j['device'],j['core_id'];eligible=[k for k in ready if jobs[k]['device']==d];free=[n for n in (0,1) if (d,n) not in busy]
-            if not eligible or min(eligible,key=ready.get)!=jid:errors.append('FIFO mismatch '+str(jid))
-            if not free or min(free,key=lambda n:(idle[d,n],n))!=c:errors.append('Idle-core mismatch '+str(jid))
+            j=jobs[jid];d,c=j['device'],j['core_id'];eligible=[k for k in ready if jobs[k]['device']==d];free=[n for n in devices[d].cores if (d,n) not in busy]
+            if jid not in eligible:errors.append('Ineligible assignment '+str(jid))
+            if fifo and (not eligible or min(eligible,key=ready.get)!=jid):errors.append('FIFO mismatch '+str(jid))
+            if c not in free:errors.append('Occupied-core assignment '+str(jid))
+            if fifo and (not free or min(free,key=lambda n:(idle[d,n],n))!=c):errors.append('Idle-core mismatch '+str(jid))
             ready.pop(jid,None);busy[d,c]=jid;assignments+=1
         elif kind=='finish':
             key=(e['device_id'],e['core_id']);busy.pop(key,None);idle[key]=e['tick']
@@ -116,7 +125,7 @@ def main():
                 if row.get('kind')=='thermal':
                     row.pop('kind');live_thermal.append(row)
     if live_thermal and live_thermal!=t['thermal']:errors.append('Live per-core thermal samples differ from the applied model')
-    summary={'trial':str(trial.relative_to(ROOT)),'step_s':dt,'sim_s':t['sim_seconds'],'host_s':t['host_seconds'],'jobs':len(jobs),'modeled_completions':sum(completed.values()),'completed_counts':dict(completed),'clock_pairs_verified':clock_rows,'dependency_edges_verified':deps,'dependency_types':dict(edge_types),'readiness_times_verified':readiness_checks,'selected_path_parents_verified':path_bindings,'selected_BT_goal_parents_verified':goal_bindings,'budgets_verified':budgets,'FIFO_assignments_verified':assignments,'validation_errors':errors,'cooling_entries':sum(e['kind']=='cooling_start' for e in t['events']),'cooling_exits':sum(e['kind']=='cooling_end' for e in t['events']),'exact_DDS_source_bindings':bindings['DDS_source_interval',True],'payload_or_UUID_bindings':bindings['equivalent_payload_or_goal_UUID',True],'unresolved_or_external_inputs':sum(n for (method,found),n in bindings.items() if not found),'moving_odometry_segments_during_cooling':moving,'trace_sha256':hashlib.sha256((trial/'trace.json').read_bytes()).hexdigest(),'outcome':'Intentional finite trial; no full-lap completion is claimed.'}
+    summary={'trial':str(trial.relative_to(ROOT)),'step_s':dt,'sim_s':t['sim_seconds'],'host_s':t['host_seconds'],'jobs':len(jobs),'modeled_completions':sum(completed.values()),'completed_counts':dict(completed),'clock_pairs_verified':clock_rows,'dependency_edges_verified':deps,'dependency_types':dict(edge_types),'readiness_times_verified':readiness_checks,'selected_path_parents_verified':path_bindings,'selected_BT_goal_parents_verified':goal_bindings,'budgets_verified':budgets,'scheduling_policy_id':t.get('scheduling_policy_id',ReadyFIFOOldestIdle.name),'core_assignments_verified':assignments,'FIFO_assignments_verified':assignments if fifo else 0,'validation_errors':errors,'cooling_entries':sum(e['kind']=='cooling_start' for e in t['events']),'cooling_exits':sum(e['kind']=='cooling_end' for e in t['events']),'exact_DDS_source_bindings':bindings['DDS_source_interval',True],'payload_or_UUID_bindings':bindings['equivalent_payload_or_goal_UUID',True],'unresolved_or_external_inputs':sum(n for (method,found),n in bindings.items() if not found),'moving_odometry_segments_during_cooling':moving,'trace_sha256':hashlib.sha256((trial/'trace.json').read_bytes()).hexdigest(),'outcome':'Intentional finite trial; no full-lap completion is claimed.'}
     summary['common_start']=common_start
     if dual:
         summary['budget_policy']=t['config']['budget_policy']
@@ -124,6 +133,12 @@ def main():
         summary['observed_max_exceeded_jobs']=sum(j['observed_max_exceeded'] for j in jobs.values())
         summary['sealed_computations']=len(sealed)
         summary['outputs_at_exact_selected_finish']=sum(e['kind']=='publication' and bool(e.get('job_id')) for e in t['events'])
+    if piecewise:
+        summary['execution_accounting']=t['execution_accounting']
+        summary['DVFS_jobs_verified']=sum(j['start_tick'] is not None for j in jobs.values())
+        summary['DVFS_change_events']=sum(e['kind']=='dvfs_change' for e in t['events'])
+        summary['job_overrun_events']=sum(e['kind']=='job_overrun' for e in t['events'])
+        summary['active_ticks_by_point']={f'{d}:{c}':dict(collections.Counter({level:sum(s['end_tick']-s['start_tick'] for j in jobs.values() if j['device']==d and j['core_id']==c for s in j['execution_segments'] if s['level_id']==level) for level in devices[d].cores[c].core_type.dvfs_by_id})) for d,c in occupancy}
     summary['thermal_configuration']=t.get('hardware_configuration',{}).get('thermal',devices[0].thermal_spec.__dict__)
     summary['thermal_guard_period_s']=dt
     summary['live_thermal_samples_verified']=len(live_thermal) if live_thermal==t['thermal'] else 0
@@ -155,7 +170,7 @@ def main():
         for a,b in spans:
             left=max(a*dt,first);width=min(b*dt,last)-left
             if width>0:ax.broken_barh([(left,width)],(2*d+j['core_id']-.28,.56),facecolors=palette[j['task']])
-    ax.set(xlim=(first,last),ylim=(-.6,2*len(devices)-.3),xlabel='Simulation / hardware time (s)',title='Applied live FIFO schedule — actual Nav2 arrivals, local A7 + A15 per car');ax.set_yticks(range(2*len(devices)),[f'{car} / {core}' for car in ('Red','Blue','White','Green')[:len(devices)] for core in ('A7','A15')]);ax.grid(axis='x',alpha=.2)
+    ax.set(xlim=(first,last),ylim=(-.6,2*len(devices)-.3),xlabel='Simulation / hardware time (s)',title='Applied live schedule — '+t.get('scheduling_policy_id','ready FIFO / oldest idle core'));ax.set_yticks(range(2*len(devices)),[f'{car} / {core}' for car in ('Red','Blue','White','Green')[:len(devices)] for core in ('A7','A15')]);ax.grid(axis='x',alpha=.2)
     handles=[Patch(facecolor=palette[n],label=tasks[n].task_id+': '+n.replace('_',' ')) for n in TASK_NAMES]+[Patch(facecolor='#f5d2d2',label='Whole-device cooling')]
     if origin is not None:
         from matplotlib.ticker import FuncFormatter

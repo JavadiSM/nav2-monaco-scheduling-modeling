@@ -1,0 +1,140 @@
+{
+  "trial": "artifacts/live-bridge/dvfs-low-01",
+  "step_s": 0.001,
+  "sim_s": 14.0,
+  "host_s": 56.23696432799625,
+  "jobs": 1354,
+  "modeled_completions": 1348,
+  "completed_counts": {
+    "local_costmap_update": 39,
+    "bt_tick": 581,
+    "planning_request": 26,
+    "global_costmap_update": 8,
+    "velocity_smoothing_tick": 130,
+    "amcl_scan_callback": 39,
+    "controller_path_install": 26,
+    "control_iteration": 124,
+    "velocity_command_callback": 124,
+    "mppi_noise_generation": 124,
+    "collision_check": 127
+  },
+  "clock_pairs_verified": 14000,
+  "dependency_edges_verified": 1002,
+  "dependency_types": {
+    "bt_tick -> planning_request": 27,
+    "planning_request -> global_costmap_update": 8,
+    "planning_request -> controller_path_install": 26,
+    "local_costmap_update -> control_iteration": 125,
+    "controller_path_install -> control_iteration": 125,
+    "control_iteration -> velocity_command_callback": 124,
+    "control_iteration -> mppi_noise_generation": 124,
+    "velocity_command_callback -> velocity_smoothing_tick": 128,
+    "velocity_smoothing_tick -> collision_check": 127,
+    "mppi_noise_generation -> control_iteration": 124,
+    "local_costmap_update -> local_costmap_update": 38,
+    "global_costmap_update -> planning_request": 8,
+    "planning_request -> planning_request": 18
+  },
+  "readiness_times_verified": 1350,
+  "selected_path_parents_verified": 26,
+  "selected_BT_goal_parents_verified": 27,
+  "budgets_verified": 1349,
+  "FIFO_assignments_verified": 1350,
+  "validation_errors": [],
+  "cooling_entries": 6,
+  "cooling_exits": 5,
+  "exact_DDS_source_bindings": 251,
+  "payload_or_UUID_bindings": 53,
+  "unresolved_or_external_inputs": 0,
+  "moving_odometry_segments_during_cooling": {
+    "0": 53
+  },
+  "trace_sha256": "0aee40ff990361c0b1d19862f6828cd65ebdfc3e9544cf22e05e44efc72166ea",
+  "outcome": "Intentional finite trial; no full-lap completion is claimed.",
+  "common_start": {
+    "origin_sim_s": 6.0,
+    "race_s": 8.0,
+    "goal_acceptance_ticks": [
+      6000
+    ],
+    "first_core_start_ticks": {
+      "0": 6000
+    }
+  },
+  "budget_policy": "actual_CPU_mean_LO_observed_max_HI",
+  "selected_budget_counts": {
+    "LO": 1232,
+    "HI": 122
+  },
+  "observed_max_exceeded_jobs": 0,
+  "sealed_computations": 1354,
+  "outputs_at_exact_selected_finish": 778,
+  "execution_accounting": "piecewise_DVFS_equivalent_work",
+  "DVFS_jobs_verified": 1350,
+  "DVFS_change_events": 1472,
+  "job_overrun_events": 122,
+  "active_ticks_by_point": {
+    "0:0": {
+      "0": 1894,
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 649
+    },
+    "0:1": {
+      "0": 1356,
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 322
+    }
+  },
+  "thermal_configuration": {
+    "ambient_temperature_c": 45.0,
+    "reference_temperature_c": 35.0,
+    "max_temperature_c": 46.3,
+    "balance_temperature_c": 45.8,
+    "thermal_epoch_ms": 100.0,
+    "coupling_base_conductance_range_w_per_k": [
+      0.07,
+      0.11
+    ],
+    "coupling_distance_attenuation": 0.8,
+    "control_epoch_s": 0.005,
+    "initial_temperature_c": 45.0
+  },
+  "thermal_guard_period_s": 0.001,
+  "live_thermal_samples_verified": 800,
+  "stop_reason": "simulation-time limit",
+  "cooling_time_s": {
+    "0": 2.0100000000000002
+  },
+  "cooling_fraction": {
+    "0": 0.25125000000000003
+  },
+  "peak_sampled_temperature_c": {
+    "0": [
+      45.94003532691719,
+      46.30227033770261
+    ]
+  },
+  "last_sampled_temperature_c": {
+    "0": [
+      45.74569616423049,
+      46.0042516896689
+    ]
+  },
+  "vehicles": {
+    "red": {
+      "passed": false,
+      "action_status": null,
+      "nav2_error_code": null,
+      "odometry_distance_m": 3.3710593886869336,
+      "ordered_targets_passed": 0,
+      "navigation_recoveries": 0,
+      "scheduler": "live_local_FIFO_oldest_idle_core",
+      "error": "Interrupted."
+    }
+  },
+  "navigation_failed": false
+}

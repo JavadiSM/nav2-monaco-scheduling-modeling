@@ -38,7 +38,7 @@ def main():
         'shortest_drivable_path_m': scene['shortest_drivable_path_m'],
         'start_finish_direct_distance_m': scene['start_finish_direct_distance_m'],
         'start': scene['start'], 'finish': scene['finish'],
-        'parked_endpoint_count': len(scene['servers']), 'coverage_radius_assigned': False,
+        'parked_endpoint_count': len(scene['servers']), 'coverage_radius_assigned': True, 'coverage_radius_m': 5.0,
     }
     evidence = ROOT / 'docs/evidence'
     (evidence / 'metric-map-dimensions.json').write_text(json.dumps(report,indent=2)+'\n')
@@ -71,7 +71,7 @@ def main():
     bx,by=xmin+.8,ymin+.8
     ax.plot([bx,bx+5],[by,by],color='black',lw=4)
     ax.text(bx+2.5,by+.45,'5 m',ha='center',fontsize=9)
-    ax.text(xmax-.5,ymax-.3,f"Road width: {scene['road_width_m']:.2f} m\nRoute length: {scene['centreline_length_m']:.2f} m\n19 parked endpoint locations; coverage not assigned",ha='right',va='top',fontsize=9,bbox={'facecolor':'white','alpha':.9,'edgecolor':'#a0a0a0'})
+    ax.text(xmax-.5,ymax-.3,f"Road width: {scene['road_width_m']:.2f} m\nRoute length: {scene['centreline_length_m']:.2f} m\n{len(scene['servers'])} roadside endpoints; coverage radius 5 m",ha='right',va='top',fontsize=9,bbox={'facecolor':'white','alpha':.9,'edgecolor':'#a0a0a0'})
     ax.set_xlim(xmin-1,xmax+3);ax.set_ylim(ymin-2.5,ymax+1)
     ax.set_aspect('equal');ax.set_xlabel('x (m) — ROS map frame');ax.set_ylabel('y (m) — ROS map frame')
     ax.xaxis.set_major_locator(MultipleLocator(5));ax.yaxis.set_major_locator(MultipleLocator(5))
@@ -79,6 +79,7 @@ def main():
     ax.grid(which='major',alpha=.3,lw=.7);ax.grid(which='minor',alpha=.12,lw=.4)
     ax.set_title('Existing Monaco circuit — metric map and parked endpoint coordinates',fontsize=15,pad=15)
     fig.tight_layout();fig.savefig(output/'circuit-dimensions.png',dpi=180);fig.savefig(output/'circuit-dimensions.svg');plt.close(fig)
+    svg=output/'circuit-dimensions.svg';svg.write_text('\n'.join(line.rstrip() for line in svg.read_text().splitlines())+'\n')
     print(json.dumps(report,indent=2))
 
 

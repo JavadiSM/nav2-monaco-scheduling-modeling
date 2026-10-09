@@ -38,8 +38,7 @@
     "yaw": 0.8913825213871167,
     "s": 125.88453522025038
   },
-  "parked_endpoint_count": 19,
+  "parked_endpoint_count": 25,
   "coverage_radius_assigned": true,
-  "coverage_radius_m": 5.0,
-  "communication_cost_s": 0.0
+  "coverage_radius_m": 5.0
 }

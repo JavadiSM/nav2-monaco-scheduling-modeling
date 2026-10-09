@@ -75,7 +75,7 @@ class Core:
     initial_temperature_c: float = 45.
     temperature_c: float = 45.
     max_temperature_c: float = 46.2
-    balance_temperature_c: float = 45.45
+    balance_temperature_c: float = 45.6
     thermal_forced_idle: bool = False
 
     @property
@@ -179,11 +179,11 @@ def load_platform(path=None, *, device_classes=('vehicle', 'server')):
     data = json.loads(path.read_text())
     types = {name: CoreType.from_dict(cfg) for name, cfg in data['core_types'].items()}
     devices = {}
-    spec = ThermalSpec(**data['thermal'])
-    initial = spec.ambient_temperature_c if spec.initial_temperature_c is None else spec.initial_temperature_c
     rng = random.Random(data['physical_seed'])
     for device_id, name in enumerate(device_classes):
         cfg = data['device_classes'][name]
+        spec = ThermalSpec(**{**data['thermal'], **cfg.get('thermal', {})})
+        initial = spec.ambient_temperature_c if spec.initial_temperature_c is None else spec.initial_temperature_c
         counts = [cfg['lp_cores'], cfg['hp_cores']]
         if any(isinstance(n, bool) or not isinstance(n, int) or n < 0 for n in counts) or sum(counts) == 0:
             raise ValueError('Core counts must be nonnegative integers, with at least one core')

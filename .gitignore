@@ -19,4 +19,4 @@ __pycache__/
 # Publish the selected compact recordings.
 docs/media/*.gif
 !docs/media/dual-view-4x.gif
-!docs/media/live-fifo-6x.gif
+!docs/media/live-fifo-8x.gif

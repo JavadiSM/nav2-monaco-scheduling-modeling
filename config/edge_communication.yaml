@@ -10,3 +10,6 @@ defaults:
   communication_cost_s: 0.0
 cost_assumption: User-selected ideal zero-cost link inside the 5 m radius; not a physical
   latency measurement.
+coverage_check: request_send_only
+result_delivery: admitted_request_no_distance_recheck
+cost_interface: keyword_arguments_return_nonnegative_seconds

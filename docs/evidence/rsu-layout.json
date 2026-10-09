@@ -1,0 +1,140 @@
+{
+  "server_count": 25,
+  "new_server_count": 6,
+  "new_endpoint_ids": [
+    "edge_start",
+    "edge_finish",
+    "edge_fill_01",
+    "edge_fill_02",
+    "edge_fill_03",
+    "edge_fill_04"
+  ],
+  "maximum_consecutive_distance_m": 9.59563972070683,
+  "distance_definition": "Euclidean XY distance, consecutive in route-station order; open start-to-finish route",
+  "start_finish_roadside": true,
+  "route_unchanged": true,
+  "existing_endpoint_poses_unchanged": true,
+  "non_RSU_world_unchanged": true,
+  "gaps": [
+    {
+      "from_id": "edge_start",
+      "to_id": "edge_01",
+      "distance_m": 9.59563972070683
+    },
+    {
+      "from_id": "edge_01",
+      "to_id": "edge_fill_01",
+      "distance_m": 7.010335985497554
+    },
+    {
+      "from_id": "edge_fill_01",
+      "to_id": "edge_02",
+      "distance_m": 5.734355275121871
+    },
+    {
+      "from_id": "edge_02",
+      "to_id": "edge_03",
+      "distance_m": 6.84202422508972
+    },
+    {
+      "from_id": "edge_03",
+      "to_id": "edge_04",
+      "distance_m": 5.02502172622833
+    },
+    {
+      "from_id": "edge_04",
+      "to_id": "edge_05",
+      "distance_m": 8.10864258919422
+    },
+    {
+      "from_id": "edge_05",
+      "to_id": "edge_06",
+      "distance_m": 8.398801990327772
+    },
+    {
+      "from_id": "edge_06",
+      "to_id": "edge_07",
+      "distance_m": 5.76028946709962
+    },
+    {
+      "from_id": "edge_07",
+      "to_id": "edge_08",
+      "distance_m": 3.1173673325858
+    },
+    {
+      "from_id": "edge_08",
+      "to_id": "edge_fill_02",
+      "distance_m": 6.534287484801036
+    },
+    {
+      "from_id": "edge_fill_02",
+      "to_id": "edge_09",
+      "distance_m": 6.055716580971715
+    },
+    {
+      "from_id": "edge_09",
+      "to_id": "edge_fill_03",
+      "distance_m": 7.235442018641819
+    },
+    {
+      "from_id": "edge_fill_03",
+      "to_id": "edge_10",
+      "distance_m": 6.73739135166678
+    },
+    {
+      "from_id": "edge_10",
+      "to_id": "edge_11",
+      "distance_m": 2.594505782145752
+    },
+    {
+      "from_id": "edge_11",
+      "to_id": "edge_fill_04",
+      "distance_m": 6.36560398439436
+    },
+    {
+      "from_id": "edge_fill_04",
+      "to_id": "edge_12",
+      "distance_m": 5.423023683016997
+    },
+    {
+      "from_id": "edge_12",
+      "to_id": "edge_13",
+      "distance_m": 2.5532004489867854
+    },
+    {
+      "from_id": "edge_13",
+      "to_id": "edge_14",
+      "distance_m": 3.286104609691421
+    },
+    {
+      "from_id": "edge_14",
+      "to_id": "edge_15",
+      "distance_m": 3.389130759955501
+    },
+    {
+      "from_id": "edge_15",
+      "to_id": "edge_16",
+      "distance_m": 2.750565102173173
+    },
+    {
+      "from_id": "edge_16",
+      "to_id": "edge_17",
+      "distance_m": 4.710781762706157
+    },
+    {
+      "from_id": "edge_17",
+      "to_id": "edge_18",
+      "distance_m": 3.161962820300758
+    },
+    {
+      "from_id": "edge_18",
+      "to_id": "edge_19",
+      "distance_m": 5.077968218806525
+    },
+    {
+      "from_id": "edge_19",
+      "to_id": "edge_finish",
+      "distance_m": 8.889733728644998
+    }
+  ]
+}

@@ -35,7 +35,7 @@ Level IDs are zero based. Default assignment selects level 4. Frequency and volt
 
 Each endpoint samples independent per-core capacitance/resistance and a chip coupling coefficient in [0.07, 0.11] W/K. A fixed `physical_seed` makes a hardware realization reproducible for comparisons. Core coordinates describe normalized floorplan cells; they are unrelated to the circuit coordinates in metres.
 
-Current ambient temperature is 45 C; each core starts at 45 C through the separate `initial_temperature_c` parameter. The leakage reference temperature is 35 C, Tmax is 46.2 C and Tbalance is 45.8 C. The thermal base epoch is 0.1 s and the control period is 0.005 s. Cooling power is distinct from ordinary idle power.
+Current ambient temperature is 45 C; each core starts at 45 C through the separate `initial_temperature_c` parameter. The leakage reference temperature is 35 C, vehicle Tmax is 46.2 C and Tbalance is 45.6 C; server Tmax is 46.5 C and Tbalance is 46.0 C. The thermal base epoch is 0.1 s and the control period is 0.005 s. Cooling power is distinct from ordinary idle power.
 
 ## CPU timing and dispatch
 
@@ -80,7 +80,7 @@ When any core reaches its maximum at a control tick, **every core on that endpoi
 
 The guard samples temperatures every 0.005 s, so Tmax is a trigger threshold, not a continuously enforced hard cap: a small overshoot may occur before the next tick. The model does not clamp temperatures to conceal this effect.
 
-An equilibrium check rejects cooling settings that cannot reach Tbalance. With the selected seeded realization, all-cooling equilibria are approximately 45.0475/45.0709 C on the vehicle and 45.0472/45.0475/45.0670/45.0664 C on the server. They are below 45.8 C. Total cooling power is 0.020 W for a vehicle and 0.040 W for a server.
+An equilibrium check rejects cooling settings that cannot reach Tbalance. With the selected seeded realization, all-cooling equilibria are approximately 45.0475/45.0709 C on the vehicle and 45.0472/45.0475/45.0670/45.0664 C on the server. They are below the respective 45.6 C / 46.0 C balance thresholds. Total cooling power is 0.020 W for a vehicle and 0.040 W for a server.
 
 ## Validation and demonstration
 
@@ -98,7 +98,7 @@ The retained standalone demo below used ambient/initial 55 C, Tmax 55.6 C and Tb
 
 ![DVFS, power, temperature and execution segments](figures/abstract-compute/hardware-power-cooling.png)
 
-Detailed runtime traces remain under ignored `artifacts/abstract-compute/`. Outputs include power and temperature, without energy integration or aging. The module has no ROS imports, message transport, communication model or task-graph adapter.
+Detailed runtime traces remain under ignored `artifacts/abstract-compute/`. Outputs include power and temperature, without energy integration or aging. The standalone hardware module has no ROS imports or message transport. Separate [communication and scheduling interfaces](scheduling-interfaces.en.md) support the live testbed.
 
 ## Metric map for subsequent communication design
 

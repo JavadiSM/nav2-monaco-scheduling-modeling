@@ -32,7 +32,8 @@ def main():
     path=ROOT/'scenarios/monaco/world.sdf';old=path.read_bytes();root=ET.fromstring(old)
     before=without_server_visuals(root)
     models=[m for m in root.findall('./world/model') if m.get('name','').startswith('edge_')]
-    if len(models)!=19:raise RuntimeError('Expected nineteen fixed edge endpoints')
+    expected=len(json.loads((ROOT/'scenarios/monaco/scenario.json').read_text())['servers'])
+    if len(models)!=expected:raise RuntimeError('World endpoint count differs from scene')
     for model in models:
         link=model.find('link')
         for v in link.findall('visual'):link.remove(v)

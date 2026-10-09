@@ -18826,5 +18826,893 @@
         </visual>
       </link>
     </model>
+    <model name="edge_start">
+      <static>true</static>
+      <pose>-17.215259311 4.27208278523 0 0 0 0.667306134978</pose>
+      <link name="body">
+        <collision name="chassis_collision">
+          <pose>0 0 0.14 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.64 0.32 0.13</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="parking_bay">
+          <pose>0 0 0.012 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.86 0.60 0.025</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.04 0.40 0.60 1</ambient>
+            <diffuse>0.04 0.40 0.60 1</diffuse>
+          </material>
+        </visual>
+        <visual name="server_cabinet">
+          <pose>0 0 0.65 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.66 0.44 1.25</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.035 0.24 0.72 1</ambient>
+            <diffuse>0.035 0.24 0.72 1</diffuse>
+          </material>
+        </visual>
+        <visual name="cabinet_top">
+          <pose>0 0 1.285 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.68 0.46 0.035</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.08 0.46 0.90 1</ambient>
+            <diffuse>0.08 0.46 0.90 1</diffuse>
+          </material>
+        </visual>
+        <visual name="front_panel">
+          <pose>0.337 0 0.73 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.014 0.34 0.82</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.025 0.075 0.14 1</ambient>
+            <diffuse>0.025 0.075 0.14 1</diffuse>
+          </material>
+        </visual>
+        <visual name="rack_slot_0">
+          <pose>0.347 0 0.47 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.012 0.29 0.045</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.11 0.38 0.62 1</ambient>
+            <diffuse>0.11 0.38 0.62 1</diffuse>
+          </material>
+        </visual>
+        <visual name="rack_slot_1">
+          <pose>0.347 0 0.64 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.012 0.29 0.045</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.11 0.38 0.62 1</ambient>
+            <diffuse>0.11 0.38 0.62 1</diffuse>
+          </material>
+        </visual>
+        <visual name="rack_slot_2">
+          <pose>0.347 0 0.81 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.012 0.29 0.045</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.11 0.38 0.62 1</ambient>
+            <diffuse>0.11 0.38 0.62 1</diffuse>
+          </material>
+        </visual>
+        <visual name="rack_slot_3">
+          <pose>0.347 0 0.98 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.012 0.29 0.045</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.11 0.38 0.62 1</ambient>
+            <diffuse>0.11 0.38 0.62 1</diffuse>
+          </material>
+        </visual>
+        <visual name="status_light">
+          <pose>0.347 -0.10 1.08 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.015 0.035 0.035</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.10 0.95 0.80 1</ambient>
+            <diffuse>0.10 0.95 0.80 1</diffuse>
+          </material>
+        </visual>
+        <visual name="antenna">
+          <pose>-0.17 0 1.55 0 0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.018</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.05 0.10 0.17 1</ambient>
+            <diffuse>0.05 0.10 0.17 1</diffuse>
+          </material>
+        </visual>
+        <visual name="antenna_tip">
+          <pose>-0.17 0 1.81 0 0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.027</radius>
+              <length>0.035</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.12 0.90 0.96 1</ambient>
+            <diffuse>0.12 0.90 0.96 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="edge_finish">
+      <static>true</static>
+      <pose>-19.3315905028 1.5946029448 0 0 0 0.891382521387</pose>
+      <link name="body">
+        <collision name="chassis_collision">
+          <pose>0 0 0.14 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.64 0.32 0.13</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="parking_bay">
+          <pose>0 0 0.012 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.86 0.60 0.025</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.04 0.40 0.60 1</ambient>
+            <diffuse>0.04 0.40 0.60 1</diffuse>
+          </material>
+        </visual>
+        <visual name="server_cabinet">
+          <pose>0 0 0.65 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.66 0.44 1.25</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.035 0.24 0.72 1</ambient>
+            <diffuse>0.035 0.24 0.72 1</diffuse>
+          </material>
+        </visual>
+        <visual name="cabinet_top">
+          <pose>0 0 1.285 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.68 0.46 0.035</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.08 0.46 0.90 1</ambient>
+            <diffuse>0.08 0.46 0.90 1</diffuse>
+          </material>
+        </visual>
+        <visual name="front_panel">
+          <pose>0.337 0 0.73 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.014 0.34 0.82</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.025 0.075 0.14 1</ambient>
+            <diffuse>0.025 0.075 0.14 1</diffuse>
+          </material>
+        </visual>
+        <visual name="rack_slot_0">
+          <pose>0.347 0 0.47 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.012 0.29 0.045</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.11 0.38 0.62 1</ambient>
+            <diffuse>0.11 0.38 0.62 1</diffuse>
+          </material>
+        </visual>
+        <visual name="rack_slot_1">
+          <pose>0.347 0 0.64 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.012 0.29 0.045</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.11 0.38 0.62 1</ambient>
+            <diffuse>0.11 0.38 0.62 1</diffuse>
+          </material>
+        </visual>
+        <visual name="rack_slot_2">
+          <pose>0.347 0 0.81 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.012 0.29 0.045</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.11 0.38 0.62 1</ambient>
+            <diffuse>0.11 0.38 0.62 1</diffuse>
+          </material>
+        </visual>
+        <visual name="rack_slot_3">
+          <pose>0.347 0 0.98 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.012 0.29 0.045</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.11 0.38 0.62 1</ambient>
+            <diffuse>0.11 0.38 0.62 1</diffuse>
+          </material>
+        </visual>
+        <visual name="status_light">
+          <pose>0.347 -0.10 1.08 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.015 0.035 0.035</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.10 0.95 0.80 1</ambient>
+            <diffuse>0.10 0.95 0.80 1</diffuse>
+          </material>
+        </visual>
+        <visual name="antenna">
+          <pose>-0.17 0 1.55 0 0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.018</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.05 0.10 0.17 1</ambient>
+            <diffuse>0.05 0.10 0.17 1</diffuse>
+          </material>
+        </visual>
+        <visual name="antenna_tip">
+          <pose>-0.17 0 1.81 0 0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.027</radius>
+              <length>0.035</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.12 0.90 0.96 1</ambient>
+            <diffuse>0.12 0.90 0.96 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="edge_fill_01">
+      <static>true</static>
+      <pose>-3.29514299174 4.99834405835 0 0 0 -0.753524903213</pose>
+      <link name="body">
+        <collision name="chassis_collision">
+          <pose>0 0 0.14 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.64 0.32 0.13</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="parking_bay">
+          <pose>0 0 0.012 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.86 0.60 0.025</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.04 0.40 0.60 1</ambient>
+            <diffuse>0.04 0.40 0.60 1</diffuse>
+          </material>
+        </visual>
+        <visual name="server_cabinet">
+          <pose>0 0 0.65 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.66 0.44 1.25</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.035 0.24 0.72 1</ambient>
+            <diffuse>0.035 0.24 0.72 1</diffuse>
+          </material>
+        </visual>
+        <visual name="cabinet_top">
+          <pose>0 0 1.285 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.68 0.46 0.035</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.08 0.46 0.90 1</ambient>
+            <diffuse>0.08 0.46 0.90 1</diffuse>
+          </material>
+        </visual>
+        <visual name="front_panel">
+          <pose>0.337 0 0.73 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.014 0.34 0.82</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.025 0.075 0.14 1</ambient>
+            <diffuse>0.025 0.075 0.14 1</diffuse>
+          </material>
+        </visual>
+        <visual name="rack_slot_0">
+          <pose>0.347 0 0.47 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.012 0.29 0.045</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.11 0.38 0.62 1</ambient>
+            <diffuse>0.11 0.38 0.62 1</diffuse>
+          </material>
+        </visual>
+        <visual name="rack_slot_1">
+          <pose>0.347 0 0.64 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.012 0.29 0.045</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.11 0.38 0.62 1</ambient>
+            <diffuse>0.11 0.38 0.62 1</diffuse>
+          </material>
+        </visual>
+        <visual name="rack_slot_2">
+          <pose>0.347 0 0.81 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.012 0.29 0.045</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.11 0.38 0.62 1</ambient>
+            <diffuse>0.11 0.38 0.62 1</diffuse>
+          </material>
+        </visual>
+        <visual name="rack_slot_3">
+          <pose>0.347 0 0.98 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.012 0.29 0.045</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.11 0.38 0.62 1</ambient>
+            <diffuse>0.11 0.38 0.62 1</diffuse>
+          </material>
+        </visual>
+        <visual name="status_light">
+          <pose>0.347 -0.10 1.08 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.015 0.035 0.035</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.10 0.95 0.80 1</ambient>
+            <diffuse>0.10 0.95 0.80 1</diffuse>
+          </material>
+        </visual>
+        <visual name="antenna">
+          <pose>-0.17 0 1.55 0 0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.018</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.05 0.10 0.17 1</ambient>
+            <diffuse>0.05 0.10 0.17 1</diffuse>
+          </material>
+        </visual>
+        <visual name="antenna_tip">
+          <pose>-0.17 0 1.81 0 0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.027</radius>
+              <length>0.035</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.12 0.90 0.96 1</ambient>
+            <diffuse>0.12 0.90 0.96 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="edge_fill_02">
+      <static>true</static>
+      <pose>18.2811445155 -7.6731197475 0 0 0 -2.67610342604</pose>
+      <link name="body">
+        <collision name="chassis_collision">
+          <pose>0 0 0.14 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.64 0.32 0.13</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="parking_bay">
+          <pose>0 0 0.012 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.86 0.60 0.025</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.04 0.40 0.60 1</ambient>
+            <diffuse>0.04 0.40 0.60 1</diffuse>
+          </material>
+        </visual>
+        <visual name="server_cabinet">
+          <pose>0 0 0.65 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.66 0.44 1.25</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.035 0.24 0.72 1</ambient>
+            <diffuse>0.035 0.24 0.72 1</diffuse>
+          </material>
+        </visual>
+        <visual name="cabinet_top">
+          <pose>0 0 1.285 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.68 0.46 0.035</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.08 0.46 0.90 1</ambient>
+            <diffuse>0.08 0.46 0.90 1</diffuse>
+          </material>
+        </visual>
+        <visual name="front_panel">
+          <pose>0.337 0 0.73 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.014 0.34 0.82</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.025 0.075 0.14 1</ambient>
+            <diffuse>0.025 0.075 0.14 1</diffuse>
+          </material>
+        </visual>
+        <visual name="rack_slot_0">
+          <pose>0.347 0 0.47 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.012 0.29 0.045</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.11 0.38 0.62 1</ambient>
+            <diffuse>0.11 0.38 0.62 1</diffuse>
+          </material>
+        </visual>
+        <visual name="rack_slot_1">
+          <pose>0.347 0 0.64 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.012 0.29 0.045</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.11 0.38 0.62 1</ambient>
+            <diffuse>0.11 0.38 0.62 1</diffuse>
+          </material>
+        </visual>
+        <visual name="rack_slot_2">
+          <pose>0.347 0 0.81 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.012 0.29 0.045</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.11 0.38 0.62 1</ambient>
+            <diffuse>0.11 0.38 0.62 1</diffuse>
+          </material>
+        </visual>
+        <visual name="rack_slot_3">
+          <pose>0.347 0 0.98 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.012 0.29 0.045</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.11 0.38 0.62 1</ambient>
+            <diffuse>0.11 0.38 0.62 1</diffuse>
+          </material>
+        </visual>
+        <visual name="status_light">
+          <pose>0.347 -0.10 1.08 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.015 0.035 0.035</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.10 0.95 0.80 1</ambient>
+            <diffuse>0.10 0.95 0.80 1</diffuse>
+          </material>
+        </visual>
+        <visual name="antenna">
+          <pose>-0.17 0 1.55 0 0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.018</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.05 0.10 0.17 1</ambient>
+            <diffuse>0.05 0.10 0.17 1</diffuse>
+          </material>
+        </visual>
+        <visual name="antenna_tip">
+          <pose>-0.17 0 1.81 0 0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.027</radius>
+              <length>0.035</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.12 0.90 0.96 1</ambient>
+            <diffuse>0.12 0.90 0.96 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="edge_fill_03">
+      <static>true</static>
+      <pose>5.70120229891 -7.03769837055 0 0 0 2.60954572797</pose>
+      <link name="body">
+        <collision name="chassis_collision">
+          <pose>0 0 0.14 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.64 0.32 0.13</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="parking_bay">
+          <pose>0 0 0.012 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.86 0.60 0.025</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.04 0.40 0.60 1</ambient>
+            <diffuse>0.04 0.40 0.60 1</diffuse>
+          </material>
+        </visual>
+        <visual name="server_cabinet">
+          <pose>0 0 0.65 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.66 0.44 1.25</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.035 0.24 0.72 1</ambient>
+            <diffuse>0.035 0.24 0.72 1</diffuse>
+          </material>
+        </visual>
+        <visual name="cabinet_top">
+          <pose>0 0 1.285 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.68 0.46 0.035</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.08 0.46 0.90 1</ambient>
+            <diffuse>0.08 0.46 0.90 1</diffuse>
+          </material>
+        </visual>
+        <visual name="front_panel">
+          <pose>0.337 0 0.73 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.014 0.34 0.82</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.025 0.075 0.14 1</ambient>
+            <diffuse>0.025 0.075 0.14 1</diffuse>
+          </material>
+        </visual>
+        <visual name="rack_slot_0">
+          <pose>0.347 0 0.47 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.012 0.29 0.045</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.11 0.38 0.62 1</ambient>
+            <diffuse>0.11 0.38 0.62 1</diffuse>
+          </material>
+        </visual>
+        <visual name="rack_slot_1">
+          <pose>0.347 0 0.64 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.012 0.29 0.045</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.11 0.38 0.62 1</ambient>
+            <diffuse>0.11 0.38 0.62 1</diffuse>
+          </material>
+        </visual>
+        <visual name="rack_slot_2">
+          <pose>0.347 0 0.81 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.012 0.29 0.045</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.11 0.38 0.62 1</ambient>
+            <diffuse>0.11 0.38 0.62 1</diffuse>
+          </material>
+        </visual>
+        <visual name="rack_slot_3">
+          <pose>0.347 0 0.98 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.012 0.29 0.045</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.11 0.38 0.62 1</ambient>
+            <diffuse>0.11 0.38 0.62 1</diffuse>
+          </material>
+        </visual>
+        <visual name="status_light">
+          <pose>0.347 -0.10 1.08 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.015 0.035 0.035</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.10 0.95 0.80 1</ambient>
+            <diffuse>0.10 0.95 0.80 1</diffuse>
+          </material>
+        </visual>
+        <visual name="antenna">
+          <pose>-0.17 0 1.55 0 0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.018</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.05 0.10 0.17 1</ambient>
+            <diffuse>0.05 0.10 0.17 1</diffuse>
+          </material>
+        </visual>
+        <visual name="antenna_tip">
+          <pose>-0.17 0 1.81 0 0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.027</radius>
+              <length>0.035</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.12 0.90 0.96 1</ambient>
+            <diffuse>0.12 0.90 0.96 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="edge_fill_04">
+      <static>true</static>
+      <pose>-5.16786145114 0.289776903563 0 0 0 2.34641301134</pose>
+      <link name="body">
+        <collision name="chassis_collision">
+          <pose>0 0 0.14 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.64 0.32 0.13</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="parking_bay">
+          <pose>0 0 0.012 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.86 0.60 0.025</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.04 0.40 0.60 1</ambient>
+            <diffuse>0.04 0.40 0.60 1</diffuse>
+          </material>
+        </visual>
+        <visual name="server_cabinet">
+          <pose>0 0 0.65 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.66 0.44 1.25</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.035 0.24 0.72 1</ambient>
+            <diffuse>0.035 0.24 0.72 1</diffuse>
+          </material>
+        </visual>
+        <visual name="cabinet_top">
+          <pose>0 0 1.285 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.68 0.46 0.035</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.08 0.46 0.90 1</ambient>
+            <diffuse>0.08 0.46 0.90 1</diffuse>
+          </material>
+        </visual>
+        <visual name="front_panel">
+          <pose>0.337 0 0.73 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.014 0.34 0.82</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.025 0.075 0.14 1</ambient>
+            <diffuse>0.025 0.075 0.14 1</diffuse>
+          </material>
+        </visual>
+        <visual name="rack_slot_0">
+          <pose>0.347 0 0.47 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.012 0.29 0.045</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.11 0.38 0.62 1</ambient>
+            <diffuse>0.11 0.38 0.62 1</diffuse>
+          </material>
+        </visual>
+        <visual name="rack_slot_1">
+          <pose>0.347 0 0.64 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.012 0.29 0.045</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.11 0.38 0.62 1</ambient>
+            <diffuse>0.11 0.38 0.62 1</diffuse>
+          </material>
+        </visual>
+        <visual name="rack_slot_2">
+          <pose>0.347 0 0.81 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.012 0.29 0.045</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.11 0.38 0.62 1</ambient>
+            <diffuse>0.11 0.38 0.62 1</diffuse>
+          </material>
+        </visual>
+        <visual name="rack_slot_3">
+          <pose>0.347 0 0.98 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.012 0.29 0.045</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.11 0.38 0.62 1</ambient>
+            <diffuse>0.11 0.38 0.62 1</diffuse>
+          </material>
+        </visual>
+        <visual name="status_light">
+          <pose>0.347 -0.10 1.08 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.015 0.035 0.035</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.10 0.95 0.80 1</ambient>
+            <diffuse>0.10 0.95 0.80 1</diffuse>
+          </material>
+        </visual>
+        <visual name="antenna">
+          <pose>-0.17 0 1.55 0 0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.018</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.05 0.10 0.17 1</ambient>
+            <diffuse>0.05 0.10 0.17 1</diffuse>
+          </material>
+        </visual>
+        <visual name="antenna_tip">
+          <pose>-0.17 0 1.81 0 0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.027</radius>
+              <length>0.035</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.12 0.90 0.96 1</ambient>
+            <diffuse>0.12 0.90 0.96 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
   </world>
 </sdf>

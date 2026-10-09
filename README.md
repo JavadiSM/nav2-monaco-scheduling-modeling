@@ -4,7 +4,7 @@ A ROS 2 / Nav2 testbed for **modeling task scheduling on heterogeneous vehicle a
 
 This is a **personal project**, driven by my interest in real-time systems and robotics. It uses **Navigation2 (Nav2)** and the upstream minimal TurtleBot simulation for navigation, sensors and differential-drive dynamics, with a custom circuit and vehicle appearance.
 
-The map is **inspired by the overall shape of the Formula 1 Monaco circuit**. Its dimensions and details are adapted for this simulation. In the default scene, one moving vehicle visits 19 checkpoints and the finish; 19 static blue server cabinets with antennas mark edge locations.
+The map is **inspired by the overall shape of the Formula 1 Monaco circuit**. Its dimensions and details are adapted for this simulation. In the default scene, one moving vehicle visits 19 checkpoints and the finish; 25 static blue server cabinets with antennas mark roadside edge locations, including start/finish and infill endpoints.
 
 The current implementation includes extracted task parameters, explicit job dependencies, A7/A15 compute and thermal models, and a local FIFO baseline coupled to one running Nav2 stack through a 1 ms lockstep bridge. The next step is to compare baseline scheduling algorithms; edge offloading is a later extension.
 
@@ -16,27 +16,34 @@ The current implementation includes extracted task parameters, explicit job depe
 
 ## Recorded FIFO bridge preview
 
-This recording shows the earlier Q95 budget experiment. The current [bridge](docs/live-bridge.en.md) holds results until the complete host calculation is measured and the selected mean/observed-maximum budget finishes. All existing task families have HI criticality; synthetic LO workloads are a later step.
+**8× host-recording playback — displayed eight times faster than the recording.** The visible clock shows simulation time; physics pauses while actual Nav2 calculations execute on the host.
 
-**6× host-recording playback — displayed six times faster than the recording.** The visible clock shows simulation time; the bridge pauses physics while real callbacks calculate.
+One red vehicle uses the replaceable **ready FIFO / oldest-idle-core** baseline on a modeled **A7 + A15**, at maximum frequency/voltage. Physics and modeled hardware share **1 ms** steps, and the live Gantt uses **2 s** windows. The following camera remains approximately 0.75 m behind the vehicle; the overview and live per-core temperatures appear alongside it.
 
-One red vehicle uses local ready FIFO on a modeled **A7 + A15**, with **1 ms** shared physics/hardware steps and a **2 s** rolling Gantt. The rear-following camera is approximately 0.75 m behind the vehicle; the fixed overview and live per-core temperatures are shown alongside it.
+| Endpoint | A7 / A15 cores | Initial / ambient (°C) | Tmax (°C) | Tbalance (°C) |
+| --- | --- | --- | ---: | ---: |
+| Vehicle | 1 / 1 | 45 / 45 | 46.2 | 45.6 |
+| RSU | 2 / 2 | 45 / 45 | 46.5 | 46.0 |
 
-Ambient and initial core temperatures are **45 °C**, with **Tmax = 46.2 °C** and **Tbalance = 45.8 °C**. Ordinary idle powers are **0.05 / 0.15 W** for A7/A15; cooling powers are separately **0.005 / 0.015 W**. Pink bands indicate whole-device cooling. Cooling withholds new computation results and commands; Gazebo's actuator and physics continue with the last applied motor command.
+Ordinary idle powers are **0.05 / 0.15 W** per A7/A15 core; cooling powers are separately **0.005 / 0.015 W**. Pink bands indicate whole-device cooling. It suspends modeled CPU progress and withholds new results; Gazebo's actuator retains the last applied motor command.
 
-![Live FIFO bridge, per-core temperatures and actual vehicle movement at 6× host playback](docs/media/live-fifo-6x.gif)
+![Live FIFO bridge and vehicle movement — 8× host playback](docs/media/live-fifo-8x.gif)
 
-This bounded preview travels **11.006 m** in **25.011 s** of active simulation, passing one checkpoint with zero recoveries and no navigation abort. It intentionally stops at the distance target. Validation checked **31,085** matching physics/hardware steps, **3,117** actual jobs, **2,372** selected precedence edges and **2,501** live thermal samples, with **zero validation errors**. All **47 unit tests** pass.
+This bounded recording travels **11.010 m** in **26.580 s** of active simulation and passes one checkpoint, with no navigation abort. It stops at the requested distance. Validation verifies **32,658** common clock steps, **1,627** actual jobs, **1,366** selected dependency edges and **1,355** output-release events at their exact modeled finish, with **zero validation errors** and **zero unresolved selected inputs**. All **71 unit tests** pass. This is functional validation rather than a full-course or scheduling-performance comparison.
 
-## Applied local scheduling
+## Scheduling and communication model
 
-Jobs arrive from actual Nav2 callback entries; nominal periods are scheduler metadata, rather than synthetic release generators. Selected parents must finish before a child starts. Ready FIFO chooses the core that has been idle longest. Real callbacks calculate on the host. The current bridge selects the mean reference budget when actual CPU demand is at or below the measured mean, and otherwise selects the observed maximum. Buffered results are released only after that selected budget and all parent/thermal conditions complete.
+Actual Nav2 callback entries create jobs. All current task families have HI criticality; each job selects the measured mean budget when its complete actual CPU demand is at or below the reference mean, otherwise the observed-maximum budget. Outputs remain buffered until selected modeled work, selected dependencies and thermal conditions complete.
 
-![First two seconds of the revised live FIFO schedule](docs/figures/dual-budget-bridge/applied-gantt.png)
+FIFO priority and oldest-idle-core assignment are one policy class. Another policy can replace both through explicit scheduling hooks. Five paired frequency/voltage levels are available per core; a job may change levels during execution without resetting its remaining work. Omitted DVFS selections use maximum; after a job consumes its LO work, its remainder uses maximum.
 
-The revised contract passes 56 unit tests. Its 8 s active validation checks 1,033 actual jobs, 811 selected dependency edges and 666 output-release events at their selected modeled finish, with zero validation errors and zero unresolved selected input bindings. The recorded preview and revised-budget validation are reported separately in the bridge documentation. **The next goal is to compare baseline scheduling algorithms** on the same route and modeled hardware, using common measurements and checking their effects on navigation. Edge offloading remains a later extension.
+![First two seconds of the recorded live FIFO schedule](docs/figures/current-bridge/applied-gantt.png)
 
-[Bridge semantics and reproduction](docs/live-bridge.en.md) · [Validation results](docs/figures/live-bridge/validation.json) · [Task model](docs/task-execution.en.md) · [Earlier standalone FIFO replay](docs/figures/task-fifo/local-fifo-detail.png)
+Communication has a **5 m send-time request radius** and an extensible cost function returning **0 s** by default. Accepted results can return after the vehicle leaves coverage. Both request and result use the same cost interface. The local baseline does not offload jobs yet. There are 25 RSUs, each with its own four-core server template; the maximum consecutive RSU separation is **9.596 m**. The driving route and original RSU poses are preserved.
+
+**The next goal is to compare scheduling baselines and a proposed policy**, including DVFS and thermal effects, on the same route and modeled hardware.
+
+[Bridge semantics](docs/live-bridge.en.md) · [Policy and communication interfaces](docs/scheduling-interfaces.en.md) · [DVFS semantics and candidate baselines](docs/live-dvfs.en.md) · [Current validation](docs/figures/current-bridge/validation.json) · [Task model](docs/task-execution.en.md)
 
 ## Main tools
 

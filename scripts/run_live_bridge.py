@@ -6,14 +6,16 @@ ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
 from tools.live_bridge.broker import runtime_paths
 def main():
-    p=argparse.ArgumentParser();p.add_argument('--seconds',type=float,default=30);p.add_argument('--distance',type=float,help='Stop after this actual active-interval odometry distance (m), with --seconds as the maximum.');p.add_argument('--output',type=Path);p.add_argument('--gui',action='store_true');p.add_argument('--views',action='store_true');p.add_argument('--record',action='store_true');a=p.parse_args()
+    p=argparse.ArgumentParser();p.add_argument('--dvfs-level',type=int,choices=range(5),help='Use a fixed paired operating point until a job overrun forces maximum; omitted uses the configured DVFS policy.');p.add_argument('--seconds',type=float,default=30);p.add_argument('--distance',type=float,help='Stop after this actual active-interval odometry distance (m), with --seconds as the maximum.');p.add_argument('--output',type=Path);p.add_argument('--gui',action='store_true');p.add_argument('--views',action='store_true');p.add_argument('--record',action='store_true');a=p.parse_args()
     if a.distance is not None and a.distance<=0:p.error('--distance must be positive')
     out=(a.output or ROOT/'artifacts/live-bridge'/time.strftime('%Y%m%d-%H%M%S')).resolve()
     if out.exists() and any(out.iterdir()):raise SystemExit('Choose an empty output directory to preserve earlier evidence')
     out.mkdir(parents=True,exist_ok=True)
     ps=subprocess.check_output(['ps','-eo','args'],text=True)
     if any(('gz sim -s' in line or 'gz sim -r -s' in line or 'ros2 launch' in line) and 'ps -eo' not in line for line in ps.splitlines()):raise SystemExit('A simulation is already active')
-    config=json.loads((ROOT/'config/live_bridge.json').read_text());(out/'trial-config.json').write_text(json.dumps(config,indent=2)+'\n');count=config['vehicle_count']
+    config=json.loads((ROOT/'config/live_bridge.json').read_text())
+    if a.dvfs_level is not None:config['dvfs']={**config.get('dvfs',{}),'policy':'fixed','level_id':a.dvfs_level}
+    (out/'trial-config.json').write_text(json.dumps(config,indent=2)+'\n');count=config['vehicle_count']
     (out/'hardware-config.json').write_text((ROOT/'config/abstract_compute.json').read_text())
     (out/'task-parameters.json').write_text((ROOT/'docs/evidence/dual-budget-parameters.json').read_text())
     if (ROOT/'build/live-bridge/build.json').exists():

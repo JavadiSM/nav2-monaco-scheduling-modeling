@@ -7,6 +7,7 @@ from tools.abstract_compute.hardware import load_platform
 from tools.abstract_compute.thermal import ThermalModel
 from tools.abstract_compute.power import PowerModel
 from tools.abstract_compute.task_model import load_tasks
+from .policies import ReadyFIFOOldestIdle
 
 TASK_NAMES=('control_iteration','local_costmap_update','global_costmap_update',
  'velocity_smoothing_tick','bt_tick','planning_request','amcl_scan_callback',
@@ -36,11 +37,17 @@ class LiveJob:
     selected_work_mcycles:float|None=None
     observed_max_exceeded:bool=False
     measured_cpu_ns:int|None=None
+    consumed_work_mcycles:float=0.
+    overrun_tick:int|None=None
+    execution_segments:list=field(default_factory=list)
 
 class LiveEngine:
-    def __init__(self,vehicle_count=1,step_ns=1_000_000,platform_path=None,*,dual_budget=True,task_parameters=None):
+    def __init__(self,vehicle_count=1,step_ns=1_000_000,platform_path=None,*,dual_budget=True,task_parameters=None,dvfs_selector=None,scheduling_policy=None):
         if step_ns not in (1_000_000,10_000_000):raise ValueError('Supported common lattices are 1 ms and 10 ms')
         self.step_ns=step_ns;self.dt=step_ns/1e9;self.tick=0
+        # A policy returns a paired operating-point ID for each active interval.
+        self.dvfs_selector=dvfs_selector
+        self.scheduling_policy=scheduling_policy if scheduling_policy is not None else ReadyFIFOOldestIdle()
         platform_path=Path(platform_path) if platform_path is not None else Path(__file__).resolve().parents[2]/'config/abstract_compute.json'
         self.platform_config=json.loads(platform_path.read_text())
         self.dual_budget=dual_budget;self.tasks=load_tasks(task_parameters,dual=dual_budget);self.devices=load_platform(platform_path,device_classes=('vehicle',)*vehicle_count)
@@ -95,11 +102,20 @@ class LiveEngine:
                 self.event('ready',job_id=j.job_id,eligible_tick=j.ready_tick)
         for did,device in self.devices.items():
             if self.cooling[did]:continue
-            ready=sorted((self.jobs[k] for k in self.unfinished if (j:=self.jobs[k]).device==did and j.status=='queued' and j.ready_tick is not None),key=lambda j:(j.ready_tick,j.release_tick,j.job_id))
-            free=sorted((c for c in device.cores if self.running[did,c] is None),key=lambda c:(self.idle_since[did,c],c))
-            for j,c in zip(ready,free):
+            ready=[self.jobs[k] for k in sorted(self.unfinished) if (j:=self.jobs[k]).device==did and j.status=='queued' and j.ready_tick is not None]
+            free=[core for c,core in device.cores.items() if self.running[did,c] is None]
+            decisions=list(self.scheduling_policy.assignments(engine=self,device_id=did,ready_jobs=tuple(ready),free_cores=tuple(free)))
+            eligible={j.job_id for j in ready};available={c.core_id for c in free}
+            seen_jobs=set();seen_cores=set()
+            for decision in decisions:
+                if decision.job_id not in eligible or decision.core_id not in available or decision.job_id in seen_jobs or decision.core_id in seen_cores:
+                    raise RuntimeError('Scheduling policy selected an ineligible job or occupied/duplicate core')
+                seen_jobs.add(decision.job_id);seen_cores.add(decision.core_id)
+            for decision in decisions:
+                j=self.jobs[decision.job_id];c=decision.core_id
                 assert all(self.jobs[p].finish_tick is not None and self.jobs[p].finish_tick<=self.tick for p in j.parents)
                 j.status='running';j.core_id=c;j.start_tick=self.tick;self.running[did,c]=j.job_id
+                device.cores[c].current_dvfs_level_id=device.cores[c].core_type.default_dvfs_level_id
                 self.event('start',job_id=j.job_id,device_id=did,core_id=c)
                 if j.remaining<=1e-12:j.budget_end_tick=self.tick;j.status='budget_done'
     def deliverable(self,jid):
@@ -112,16 +128,49 @@ class LiveEngine:
         key=(j.device,j.core_id);self.running[key]=None;self.idle_since[key]=self.tick
         self.event('finish',job_id=jid,device_id=j.device,core_id=j.core_id,real_cpu_ns=cpu_ns)
         if dispatch:self.dispatch()
+    def _mark_overrun(self,j):
+        if not self.dual_budget or j.budget_mode!='HI' or j.overrun_tick is not None:return
+        threshold=self.tasks[j.task].reference_work(self.tasks[j.task].budget_lo_s)
+        if j.consumed_work_mcycles>=threshold-1e-9:
+            j.overrun_tick=self.tick
+            self.event('job_overrun',job_id=j.job_id,consumed_work_mcycles=j.consumed_work_mcycles,remaining_work_mcycles=j.remaining,policy='remaining_work_at_maximum_point')
+
+    def _operating_point(self,j,core):
+        self._mark_overrun(j)
+        requested=None
+        if j.overrun_tick is None:
+            requested=self.dvfs_selector(self,j,core) if self.dvfs_selector is not None else self.scheduling_policy.dvfs_level(engine=self,job=j,core=core)
+        level_id=core.core_type.default_dvfs_level_id if requested is None else requested
+        if isinstance(level_id,bool) or not isinstance(level_id,int) or level_id not in core.core_type.dvfs_by_id:
+            raise ValueError('DVFS policy must return a valid integer operating-point ID or None')
+        previous=core.current_dvfs_level_id
+        core.current_dvfs_level_id=level_id
+        if previous!=level_id:
+            point=core.dvfs_level()
+            self.event('dvfs_change',job_id=j.job_id,device_id=j.device,core_id=core.core_id,previous_level_id=previous,level_id=level_id,frequency_mhz=point.frequency_mhz,voltage_v=point.voltage_v,reason='overrun' if j.overrun_tick is not None else 'scheduler')
+        return core.dvfs_level()
+
+    def _consume_interval(self,j,core,level):
+        rate=level.frequency_mhz*core.core_type.performance_eta
+        work=min(j.remaining,rate*self.dt)
+        j.remaining=max(0.,j.remaining-work)
+        j.consumed_work_mcycles=j.selected_work_mcycles-j.remaining
+        spans=j.execution_segments
+        if spans and spans[-1]['end_tick']==self.tick and spans[-1]['level_id']==level.level_id:
+            spans[-1]['end_tick']=self.tick+1;spans[-1]['work_mcycles']+=work
+        else:
+            spans.append(dict(start_tick=self.tick,end_tick=self.tick+1,level_id=level.level_id,frequency_mhz=level.frequency_mhz,voltage_v=level.voltage_v,work_mcycles=work))
+
     def advance(self):
         self.dispatch()
         for did,device in self.devices.items():
             powers=[]
             for cid,core in device.cores.items():
                 jid=self.running[did,cid];active=jid is not None and self.jobs[jid].status=='running' and not self.cooling[did]
-                powers.append(self.power.runtime_power_w(core,is_active=active))
                 if active:
-                    j=self.jobs[jid];level=core.dvfs_level();rate=level.frequency_mhz*core.core_type.performance_eta
-                    j.remaining=max(0.,j.remaining-rate*self.dt)
+                    j=self.jobs[jid];level=self._operating_point(j,core)
+                    self._consume_interval(j,core,level)
+                powers.append(self.power.runtime_power_w(core,is_active=active))
             temp=self.thermal[did].evolve_temperature_c(self.thermal[did].temperature_vector_c(),powers,self.dt)
             for value,core in zip(temp,device.cores.values()):core.temperature_c=float(value)
             if self.tick%10==0:
@@ -129,6 +178,8 @@ class LiveEngine:
                 self.samples.append(sample)
                 if self.event_sink:self.event_sink(dict(kind='thermal',**sample))
         self.tick+=1
+        for jid in self.running.values():
+            if jid is not None and self.jobs[jid].status=='running':self._mark_overrun(self.jobs[jid])
         # Guards precede output release at a coincident completion/cooling tick.
         for did,device in self.devices.items():
             hot=[c for c,v in device.cores.items() if v.temperature_c>=v.max_temperature_c-1e-9]

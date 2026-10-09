@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "core_types": {
     "A7": {
       "name": "Cortex-A7",
@@ -83,11 +83,19 @@
   "device_classes": {
     "vehicle": {
       "lp_cores": 1,
-      "hp_cores": 1
+      "hp_cores": 1,
+      "thermal": {
+        "max_temperature_c": 46.2,
+        "balance_temperature_c": 45.6
+      }
     },
     "server": {
       "lp_cores": 2,
-      "hp_cores": 2
+      "hp_cores": 2,
+      "thermal": {
+        "max_temperature_c": 46.5,
+        "balance_temperature_c": 46.0
+      }
     }
   },
   "scheduler_policy": "ready_hi_then_plan_rank_nonpreemptive",
@@ -95,7 +103,7 @@
     "ambient_temperature_c": 45.0,
     "reference_temperature_c": 35.0,
     "max_temperature_c": 46.2,
-    "balance_temperature_c": 45.8,
+    "balance_temperature_c": 45.6,
     "thermal_epoch_ms": 100.0,
     "coupling_base_conductance_range_w_per_k": [
       0.07,

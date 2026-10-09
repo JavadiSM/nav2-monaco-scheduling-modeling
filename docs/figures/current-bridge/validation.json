@@ -1,0 +1,142 @@
+{
+  "trial": "artifacts/live-bridge/rsu-policy-8x-01",
+  "step_s": 0.001,
+  "sim_s": 32.658,
+  "host_s": 228.6953451849986,
+  "jobs": 1627,
+  "modeled_completions": 1621,
+  "completed_counts": {
+    "local_costmap_update": 82,
+    "bt_tick": 478,
+    "planning_request": 40,
+    "velocity_smoothing_tick": 182,
+    "global_costmap_update": 27,
+    "controller_path_install": 39,
+    "control_iteration": 159,
+    "velocity_command_callback": 159,
+    "mppi_noise_generation": 159,
+    "collision_check": 166,
+    "amcl_scan_callback": 130
+  },
+  "clock_pairs_verified": 32658,
+  "dependency_edges_verified": 1366,
+  "dependency_types": {
+    "bt_tick -> planning_request": 40,
+    "planning_request -> global_costmap_update": 27,
+    "planning_request -> controller_path_install": 39,
+    "local_costmap_update -> control_iteration": 159,
+    "controller_path_install -> control_iteration": 159,
+    "control_iteration -> velocity_command_callback": 159,
+    "control_iteration -> mppi_noise_generation": 159,
+    "velocity_command_callback -> velocity_smoothing_tick": 180,
+    "mppi_noise_generation -> control_iteration": 158,
+    "velocity_smoothing_tick -> collision_check": 166,
+    "global_costmap_update -> planning_request": 26,
+    "local_costmap_update -> local_costmap_update": 81,
+    "planning_request -> planning_request": 13
+  },
+  "readiness_times_verified": 1622,
+  "selected_path_parents_verified": 39,
+  "selected_BT_goal_parents_verified": 40,
+  "budgets_verified": 1621,
+  "scheduling_policy_id": "ready_FIFO_oldest_idle_core_nonpreemptive",
+  "core_assignments_verified": 1622,
+  "FIFO_assignments_verified": 1622,
+  "validation_errors": [],
+  "cooling_entries": 41,
+  "cooling_exits": 40,
+  "exact_DDS_source_bindings": 326,
+  "payload_or_UUID_bindings": 85,
+  "unresolved_or_external_inputs": 0,
+  "moving_odometry_segments_during_cooling": {
+    "0": 578
+  },
+  "trace_sha256": "66ecc15655fcfd26b5150ed113be32e59dac0725880320aedb20d53a1722dcda",
+  "outcome": "Intentional finite trial; no full-lap completion is claimed.",
+  "common_start": {
+    "origin_sim_s": 6.078,
+    "race_s": 26.580000000000002,
+    "goal_acceptance_ticks": [
+      6078
+    ],
+    "first_core_start_ticks": {
+      "0": 6078
+    }
+  },
+  "budget_policy": "actual_CPU_mean_LO_observed_max_HI",
+  "selected_budget_counts": {
+    "LO": 1053,
+    "HI": 574
+  },
+  "observed_max_exceeded_jobs": 0,
+  "sealed_computations": 1627,
+  "outputs_at_exact_selected_finish": 1355,
+  "execution_accounting": "piecewise_DVFS_equivalent_work",
+  "DVFS_jobs_verified": 1622,
+  "DVFS_change_events": 0,
+  "job_overrun_events": 573,
+  "active_ticks_by_point": {
+    "0:0": {
+      "0": 0,
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 4100
+    },
+    "0:1": {
+      "0": 0,
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 3219
+    }
+  },
+  "thermal_configuration": {
+    "ambient_temperature_c": 45.0,
+    "reference_temperature_c": 35.0,
+    "max_temperature_c": 46.2,
+    "balance_temperature_c": 45.6,
+    "thermal_epoch_ms": 100.0,
+    "coupling_base_conductance_range_w_per_k": [
+      0.07,
+      0.11
+    ],
+    "coupling_distance_attenuation": 0.8,
+    "control_epoch_s": 0.005,
+    "initial_temperature_c": 45.0
+  },
+  "thermal_guard_period_s": 0.001,
+  "live_thermal_samples_verified": 2658,
+  "stop_reason": "requested odometry distance reached",
+  "cooling_time_s": {
+    "0": 21.092
+  },
+  "cooling_fraction": {
+    "0": 0.7935289691497366
+  },
+  "peak_sampled_temperature_c": {
+    "0": [
+      45.769492695093,
+      46.20771437095262
+    ]
+  },
+  "last_sampled_temperature_c": {
+    "0": [
+      45.453773646413495,
+      45.61579618268823
+    ]
+  },
+  "vehicles": {
+    "red": {
+      "passed": false,
+      "action_status": null,
+      "nav2_error_code": null,
+      "odometry_distance_m": 11.010419372035683,
+      "ordered_targets_passed": 1,
+      "navigation_recoveries": 0,
+      "scheduler": "live_local_FIFO_oldest_idle_core",
+      "error": "Interrupted."
+    }
+  },
+  "navigation_failed": false
+}

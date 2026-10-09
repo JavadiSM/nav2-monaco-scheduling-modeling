@@ -16,5 +16,11 @@
   "action_ack_timeout_ms": 1000,
   "output_policy": "buffer_until_sealed_computation_and_selected_budget_completion",
   "task_criticality": "HI",
-  "low_criticality_tasks_enabled": false
+  "low_criticality_tasks_enabled": false,
+  "dvfs": {
+    "policy": "maximum",
+    "decision_epoch_s": 0.001,
+    "switch_latency_s": 0.0,
+    "overrun_policy": "remaining_work_at_maximum_point"
+  }
 }

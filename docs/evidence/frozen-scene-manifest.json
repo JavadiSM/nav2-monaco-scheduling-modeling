@@ -1,5 +1,5 @@
 {
-  "policy": "Freeze geometry, navigation and physics. User-authorized server visual restyling is the sole world-content exception.",
+  "policy": "Freeze route, occupancy map, vehicle, navigation and physics. Explicitly authorized RSU additions update only server layout and world models.",
   "files": {
     "config/monaco.yaml": "e048b019eea9b1bc927eae82a7e33e1dcc7ac4d6ef3afe764b0d611ca40a72c0",
     "scenarios/monaco/layout.png": "4e42146eb480919d547b36705798495d775e87b9007a73f53155d3bf372360bc",
@@ -11,7 +11,7 @@
     "scenarios/monaco/NOTICE.md": "417debd1be53963d27bd668b214f9ebc8a09829edf1cca73d206f1e09a5bc1c2",
     "scenarios/monaco/racecar.sdf": "8d6d048a3a5873ab09dfbdb20a21ed2a0d1b588f6d2a48fcc97e869850940b02",
     "scenarios/monaco/racecar.urdf": "03336beec8558bc67f2d1879bcd0fe0da0fecce8e284c8211454f156ed627ce0",
-    "scenarios/monaco/scenario.json": "18c3795c994e4e2973247a56ea4dad4ff5eb623db2654fa16d08db62cf1cc8b9",
-    "scenarios/monaco/world.sdf": "60486aef1622fc29443bb694b7232d2737c523dd141adf1aa476144073bcee64"
+    "scenarios/monaco/scenario.json": "c2e3dc1766e8bbace80e858c152dc7f05009f9e633826213c7f0463036728754",
+    "scenarios/monaco/world.sdf": "522b78113568f250d56e96f71b3638e2c9418605e29f909c6c771296549cdf3f"
   }
 }

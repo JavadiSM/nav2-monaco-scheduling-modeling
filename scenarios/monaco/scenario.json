@@ -191,13 +191,41 @@
   ],
   "servers": [
     {
+      "id": "edge_start",
+      "checkpoint_id": null,
+      "x": -17.215259310973202,
+      "y": 4.272082785225964,
+      "yaw": 0.667306134978364,
+      "static": true,
+      "worker_enabled": false,
+      "route_s_m": 0.05,
+      "placement_role": "start",
+      "roadside_offset_m": 1.3,
+      "minimum_sampled_centreline_clearance_m": 1.3001377561978487
+    },
+    {
       "id": "edge_01",
       "checkpoint_id": 1,
       "x": -8.948369878187117,
       "y": 9.143924403720598,
       "yaw": 0.3514447940035536,
       "static": true,
-      "worker_enabled": false
+      "worker_enabled": false,
+      "route_s_m": 9.333101208569254,
+      "placement_role": "checkpoint"
+    },
+    {
+      "id": "edge_fill_01",
+      "checkpoint_id": null,
+      "x": -3.295142991743302,
+      "y": 4.998344058346657,
+      "yaw": -0.7535249032126975,
+      "static": true,
+      "worker_enabled": false,
+      "route_s_m": 15.375130170436785,
+      "placement_role": "infill",
+      "roadside_offset_m": 1.3,
+      "minimum_sampled_centreline_clearance_m": 1.3000058734922224
     },
     {
       "id": "edge_02",
@@ -206,7 +234,9 @@
       "y": 1.2330450394796313,
       "yaw": -0.5307734972029063,
       "static": true,
-      "worker_enabled": false
+      "worker_enabled": false,
+      "route_s_m": 21.417159132304317,
+      "placement_role": "checkpoint"
     },
     {
       "id": "edge_03",
@@ -215,7 +245,9 @@
       "y": -2.475149448868682,
       "yaw": -0.2629336368618341,
       "static": true,
-      "worker_enabled": false
+      "worker_enabled": false,
+      "route_s_m": 28.63827665668609,
+      "placement_role": "checkpoint"
     },
     {
       "id": "edge_04",
@@ -224,7 +256,9 @@
       "y": 1.2401147627415203,
       "yaw": 0.6659692373791293,
       "static": true,
-      "worker_enabled": false
+      "worker_enabled": false,
+      "route_s_m": 35.268806054069906,
+      "placement_role": "checkpoint"
     },
     {
       "id": "edge_05",
@@ -233,7 +267,9 @@
       "y": 1.5495239995171561,
       "yaw": -0.14937406840823475,
       "static": true,
-      "worker_enabled": false
+      "worker_enabled": false,
+      "route_s_m": 42.465676808017086,
+      "placement_role": "checkpoint"
     },
     {
       "id": "edge_06",
@@ -242,7 +278,9 @@
       "y": -5.685813197978624,
       "yaw": -1.181919884196147,
       "static": true,
-      "worker_enabled": false
+      "worker_enabled": false,
+      "route_s_m": 50.033539315152055,
+      "placement_role": "checkpoint"
     },
     {
       "id": "edge_07",
@@ -251,7 +289,9 @@
       "y": -3.8631241885106706,
       "yaw": 0.6889243882148643,
       "static": true,
-      "worker_enabled": false
+      "worker_enabled": false,
+      "route_s_m": 55.73013472137361,
+      "placement_role": "checkpoint"
     },
     {
       "id": "edge_08",
@@ -260,7 +300,22 @@
       "y": -2.494840033040724,
       "yaw": -0.8515374187715115,
       "static": true,
-      "worker_enabled": false
+      "worker_enabled": false,
+      "route_s_m": 58.19162551962879,
+      "placement_role": "checkpoint"
+    },
+    {
+      "id": "edge_fill_02",
+      "checkpoint_id": null,
+      "x": 18.28114451554988,
+      "y": -7.673119747495798,
+      "yaw": -2.6761034260448175,
+      "static": true,
+      "worker_enabled": false,
+      "route_s_m": 63.710985013298725,
+      "placement_role": "infill",
+      "roadside_offset_m": 1.3,
+      "minimum_sampled_centreline_clearance_m": 1.3005953003886683
     },
     {
       "id": "edge_09",
@@ -269,7 +324,22 @@
       "y": -9.495891238859771,
       "yaw": -3.127607551424901,
       "static": true,
-      "worker_enabled": false
+      "worker_enabled": false,
+      "route_s_m": 69.23034450696866,
+      "placement_role": "checkpoint"
+    },
+    {
+      "id": "edge_fill_03",
+      "checkpoint_id": null,
+      "x": 5.7012022989055735,
+      "y": -7.037698370548297,
+      "yaw": 2.6095457279694236,
+      "static": true,
+      "worker_enabled": false,
+      "route_s_m": 75.86518835632666,
+      "placement_role": "infill",
+      "roadside_offset_m": 1.3,
+      "minimum_sampled_centreline_clearance_m": 1.3001650337734239
     },
     {
       "id": "edge_10",
@@ -278,7 +348,9 @@
       "y": -3.900169181136712,
       "yaw": 2.5207701017671225,
       "static": true,
-      "worker_enabled": false
+      "worker_enabled": false,
+      "route_s_m": 82.50003220568466,
+      "placement_role": "checkpoint"
     },
     {
       "id": "edge_11",
@@ -287,7 +359,22 @@
       "y": -1.5873487548263558,
       "yaw": 1.9525162955444766,
       "static": true,
-      "worker_enabled": false
+      "worker_enabled": false,
+      "route_s_m": 83.60780113544526,
+      "placement_role": "checkpoint"
+    },
+    {
+      "id": "edge_fill_04",
+      "checkpoint_id": null,
+      "x": -5.167861451139277,
+      "y": 0.28977690356343044,
+      "yaw": 2.3464130113393717,
+      "static": true,
+      "worker_enabled": false,
+      "route_s_m": 89.38938058893444,
+      "placement_role": "infill",
+      "roadside_offset_m": 1.3,
+      "minimum_sampled_centreline_clearance_m": 1.3003838899642133
     },
     {
       "id": "edge_12",
@@ -296,7 +383,9 @@
       "y": 3.9913711850160603,
       "yaw": 2.6257617773482065,
       "static": true,
-      "worker_enabled": false
+      "worker_enabled": false,
+      "route_s_m": 95.17096004242364,
+      "placement_role": "checkpoint"
     },
     {
       "id": "edge_13",
@@ -305,7 +394,9 @@
       "y": 3.1071963419617985,
       "yaw": -2.5752049661076515,
       "static": true,
-      "worker_enabled": false
+      "worker_enabled": false,
+      "route_s_m": 99.14270535123183,
+      "placement_role": "checkpoint"
     },
     {
       "id": "edge_14",
@@ -314,7 +405,9 @@
       "y": 2.3462311608795936,
       "yaw": -1.512040504079227,
       "static": true,
-      "worker_enabled": false
+      "worker_enabled": false,
+      "route_s_m": 101.42535387604624,
+      "placement_role": "checkpoint"
     },
     {
       "id": "edge_15",
@@ -323,7 +416,9 @@
       "y": -1.0291718161882364,
       "yaw": -2.4410563523239475,
       "static": true,
-      "worker_enabled": false
+      "worker_enabled": false,
+      "route_s_m": 104.55497595951279,
+      "placement_role": "checkpoint"
     },
     {
       "id": "edge_16",
@@ -332,7 +427,9 @@
       "y": 0.9218396846372087,
       "yaw": 3.001413810353181,
       "static": true,
-      "worker_enabled": false
+      "worker_enabled": false,
+      "route_s_m": 105.9540654735172,
+      "placement_role": "checkpoint"
     },
     {
       "id": "edge_17",
@@ -341,7 +438,9 @@
       "y": -3.6983476645769278,
       "yaw": -2.0308338431756914,
       "static": true,
-      "worker_enabled": false
+      "worker_enabled": false,
+      "route_s_m": 109.61980904723043,
+      "placement_role": "checkpoint"
     },
     {
       "id": "edge_18",
@@ -350,7 +449,9 @@
       "y": -6.476041932529949,
       "yaw": -1.2976837276046616,
       "static": true,
-      "worker_enabled": false
+      "worker_enabled": false,
+      "route_s_m": 114.01809706403874,
+      "placement_role": "checkpoint"
     },
     {
       "id": "edge_19",
@@ -359,7 +460,22 @@
       "y": -6.062089102374028,
       "yaw": 1.9169985286896902,
       "static": true,
-      "worker_enabled": false
+      "worker_enabled": false,
+      "route_s_m": 118.01493582402568,
+      "placement_role": "checkpoint"
+    },
+    {
+      "id": "edge_finish",
+      "checkpoint_id": null,
+      "x": -19.33159050283191,
+      "y": 1.5946029447975336,
+      "yaw": 0.8913825213871167,
+      "static": true,
+      "worker_enabled": false,
+      "route_s_m": 125.88453522025038,
+      "placement_role": "finish",
+      "roadside_offset_m": 1.3,
+      "minimum_sampled_centreline_clearance_m": 1.3000498701670604
     }
   ],
   "centreline": [

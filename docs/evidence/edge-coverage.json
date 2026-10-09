@@ -3,7 +3,7 @@
   "communication_cost_s": 0,
   "active_offloading": false,
   "evaluated_centreline_points": 1461,
-  "uncovered_centreline_points": 23,
-  "minimum_visible_servers": 0,
-  "maximum_visible_servers": 5
+  "uncovered_centreline_points": 0,
+  "minimum_visible_servers": 1,
+  "maximum_visible_servers": 7
 }

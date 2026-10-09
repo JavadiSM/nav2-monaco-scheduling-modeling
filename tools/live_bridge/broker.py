@@ -3,6 +3,8 @@ import argparse,csv,json,mmap,os,selectors,socket,struct,subprocess,time,traceba
 from dataclasses import asdict
 from pathlib import Path
 from .engine import LiveEngine,TASK_NAMES
+from .dvfs import configured_selector
+from .policies import configured_scheduler
 PACKET=struct.Struct('<7Q')
 ENTER,DEP,STAGE,END,WAIT,RESUME,SLEEP,PUBLISH,LOOKUP,DEVICE_GATE,START_READY,START_ACK,TRIGGER,RESULT_OWNER,RESULT_GATE,PUBLISH_BEGIN=range(1,17)
 def runtime_paths(out):
@@ -10,11 +12,11 @@ def runtime_paths(out):
     return '/tmp/nav2-live-'+tag+'.sock',Path('/tmp/nav2-live-'+tag+'.clock')
 
 class Broker:
-    def __init__(self,out,seconds,vehicles=None,bootstrap_s=None):
+    def __init__(self,out,seconds,vehicles=None,bootstrap_s=None,*,dvfs_selector=None,scheduling_policy=None):
         self.out=Path(out).resolve();self.out.mkdir(parents=True,exist_ok=True)
         config_file=self.out/'trial-config.json'
         self.config=json.loads((config_file if config_file.exists() else Path(__file__).resolve().parents[2]/'config/live_bridge.json').read_text())
-        vehicles=vehicles or self.config['vehicle_count'];self.seconds=seconds;self.engine=LiveEngine(vehicles,self.config['step_ns'],self.out/'hardware-config.json' if (self.out/'hardware-config.json').exists() else None,dual_budget=self.config.get('budget_policy')=='actual_CPU_mean_LO_observed_max_HI',task_parameters=self.out/'task-parameters.json' if (self.out/'task-parameters.json').exists() else None);self.dt=self.engine.dt;self.limit=round((seconds+self.config['bootstrap_sim_s'])/self.dt);self.bootstrap=round((self.config['bootstrap_sim_s'] if bootstrap_s is None else bootstrap_s)/self.dt)
+        vehicles=vehicles or self.config['vehicle_count'];self.seconds=seconds;self.engine=LiveEngine(vehicles,self.config['step_ns'],self.out/'hardware-config.json' if (self.out/'hardware-config.json').exists() else None,dual_budget=self.config.get('budget_policy')=='actual_CPU_mean_LO_observed_max_HI',task_parameters=self.out/'task-parameters.json' if (self.out/'task-parameters.json').exists() else None,dvfs_selector=configured_selector(self.config) if dvfs_selector is None else dvfs_selector,scheduling_policy=configured_scheduler(self.config) if scheduling_policy is None else scheduling_policy);self.dt=self.engine.dt;self.limit=round((seconds+self.config['bootstrap_sim_s'])/self.dt);self.bootstrap=round((self.config['bootstrap_sim_s'] if bootstrap_s is None else bootstrap_s)/self.dt)
         self.sockpath,self.clockpath=runtime_paths(self.out)
         # Keep an already mapped clock file nonempty while attaching the broker.
         self.clockfile=self.clockpath.open('r+b' if self.clockpath.exists() else 'w+b')
@@ -27,6 +29,7 @@ class Broker:
         self.rows=(self.out/'protocol.jsonl').open('w',buffering=1);self.failure=None
         self.live=(self.out/'live-events.jsonl').open('w',buffering=1)
         self.engine.event_sink=self.live_event
+        self.engine.event('scheduling_policy',policy_id=self.engine.scheduling_policy.name)
         self.start_ready=set();self.start_acked=set();self.origin_tick=None;self.dispatch_started=False;self.barrier_host_start=None
         self.stepfile=(self.out/'clock-pairs.csv').open('w',newline='');self.stepwriter=csv.writer(self.stepfile);self.stepwriter.writerow(['tick','physics_ns','hardware_ns','real_callbacks_busy'])
         self.stats={'packets':0,'physics_steps':0,'outputs':0,'blocked_outputs':0,'lookup_misses':0,'phase_completion_before_callback_end':0}
@@ -195,7 +198,7 @@ class Broker:
         for j in self.engine.jobs.values():
             row=asdict(j);row['parents']=sorted(j.parents);row['assumed_wcet_s']=j.selected_budget_s
             jobs.append(row)
-        report={'schema':2 if self.engine.dual_budget else 1,'task_parameters':{name:asdict(spec) for name,spec in self.engine.tasks.items()},'step_s':self.engine.dt,'clock':'SIM','policy':'ready FIFO / oldest idle core / local only','job_source':'actual callback entry','completion':'sealed actual computation then selected LO/HI budget then buffered output release' if self.engine.dual_budget else 'historical Q95 phase gate','origin_tick':self.origin_tick,'race_seconds':(self.engine.tick-self.origin_tick)*self.engine.dt if self.origin_tick is not None else 0.,'sim_seconds':self.engine.tick*self.engine.dt,'host_seconds':host_s,'failure':self.failure,'stop_reason':self.stop_reason,'stop_request':self.stop_request,'hardware_configuration':self.engine.platform_config,'stats':self.stats,'jobs':jobs,'events':self.engine.events,'thermal':self.engine.samples,'config':self.config,'hardware':{d:[{'core_id':c,'type':v.core_type.name,'frequency_mhz':v.dvfs_level().frequency_mhz,'voltage_v':v.dvfs_level().voltage_v,'performance_eta':v.core_type.performance_eta} for c,v in p.cores.items()] for d,p in self.engine.devices.items()}}
+        report={'schema':3 if self.engine.dual_budget else 1,'execution_accounting':'piecewise_DVFS_equivalent_work','task_parameters':{name:asdict(spec) for name,spec in self.engine.tasks.items()},'step_s':self.engine.dt,'clock':'SIM','scheduling_policy_id':self.engine.scheduling_policy.name,'policy':self.engine.scheduling_policy.name,'job_source':'actual callback entry','completion':'sealed actual computation then selected LO/HI budget then buffered output release' if self.engine.dual_budget else 'historical Q95 phase gate','origin_tick':self.origin_tick,'race_seconds':(self.engine.tick-self.origin_tick)*self.engine.dt if self.origin_tick is not None else 0.,'sim_seconds':self.engine.tick*self.engine.dt,'host_seconds':host_s,'failure':self.failure,'stop_reason':self.stop_reason,'stop_request':self.stop_request,'hardware_configuration':self.engine.platform_config,'stats':self.stats,'jobs':jobs,'events':self.engine.events,'thermal':self.engine.samples,'config':self.config,'hardware':{d:[{'core_id':c,'type':v.core_type.name,'frequency_mhz':v.dvfs_level().frequency_mhz,'voltage_v':v.dvfs_level().voltage_v,'performance_eta':v.core_type.performance_eta} for c,v in p.cores.items()] for d,p in self.engine.devices.items()}}
         (self.out/'trace.json').write_text(json.dumps(report,indent=2)+'\n')
 def main():
     p=argparse.ArgumentParser();p.add_argument('--output',required=True);p.add_argument('--seconds',type=float,default=30);p.add_argument('--vehicles',type=int);p.add_argument('--bootstrap',type=float);a=p.parse_args()

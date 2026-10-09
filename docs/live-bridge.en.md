@@ -1,6 +1,6 @@
 # Live Nav2 / local FIFO bridge
 
-One real Nav2 stack is coupled to one modeled vehicle with one A7 and one A15. The accepted circuit, navigation algorithms, thermal parameters and 0.001 s common physics/hardware lattice remain unchanged. Actual callbacks create jobs. No periodic or aperiodic arrivals are invented by the live scheduler.
+One real Nav2 stack is coupled to one modeled vehicle with one A7 and one A15. The accepted circuit, navigation algorithms and 0.001 s common physics/hardware lattice remain unchanged. Current thermal and DVFS settings are specified below. Actual callbacks create jobs. No periodic or aperiodic arrivals are invented by the live scheduler.
 
 ## Current budget contract
 
@@ -40,16 +40,18 @@ The existing virtual reference is f_ref = 1000 MHz and eta_ref = 1. For the sele
 
 $$W_j=B_j f_{ref}\eta_{ref},\qquad C_{j,k}=\frac{W_j}{f_k\eta_k},\qquad n_{j,k}=\left\lceil\frac{C_{j,k}}{0.001}\right\rceil.$$
 
-W is in million equivalent cycles when frequency is in MHz. Both the actual sample and the LO threshold scale by the same positive factor, so comparing them before target conversion preserves the LO/HI decision. At the current operating points, A7 uses 1600 MHz / eta 1, and A15 uses 2000 MHz / eta 1.8. These are model conversion inputs, not measured laptop clock counters. Nominal T remains timing metadata and does not scale with target frequency.
+W is in million equivalent cycles when frequency is in MHz. Both the actual sample and the LO threshold scale by the same positive factor, so comparing them before target conversion preserves the LO/HI decision. At the default maximum operating points, A7 uses 1600 MHz / eta 1, and A15 uses 2000 MHz / eta 1.8. These are model conversion inputs, not measured laptop clock counters. Nominal T remains timing metadata and does not scale with target frequency.
 
-The selected HI budget is the **total** budget, not C_LO + C_HI. Every job starts with exactly its selected demand. The 1 ms lattice rounds duration upward; cooling adds elapsed suspension without consuming remaining work.
+The selected HI budget is the **total** budget, not C_LO + C_HI. Every job starts with exactly its selected demand. The duration formula above applies at a fixed operating point. With variable DVFS, completion uses the work integral described in [DVFS semantics](live-dvfs.en.md); cooling adds elapsed suspension without consuming remaining work.
+
+A scheduler can select one of five paired frequency/voltage levels separately for each active 1 ms interval of the same job. An omitted selection uses maximum frequency and voltage. Once an HI-budget job has consumed its LO work, its remaining work is forced to the maximum point from the next lattice boundary. There is no global mode or task-dropping policy. Power and temperature use the chosen operating point.
 
 ## Compute, seal, schedule, release
 
 1. An actual instrumented Nav2 work unit enters and creates a job.
 2. The installed Nav2 function computes on the host. Its outgoing topic messages are copied into owned serialized buffers; service responses are deep-copied. The original function returns before budget selection.
 3. The adapter seals the actual CPU measurement. The broker rejects a stage request without this seal, selects LO or HI, and records both the sample and selected equivalent work.
-4. A staged job becomes eligible only after every selected parent has modeled completion. Ready FIFO selects the oldest-idle local core. Ordinary arrivals do not preempt a running job.
+4. A staged job becomes eligible only after every selected parent has modeled completion. The selected scheduling policy assigns a ready job to a free local core. The active FIFO baseline selects the oldest-idle local core. Ordinary arrivals do not preempt a running job.
 5. The selected budget executes on the common lattice. Whole-device cooling suspends both cores and blocks result release.
 6. At the modeled finish, all eligible gates are released before the next physics step. The adapter flushes the buffered topic/service results and commits the protected shared state. Transport reception of the final command is acknowledged before physics advances.
 
@@ -68,7 +70,7 @@ For job j, with actual entry r_j, sealed-computation time b_j and selected paren
 
 $$A_j=\max\left(r_j,b_j,\max_{p\in pred(j)}F_p\right),\qquad S_j\ge A_j.$$
 
-FIFO orders eligible jobs by (A_j, r_j, job ID). Blocked children occupy no core. The available core with the earliest last-idle timestamp is selected; a tie uses A7 before A15.
+The replaceable FIFO baseline orders eligible jobs by (A_j, r_j, job ID). Blocked children occupy no core. The available core with the earliest last-idle timestamp is selected; a tie uses A7 before A15.
 
 Local-map writes retain their actual map mutex until modeled release. Noise-buffer commits retain their protected ownership through the gate; inline reset regeneration remains deferred. The global planner map lock covers its read-modify-write request. Same-thread path installation and mutually exclusive component callbacks complete their gates before the next work unit can consume their state. Nested same-thread work remains charged within the primary body rather than as an additional independent job.
 
@@ -78,17 +80,19 @@ A publication interval is opened in the broker before DDS sends the message and 
 
 DDS/input fingerprints, selected map/noise state and installed path IDs establish the implemented job dependencies. Exact TF versions and every framework callback are not modeled. Unresolved/external inputs remain counted rather than assigned invented parents. The broker does not claim deterministic native-thread replay or an instruction-level RTOS emulator.
 
+Policy and communication hooks, RSU placement and device-specific thresholds are documented in [extension interfaces](scheduling-interfaces.en.md). Offloading remains inactive in the current local baseline.
+
 ## Thermal and motion semantics
 
-Ambient and initial core temperatures are 45 degrees C. Any core reaching Tmax = 46.2 degrees C suspends the whole vehicle device; both cores resume only after all are at or below Tbalance = 45.8 degrees C. Ordinary idle powers are A7 0.05 W / A15 0.15 W; cooling powers are A7 0.005 W / A15 0.015 W. The coupled RC model is advanced each 1 ms step. Thermal guards precede output delivery at coincident ticks.
+Ambient and initial core temperatures are 45 degrees C. Any core reaching Tmax = 46.2 degrees C suspends the whole vehicle device; both cores resume only after all are at or below Tbalance = 45.6 degrees C. Ordinary idle powers are A7 0.05 W / A15 0.15 W; cooling powers are A7 0.005 W / A15 0.015 W. The coupled RC model is advanced each 1 ms step. Thermal guards precede output delivery at coincident ticks.
 
 Cooling withholds new computation results and commands. Gazebo's actuator retains its last applied command and physics continues. A moving vehicle during cooling is therefore possible. The low-level motor actuator is not one of the eleven modeled CPU task families.
 
-The live Gantt uses 2 s windows and displays per-core modeled temperatures. The approximately 0.75 m following camera, overview and existing GIF assets are retained. The published 6x movie is the [historical Q95 preview](live-bridge-q95.en.md), not a recording of this revised budget contract.
+The live Gantt uses 2 s windows and displays per-core modeled temperatures. The approximately 0.75 m following camera, overview and existing GIF assets are retained. The current README preview is recorded from the sealed-budget bridge at 8x host playback. Earlier Q95 preview evidence is retained in the [historical report](live-bridge-q95.en.md).
 
 ## Verification and reproduction
 
-The final development verification is `artifacts/live-bridge/dual-budget-smoke-04`. Four bounded development trials were run while correcting output release and producer registration; this is functional verification, not a statistical comparison of policies. The final vehicle traveled 3.406654 m during 8 s of active simulation, with no navigation abort. Two newly staged jobs remain uncompleted at the deliberate cutoff; all completed jobs finished their output commits before shutdown.
+The sealed-budget verification preceding the DVFS update is `artifacts/live-bridge/dual-budget-smoke-04`, recorded with Tmax = 46.2 degrees C. Four bounded development trials were run while correcting output release and producer registration; this is functional verification, not a statistical comparison of policies. The final vehicle traveled 3.406654 m during 8 s of active simulation, with no navigation abort. Two newly staged jobs remain uncompleted at the deliberate cutoff; all completed jobs finished their output commits before shutdown.
 
 | Check | Result |
 | --- | ---: |
@@ -104,7 +108,7 @@ The final development verification is `artifacts/live-bridge/dual-budget-smoke-0
 | Validation errors | 0 |
 | Unit tests passed | 56 |
 
-The current short-trial [validation](figures/dual-budget-bridge/validation.json), [per-task results](figures/dual-budget-bridge/task-summary.csv) and [applied Gantt](figures/dual-budget-bridge/applied-gantt.png) report the measured LO/HI selections and output timings. A finite smoke trial demonstrates the local bridge contract, not full-course success or a formal hard-deadline guarantee.
+The retained sealed-budget short-trial [validation](figures/dual-budget-bridge/validation.json), [per-task results](figures/dual-budget-bridge/task-summary.csv) and [applied Gantt](figures/dual-budget-bridge/applied-gantt.png) report the measured LO/HI selections and output timings. A finite smoke trial demonstrates the local bridge contract, not full-course success or a formal hard-deadline guarantee.
 
 ```bash
 source scripts/environment.sh
@@ -117,3 +121,10 @@ python3 scripts/verify_frozen_scene.py
 ```
 
 Each new trial snapshots the launch configuration, hardware configuration and task budget table. Raw protocol, live events, jobs, CPU measurements and clock pairs stay together under ignored `artifacts/live-bridge`. Socket/shared-clock files live under /tmp. Historical raw characterization CSVs are preserved. Scene geometry is unchanged. Commit and push remain manual.
+
+
+## Current policy/RSU preview
+
+The latest bounded preview is `artifacts/live-bridge/rsu-policy-8x-01`, using the current vehicle thresholds (46.2 / 45.6 °C), the replaceable FIFO policy at maximum DVFS and 25 RSUs. It travels 11.010419 m in 26.580 s of active simulation and passes one checkpoint, with no navigation abort. The 8x host-playback GIF is used in the README. [Current validation](figures/current-bridge/validation.json) checks 32,658 common clock pairs, 1,627 sealed jobs, 1,366 selected dependency edges, 1,355 exact output-release events and zero unresolved selected inputs or validation errors. There are 1,621 modeled completed jobs; the remaining newly queued/running jobs are retained as incomplete at the requested distance cutoff.
+
+Cooling occupied 21.092 s (79.353%) of this active interval, with 41 entries and 40 exits; the final cooling interval is truncated by shutdown. Actual host rendering load changes the measured per-job CPU samples used for budget selection, so this presentation run is not a controlled performance comparison against the preceding headless trials. Maximum frequency remains the baseline; no thermal optimization was enabled. All 71 unit tests pass.
