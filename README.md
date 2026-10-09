@@ -6,7 +6,7 @@ This is a **personal project**, driven by my interest in real-time systems and r
 
 The map is **inspired by the overall shape of the Formula 1 Monaco circuit**. Its dimensions and details are adapted for this simulation. In the default scene, one moving vehicle visits 19 checkpoints and the finish; 19 static blue server cabinets with antennas mark edge locations.
 
-The current implementation includes extracted task parameters, explicit job dependencies, A7/A15 compute and thermal models, and a local FIFO baseline coupled to one running Nav2 stack through a 1 ms lockstep bridge. Comparing additional scheduling algorithms and enabling edge offloading are the next steps.
+The current implementation includes extracted task parameters, explicit job dependencies, A7/A15 compute and thermal models, and a local FIFO baseline coupled to one running Nav2 stack through a 1 ms lockstep bridge. The next step is to compare baseline scheduling algorithms; edge offloading is a later extension.
 
 ## Circuit dimensions
 
@@ -14,33 +14,27 @@ The current implementation includes extracted task parameters, explicit job depe
 
 ![Metric circuit map](docs/figures/metric-map/circuit-dimensions.png)
 
-## Complete navigation run
+## Live FIFO bridge preview
 
-**4× playback - displayed four times faster than the recorded run.**
+**6× host-recording playback — displayed six times faster than the recording.** The visible clock shows simulation time; the bridge pauses physics while real callbacks calculate.
 
-Compact GIF (approximately 13.5 MB), retaining the full start-to-finish interval. Actual Gazebo footage: approximately 0.75 m behind the vehicle on the left, and a fixed overview on the right.
+One red vehicle uses local ready FIFO on a modeled **A7 + A15**, with **1 ms** shared physics/hardware steps and a **2 s** rolling Gantt. The rear-following camera is approximately 0.75 m behind the vehicle; the fixed overview and live per-core temperatures are shown alongside it.
 
-Verified single-vehicle mission: **20/20 ordered targets**, **353.9 s** mission wall time and **zero recoveries**. This recording predates the live scheduling bridge.
+Ambient and initial core temperatures are **45 °C**, with **Tmax = 46.2 °C** and **Tbalance = 45.8 °C**. Ordinary idle powers are **0.05 / 0.15 W** for A7/A15; cooling powers are separately **0.005 / 0.015 W**. Pink bands indicate whole-device cooling. Cooling withholds new computation results and commands; Gazebo's actuator and physics continue with the last applied motor command.
 
-![Complete run at four times playback speed](docs/media/dual-view-4x.gif)
+![Live FIFO bridge, per-core temperatures and actual vehicle movement at 6× host playback](docs/media/live-fifo-6x.gif)
 
-## Initial FIFO scheduling example
+This bounded preview travels **11.006 m** in **25.011 s** of active simulation, passing one checkpoint with zero recoveries and no navigation abort. It intentionally stops at the distance target. Validation checked **31,085** matching physics/hardware steps, **3,117** actual jobs, **2,372** selected precedence edges and **2,501** live thermal samples, with **zero validation errors**. All **47 unit tests** pass.
 
-**Standalone model replay.** This Gantt shows a short initial interval on the vehicle's A7 and A15, using the selected 95%-ECDF execution budgets. Children wait for their selected parents to finish. This replay runs independently of the navigation footage above. The live bridge has its own applied scheduling evidence below.
+## Applied local scheduling
 
-![Initial local FIFO replay detail](docs/figures/task-fifo/local-fifo-detail.png)
+Jobs arrive from actual Nav2 callback entries; nominal periods are scheduler metadata, rather than synthetic release generators. Selected parents must finish before a child starts. Ready FIFO chooses the core that has been idle longest. Real callbacks calculate on the host, while their modeled Q95 budgets determine when results can be released.
 
-[Full 0.586 s Gantt](docs/figures/task-fifo/local-fifo-gantt.png) · [Selected job DAG](docs/figures/task-fifo/selected-job-dag.svg) · [Task model and equations](docs/task-execution.en.md)
+![First two seconds of the applied live FIFO schedule](docs/figures/live-bridge/applied-gantt.png)
 
-## Live local scheduling bridge
+The local FIFO bridge is implemented and validated for this preview. **The next goal is to compare baseline scheduling algorithms** on the same route and modeled hardware, using common measurements and checking their effects on navigation. Edge offloading remains a later extension.
 
-One red vehicle produces jobs from actual Nav2 callback entries. Its modeled processor has one A7 and one A15. Ready FIFO selects the core that has been idle longest; selected parents must complete before a child starts. Real calculation holds simulation time, while Q95 execution budgets, output delivery and whole-device thermal suspension run on the common **0.001 s** clock. The live Gantt uses **2 s** windows alongside the rear-following camera and fixed overview.
-
-A **30 s** active trial verified **36,078** matching physics/hardware steps, **1,944** actual jobs and **1,680** selected dependency edges, with no validation errors. The vehicle traveled **11.49 m** without a navigation abort in that interval. This is a bounded bridge test; full-lap completion under the live scheduler is still unverified. Pink regions are whole-device cooling.
-
-![Applied live FIFO schedule](docs/figures/live-bridge/applied-gantt.png)
-
-[Bridge semantics, limitations and reproduction](docs/live-bridge.en.md) · [Validation results](docs/figures/live-bridge/validation.json)
+[Bridge semantics and reproduction](docs/live-bridge.en.md) · [Validation results](docs/figures/live-bridge/validation.json) · [Task model](docs/task-execution.en.md) · [Earlier standalone FIFO replay](docs/figures/task-fifo/local-fifo-detail.png)
 
 ## Main tools
 

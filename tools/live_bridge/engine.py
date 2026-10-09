@@ -1,7 +1,8 @@
 """Incremental local FIFO model driven exclusively by observed callback entries."""
 from dataclasses import dataclass,field
 from dataclasses import replace
-import math
+import math,json
+from pathlib import Path
 from tools.abstract_compute.hardware import load_platform
 from tools.abstract_compute.thermal import ThermalModel
 from tools.abstract_compute.power import PowerModel
@@ -30,10 +31,12 @@ class LiveJob:
     publications:int=0
 
 class LiveEngine:
-    def __init__(self,vehicle_count=1,step_ns=1_000_000):
+    def __init__(self,vehicle_count=1,step_ns=1_000_000,platform_path=None):
         if step_ns not in (1_000_000,10_000_000):raise ValueError('Supported common lattices are 1 ms and 10 ms')
         self.step_ns=step_ns;self.dt=step_ns/1e9;self.tick=0
-        self.tasks=load_tasks();self.devices=load_platform(device_classes=('vehicle',)*vehicle_count)
+        platform_path=Path(platform_path) if platform_path is not None else Path(__file__).resolve().parents[2]/'config/abstract_compute.json'
+        self.platform_config=json.loads(platform_path.read_text())
+        self.tasks=load_tasks();self.devices=load_platform(platform_path,device_classes=('vehicle',)*vehicle_count)
         for d in self.devices.values():d.thermal_spec=replace(d.thermal_spec,control_epoch_s=self.dt)
         self.thermal={i:ThermalModel(d) for i,d in self.devices.items()}
         for m in self.thermal.values():m.validate_idle_recovery()
@@ -104,7 +107,10 @@ class LiveEngine:
                     j.remaining=max(0.,j.remaining-rate*self.dt)
             temp=self.thermal[did].evolve_temperature_c(self.thermal[did].temperature_vector_c(),powers,self.dt)
             for value,core in zip(temp,device.cores.values()):core.temperature_c=float(value)
-            if self.tick%10==0:self.samples.append(dict(tick=self.tick+1,device_id=did,temperature_c=list(map(float,temp)),power_w=powers,cooling=self.cooling[did]))
+            if self.tick%10==0:
+                sample=dict(tick=self.tick+1,device_id=did,temperature_c=list(map(float,temp)),power_w=powers,cooling=self.cooling[did])
+                self.samples.append(sample)
+                if self.event_sink:self.event_sink(dict(kind='thermal',**sample))
         self.tick+=1
         # Guards precede output release at a coincident completion/cooling tick.
         for did,device in self.devices.items():

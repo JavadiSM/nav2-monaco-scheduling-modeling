@@ -9,7 +9,7 @@ from tools.live_bridge.viewer import TITLE
 
 def main():
     p=argparse.ArgumentParser();p.add_argument('--trial',type=Path,required=True);p.add_argument('--record',action='store_true');a=p.parse_args();trial=a.trial.resolve();out=trial/'views';out.mkdir(parents=True,exist_ok=True)
-    owned=[];handles=[];recorder=None;result={'scheduler_coupled_to_robot':True,'playback':'4x host recording; simulation clock remains visible','completed':False}
+    owned=[];handles=[];recorder=None;result={'scheduler_coupled_to_robot':True,'playback':'6x host recording; simulation clock remains visible','completed':False}
     def start(cmd,label):
         f=(out/(label+'.log')).open('w');handles.append(f);proc=subprocess.Popen(cmd,cwd=ROOT,stdout=f,stderr=subprocess.STDOUT,start_new_session=True);owned.append(proc);return proc
     try:
@@ -55,7 +55,7 @@ def main():
                 time.sleep(.25)
             cmd=['ffmpeg','-y','-hide_banner','-loglevel','warning']
             for label,size in (('chase','1600x900'),('overview','1600x900'),('gantt','1280x720')):cmd+=['-thread_queue_size','512','-f','x11grab','-framerate','3','-window_id',ids[label],'-video_size',size,'-i',os.environ['DISPLAY']]
-            graph="[0:v]setpts=PTS-STARTPTS,scale=640:360[c];[1:v]setpts=PTS-STARTPTS,scale=640:360[o];[2:v]setpts=PTS-STARTPTS[g];[c][o]vstack[left];[left][g]hstack,scale=1440:540,drawtext=text='LIVE bridge | 4x host playback':x=8:y=8:fontsize=18:fontcolor=white:box=1:boxcolor=black@0.8,setpts=PTS/4,split[a][b];[a]palettegen=max_colors=128:stats_mode=single[p];[b][p]paletteuse=new=1:dither=bayer:bayer_scale=4"
+            graph="[0:v]setpts=PTS-STARTPTS,scale=640:360[c];[1:v]setpts=PTS-STARTPTS,scale=640:360[o];[2:v]setpts=PTS-STARTPTS[g];[c][o]vstack[left];[left][g]hstack,scale=1440:540,drawtext=text='LIVE bridge | 6x host playback':x=8:y=8:fontsize=18:fontcolor=white:box=1:boxcolor=black@0.8,setpts=PTS/6,split[a][b];[a]palettegen=max_colors=128:stats_mode=single[p];[b][p]paletteuse=new=1:dither=bayer:bayer_scale=4"
             cmd+=['-filter_complex_threads','1','-filter_complex',graph,'-r','12','-fps_mode','cfr','-loop','0',str(out/'live-three-view.gif')]
             recorder=start(cmd,'capture');time.sleep(.5)
             if recorder.poll() is not None:raise RuntimeError('Three-view capture did not start')
@@ -67,6 +67,11 @@ def main():
         if recorder:
             recorder.send_signal(signal.SIGINT);recorder.wait(timeout=60)
             if recorder.returncode not in (0,255):raise RuntimeError('Capture failed')
+            # Capture has ended; release rendering resources during GIF processing.
+            for proc in owned:
+                if proc is not recorder and proc.poll() is None:
+                    try:os.killpg(proc.pid,signal.SIGINT)
+                    except ProcessLookupError:pass
             from PIL import Image
             with Image.open(out/'live-three-view.gif') as im:
                 result['size']=im.size;frames=0
@@ -77,8 +82,8 @@ def main():
                     except EOFError:break
                 result['frames']=frames
                 if frames<2:raise RuntimeError('Capture has fewer than two frames')
-            target=ROOT/'artifacts/videos/live-fifo-single-4x.gif';target.parent.mkdir(parents=True,exist_ok=True)
-            # The capture already has 4x host timing; compression preserves that speed.
+            target=ROOT/'artifacts/videos/live-fifo-single-6x.gif';target.parent.mkdir(parents=True,exist_ok=True)
+            # The capture already has 6x host timing; compression preserves that speed.
             with (out/'compression.log').open('w') as log:
                 subprocess.run([sys.executable,str(ROOT/'scripts/compress_publication_gif.py'),str(out/'live-three-view.gif'),'--output',str(target),'--speed','1','--width','1440','--fps','12','--colors','96','--dither','none'],stdout=log,stderr=subprocess.STDOUT,check=True,timeout=150)
             metadata=target.with_suffix('.json');result['compression']=json.loads(metadata.read_text())

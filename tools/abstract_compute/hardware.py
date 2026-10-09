@@ -72,10 +72,10 @@ class Core:
     thermal_capacitance_j_per_k: float = .1
     ambient_resistance_k_per_w: float = 5.
     reference_temperature_c: float = 35.
-    initial_temperature_c: float = 55.
-    temperature_c: float = 55.
-    max_temperature_c: float = 55.6
-    balance_temperature_c: float = 55.45
+    initial_temperature_c: float = 45.
+    temperature_c: float = 45.
+    max_temperature_c: float = 46.2
+    balance_temperature_c: float = 45.45
     thermal_forced_idle: bool = False
 
     @property
@@ -126,12 +126,15 @@ class ThermalSpec:
     coupling_base_conductance_range_w_per_k: tuple[float, float]
     coupling_distance_attenuation: float
     control_epoch_s: float
+    initial_temperature_c: Optional[float] = None
 
     @property
     def thermal_epoch_s(self):
         return self.thermal_epoch_ms / 1000.
 
     def __post_init__(self):
+        if self.initial_temperature_c is not None and not math.isfinite(self.initial_temperature_c):
+            raise ValueError('Initial temperature must be finite')
         if self.balance_temperature_c >= self.max_temperature_c:
             raise ValueError('Tbalance must be strictly below Tmax')
         if not (0 < self.control_epoch_s <= self.thermal_epoch_s):
@@ -177,6 +180,7 @@ def load_platform(path=None, *, device_classes=('vehicle', 'server')):
     types = {name: CoreType.from_dict(cfg) for name, cfg in data['core_types'].items()}
     devices = {}
     spec = ThermalSpec(**data['thermal'])
+    initial = spec.ambient_temperature_c if spec.initial_temperature_c is None else spec.initial_temperature_c
     rng = random.Random(data['physical_seed'])
     for device_id, name in enumerate(device_classes):
         cfg = data['device_classes'][name]
@@ -192,8 +196,8 @@ def load_platform(path=None, *, device_classes=('vehicle', 'server')):
                                   thermal_capacitance_j_per_k=rng.uniform(*ctype.thermal_capacitance_range_j_per_k),
                                   ambient_resistance_k_per_w=rng.uniform(*ctype.ambient_resistance_range_k_per_w),
                                   reference_temperature_c=spec.reference_temperature_c,
-                                  initial_temperature_c=spec.ambient_temperature_c,
-                                  temperature_c=spec.ambient_temperature_c,
+                                  initial_temperature_c=initial,
+                                  temperature_c=initial,
                                   max_temperature_c=spec.max_temperature_c,
                                   balance_temperature_c=spec.balance_temperature_c)
         devices[device_id] = Processor(device_id, name, cores, spec, rng.uniform(*spec.coupling_base_conductance_range_w_per_k))

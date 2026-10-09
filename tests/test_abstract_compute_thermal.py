@@ -1,6 +1,9 @@
 """Power equations, coupled RC physics and device-wide thermal recovery."""
 from dataclasses import replace
 import math
+import json
+import tempfile
+from pathlib import Path
 import unittest
 import numpy as np
 
@@ -11,6 +14,15 @@ from tools.abstract_compute.thermal_scheduler import ThermalScheduler
 
 
 class ThermalTests(unittest.TestCase):
+    def hot_platform(self):
+        devices=load_platform()
+        for device in devices.values():
+            device.thermal_spec=replace(device.thermal_spec,ambient_temperature_c=55.,max_temperature_c=55.6,balance_temperature_c=55.45)
+            for core in device.cores.values():
+                core.initial_temperature_c=core.temperature_c=55.
+                core.max_temperature_c=55.6;core.balance_temperature_c=55.45
+        return devices
+
     def test_seeded_physical_realizations_stay_in_ranges(self):
         a, b = load_platform(), load_platform()
         for did, device in a.items():
@@ -21,6 +33,23 @@ class ThermalTests(unittest.TestCase):
                 self.assertTrue(low <= core.thermal_capacitance_j_per_k <= high)
                 low, high = core.core_type.ambient_resistance_range_k_per_w
                 self.assertTrue(low <= core.ambient_resistance_k_per_w <= high)
+
+    def test_initial_temperature_is_independent_of_ambient_and_reset(self):
+        data=json.loads((Path(__file__).resolve().parents[1]/'config/abstract_compute.json').read_text())
+        data['thermal']['ambient_temperature_c']=40.
+        data['thermal']['initial_temperature_c']=55.
+        with tempfile.TemporaryDirectory() as folder:
+            config=Path(folder)/'hardware.json';config.write_text(json.dumps(data))
+            device=load_platform(config)[0]
+        self.assertEqual(device.thermal_spec.ambient_temperature_c,40.)
+        self.assertEqual([c.temperature_c for c in device.cores.values()],[55.,55.])
+        model=ThermalModel(device)
+        power=[c.core_type.idle_power_w for c in device.cores.values()]
+        relaxed=model.evolve_temperature_c([55.,55.],power,.01)
+        self.assertTrue(np.all(relaxed<55.))
+        for core,value in zip(device.cores.values(),relaxed):core.temperature_c=float(value)
+        device.reset()
+        self.assertEqual([c.temperature_c for c in device.cores.values()],[55.,55.])
 
     def test_active_power_voltage_frequency_and_temperature(self):
         cores = load_platform()[0].cores
@@ -55,7 +84,7 @@ class ThermalTests(unittest.TestCase):
             self.assertTrue(np.all(np.linalg.eigvalsh(model.B) > 0))
 
     def test_current_cooling_can_reach_balance_and_bad_power_is_rejected(self):
-        for device in load_platform().values():
+        for device in self.hot_platform().values():
             eq = ThermalModel(device).validate_idle_recovery()
             self.assertTrue(np.all(eq < 55.45))
             for core in device.cores.values():
@@ -64,7 +93,7 @@ class ThermalTests(unittest.TestCase):
                 ThermalModel(device).validate_idle_recovery()
 
     def test_entire_device_pauses_and_resumes_without_losing_work(self):
-        runtime = ThermalScheduler(load_platform())
+        runtime = ThermalScheduler(self.hot_platform())
         results = runtime.run([Job(1, 3600, 0, 1), Job(2, 3600, 0, 0)])
         starts = [e for e in runtime.cooling_events if e['kind'] == 'cooling_start' and e['device_id'] == 0]
         ends = [e for e in runtime.cooling_events if e['kind'] == 'cooling_end' and e['device_id'] == 0]
@@ -91,7 +120,7 @@ class ThermalTests(unittest.TestCase):
             self.assertEqual(round(event['time_s'] * 1e9) % 5_000_000, 0)
 
     def test_other_device_keeps_executing_during_cooling(self):
-        runtime = ThermalScheduler(load_platform())
+        runtime = ThermalScheduler(self.hot_platform())
         results = runtime.run([Job(1, 3600, 0, 1), Job(2, 80, 1, 0, dvfs_level_id=0)])
         self.assertAlmostEqual(results[1]['finish_s'], .1, places=10)
         first = runtime.cooling_events[:2]

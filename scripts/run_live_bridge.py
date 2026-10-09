@@ -6,16 +6,21 @@ ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
 from tools.live_bridge.broker import runtime_paths
 def main():
-    p=argparse.ArgumentParser();p.add_argument('--seconds',type=float,default=30);p.add_argument('--output',type=Path);p.add_argument('--gui',action='store_true');p.add_argument('--views',action='store_true');p.add_argument('--record',action='store_true');a=p.parse_args()
+    p=argparse.ArgumentParser();p.add_argument('--seconds',type=float,default=30);p.add_argument('--distance',type=float,help='Stop after this actual active-interval odometry distance (m), with --seconds as the maximum.');p.add_argument('--output',type=Path);p.add_argument('--gui',action='store_true');p.add_argument('--views',action='store_true');p.add_argument('--record',action='store_true');a=p.parse_args()
+    if a.distance is not None and a.distance<=0:p.error('--distance must be positive')
     out=(a.output or ROOT/'artifacts/live-bridge'/time.strftime('%Y%m%d-%H%M%S')).resolve()
     if out.exists() and any(out.iterdir()):raise SystemExit('Choose an empty output directory to preserve earlier evidence')
     out.mkdir(parents=True,exist_ok=True)
     ps=subprocess.check_output(['ps','-eo','args'],text=True)
     if any(('gz sim -s' in line or 'gz sim -r -s' in line or 'ros2 launch' in line) and 'ps -eo' not in line for line in ps.splitlines()):raise SystemExit('A simulation is already active')
     config=json.loads((ROOT/'config/live_bridge.json').read_text());(out/'trial-config.json').write_text(json.dumps(config,indent=2)+'\n');count=config['vehicle_count']
-    owned=[];handles=[];result={'output':str(out),'requested_sim_s':a.seconds,'scheduler_coupled_to_robot':True,'completed':False}
+    (out/'hardware-config.json').write_text((ROOT/'config/abstract_compute.json').read_text())
+    owned=[];handles=[];result={'output':str(out),'requested_sim_s':a.seconds,'requested_distance_m':a.distance,'scheduler_coupled_to_robot':True,'completed':False}
     def start(cmd,name):
         log=(out/(name+'.log')).open('w');handles.append(log);proc=subprocess.Popen(cmd,cwd=ROOT,stdout=log,stderr=subprocess.STDOUT,start_new_session=True);owned.append(proc);return proc
+    def terminate_trial(signum,frame):
+        raise KeyboardInterrupt(f'Trial interrupted by signal {signum}')
+    signal.signal(signal.SIGTERM,terminate_trial)
     try:
         # The broker creates the clock/socket before launch, but Gazebo must exist before its first step.
         sockpath,clock=runtime_paths(out);clock.write_bytes(bytes(32))
@@ -47,6 +52,12 @@ def main():
                     missions.append(start(cmd,color+'-mission'))
                 sent=True
             if not (out/'armed').exists() and any(m.poll() is not None for m in missions):raise RuntimeError('A mission failed during initialization; inspect its report')
+            if a.distance is not None and (out/'armed').exists() and not (out/'stop-requested.json').exists():
+                try:distance=json.loads((out/'distance-progress.json').read_text())
+                except (FileNotFoundError,json.JSONDecodeError):distance={}
+                if distance.get('distance_m',{}).get('0',0)>=a.distance:
+                    request={'reason':'requested odometry distance reached','target_m':a.distance,'observation':distance}
+                    tmp=out/'stop-requested.tmp';tmp.write_text(json.dumps(request)+'\n');tmp.replace(out/'stop-requested.json')
             if time.monotonic()>deadline:raise RuntimeError('Trial exceeded bounded host timeout')
             time.sleep(.5)
         if broker.returncode:raise RuntimeError('Bridge rejected the trial; inspect broker.log')
@@ -54,7 +65,7 @@ def main():
         result['simulation_completed']=True
         if presentation and presentation.wait(timeout=180):raise RuntimeError('Three-view presentation failed')
         result['completed']=True
-        result['stop_reason']='intentional simulation-time limit'
+        result['stop_reason']=json.loads((out/'trace.json').read_text()).get('stop_reason','simulation-time limit')
         result['end_of_trial_monotonic_ns']=time.monotonic_ns()
     except BaseException as ex:result['error']=str(ex);raise
     finally:

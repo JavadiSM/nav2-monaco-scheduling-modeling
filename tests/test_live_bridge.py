@@ -50,7 +50,7 @@ class LiveBridgeTests(unittest.TestCase):
 
     def test_device_cooling_holds_both_cores_and_recovers(self):
         m=LiveEngine(1,step_ns=1_000_000);a=m.arrive(0,'planning_request');b=m.arrive(0,'control_iteration');m.stage(a);m.stage(b)
-        for c in m.devices[0].cores.values():c.temperature_c=c.max_temperature_c+.001
+        for c in m.devices[0].cores.values():c.temperature_c=c.max_temperature_c+.1
         m.advance();self.assertTrue(m.cooling[0]);remaining=[m.jobs[j].remaining for j in (a,b)]
         m.advance();self.assertEqual(remaining,[m.jobs[j].remaining for j in (a,b)])
         for c in m.devices[0].cores.values():self.assertTrue(c.thermal_forced_idle)

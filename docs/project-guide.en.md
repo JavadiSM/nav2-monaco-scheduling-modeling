@@ -97,7 +97,7 @@ The scheduling inputs are now [extracted parameters](extracted-parameters.en.md)
 
 ## Independent virtual compute validation
 
-The [standalone heterogeneous compute model](abstract-compute.en.md) has configurable Cortex-A7/A15 operating points, one A7 plus one A15 per vehicle, and two of each per server. Its independent scheduler supports readiness, per-core serial execution and device-wide thermal cooling with retained work. Power and temperature are modeled without energy reporting or aging. The extracted task budgets and selected job graph now feed a standalone local FIFO replay. Live ROS result gating and offloading remain separate future integration steps.
+The [standalone heterogeneous compute model](abstract-compute.en.md) has configurable Cortex-A7/A15 operating points, one A7 plus one A15 per vehicle, and two of each per server. Its independent scheduler supports readiness, per-core serial execution and device-wide thermal cooling with retained work. Power and temperature are modeled without energy reporting or aging. The extracted task budgets and selected job graph now feed a standalone local FIFO replay. The [live bridge](live-bridge.en.md) now applies local FIFO budgets and result gating to actual Nav2 arrivals; offloading remains a future step.
 
 Run `python3 scripts/validate_abstract_compute.py` for tests and `python3 scripts/demo_abstract_compute.py` for the synthetic power/cooling demonstration. The [metric circuit map](figures/metric-map/circuit-dimensions.png) and [endpoint coordinates](evidence/metric-map-locations.csv) support subsequent coverage design.
 

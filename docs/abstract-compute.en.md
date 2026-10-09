@@ -35,7 +35,7 @@ Level IDs are zero based. Default assignment selects level 4. Frequency and volt
 
 Each endpoint samples independent per-core capacitance/resistance and a chip coupling coefficient in [0.07, 0.11] W/K. A fixed `physical_seed` makes a hardware realization reproducible for comparisons. Core coordinates describe normalized floorplan cells; they are unrelated to the circuit coordinates in metres.
 
-Ambient temperature is 55 C, leakage reference temperature is 35 C, Tmax is 55.6 C and Tbalance is 55.45 C. The thermal base epoch is 0.1 s and the control period is 0.005 s. Cooling power is distinct from ordinary idle power.
+Current ambient temperature is 45 C; each core starts at 45 C through the separate `initial_temperature_c` parameter. The leakage reference temperature is 35 C, Tmax is 46.2 C and Tbalance is 45.8 C. The thermal base epoch is 0.1 s and the control period is 0.005 s. Cooling power is distinct from ordinary idle power.
 
 ## CPU timing and dispatch
 
@@ -80,7 +80,7 @@ When any core reaches its maximum at a control tick, **every core on that endpoi
 
 The guard samples temperatures every 0.005 s, so Tmax is a trigger threshold, not a continuously enforced hard cap: a small overshoot may occur before the next tick. The model does not clamp temperatures to conceal this effect.
 
-An equilibrium check rejects cooling settings that cannot reach Tbalance. With the selected seeded realization, all-cooling equilibria are approximately 55.0475/55.0709 C on the vehicle and 55.0472/55.0475/55.0670/55.0664 C on the server. They are below 55.45 C. Total cooling power is 0.020 W for a vehicle and 0.040 W for a server.
+An equilibrium check rejects cooling settings that cannot reach Tbalance. With the selected seeded realization, all-cooling equilibria are approximately 45.0475/45.0709 C on the vehicle and 45.0472/45.0475/45.0670/45.0664 C on the server. They are below 45.8 C. Total cooling power is 0.020 W for a vehicle and 0.040 W for a server.
 
 ## Validation and demonstration
 
@@ -94,7 +94,7 @@ python3 scripts/render_metric_map.py
 
 Validation covers 22 tests, including 4,000 seeded random jobs, analytically known execution times, gap reservations, readiness and priority, serial and parallel execution, active/idle/cooling power, a closed-form single-core RC solution, coupled-matrix invariants, device-wide pause/recovery, preservation of work and independence of endpoints. The saved test result is `docs/evidence/abstract-compute-validation.json`.
 
-The demo completes 3 synthetic jobs. Vehicle A15 work needs 1.0 s of active CPU time and finishes at virtual time 12.975 s; vehicle A7 work needs 2.25 s of active CPU time and finishes at 17.915 s because of cooling. The server test job finishes at 0.1 s while the vehicle is cooling. There are 65 vehicle cooling entries and 65 recoveries. These numbers validate the standalone model and are not robot mission performance measurements.
+The retained standalone demo below used ambient/initial 55 C, Tmax 55.6 C and Tbalance 55.45 C. The current [live bridge trial](live-bridge.en.md) uses the settings above. That earlier demo completes 3 synthetic jobs. Vehicle A15 work needs 1.0 s of active CPU time and finishes at virtual time 12.975 s; vehicle A7 work needs 2.25 s of active CPU time and finishes at 17.915 s because of cooling. The server test job finishes at 0.1 s while the vehicle is cooling. There are 65 vehicle cooling entries and 65 recoveries. These numbers validate the standalone model and are not robot mission performance measurements.
 
 ![DVFS, power, temperature and execution segments](figures/abstract-compute/hardware-power-cooling.png)
 

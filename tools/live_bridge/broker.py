@@ -12,8 +12,9 @@ def runtime_paths(out):
 class Broker:
     def __init__(self,out,seconds,vehicles=None,bootstrap_s=None):
         self.out=Path(out).resolve();self.out.mkdir(parents=True,exist_ok=True)
-        self.config=json.loads((Path(__file__).resolve().parents[2]/'config/live_bridge.json').read_text())
-        vehicles=vehicles or self.config['vehicle_count'];self.seconds=seconds;self.engine=LiveEngine(vehicles,self.config['step_ns']);self.dt=self.engine.dt;self.limit=round((seconds+self.config['bootstrap_sim_s'])/self.dt);self.bootstrap=round((self.config['bootstrap_sim_s'] if bootstrap_s is None else bootstrap_s)/self.dt)
+        config_file=self.out/'trial-config.json'
+        self.config=json.loads((config_file if config_file.exists() else Path(__file__).resolve().parents[2]/'config/live_bridge.json').read_text())
+        vehicles=vehicles or self.config['vehicle_count'];self.seconds=seconds;self.engine=LiveEngine(vehicles,self.config['step_ns'],self.out/'hardware-config.json' if (self.out/'hardware-config.json').exists() else None);self.dt=self.engine.dt;self.limit=round((seconds+self.config['bootstrap_sim_s'])/self.dt);self.bootstrap=round((self.config['bootstrap_sim_s'] if bootstrap_s is None else bootstrap_s)/self.dt)
         self.sockpath,self.clockpath=runtime_paths(self.out)
         # Keep an already mapped clock file nonempty while attaching the broker.
         self.clockfile=self.clockpath.open('r+b' if self.clockpath.exists() else 'w+b')
@@ -22,6 +23,7 @@ class Broker:
         self.server=socket.socket(socket.AF_UNIX,socket.SOCK_SEQPACKET);self.server.bind(self.sockpath);self.server.listen(256);self.server.setblocking(False)
         self.selector=selectors.DefaultSelector();self.selector.register(self.server,selectors.EVENT_READ)
         self.clients={};self.producers={};self.expected_commands=[0]*vehicles;self.last_activity=time.monotonic();self.armed=False;self.stop=False
+        self.stop_reason='simulation-time limit';self.stop_request=None
         self.rows=(self.out/'protocol.jsonl').open('w',buffering=1);self.failure=None
         self.live=(self.out/'live-events.jsonl').open('w',buffering=1)
         self.engine.event_sink=self.live_event
@@ -116,6 +118,8 @@ class Broker:
         start=time.monotonic();last_progress=start;last_report=-1
         try:
             while (not self.armed or self.engine.tick<self.limit) and not self.stop:
+                if (self.out/'stop-requested.json').exists():
+                    self.stop_request=json.loads((self.out/'stop-requested.json').read_text());self.stop_reason=self.stop_request['reason'];break
                 events=self.selector.select(.0005)
                 for key,_ in events:
                     if key.fileobj is self.server:
@@ -160,7 +164,7 @@ class Broker:
         for j in self.engine.jobs.values():
             row=asdict(j);row['parents']=sorted(j.parents);row['assumed_wcet_s']=self.engine.tasks[j.task].budget_s
             jobs.append(row)
-        report={'schema':1,'step_s':self.engine.dt,'clock':'SIM','policy':'ready FIFO / oldest idle core / local only','job_source':'actual callback entry','completion':'first externally visible phase after full assumed WCET budget','origin_tick':self.origin_tick,'race_seconds':(self.engine.tick-self.origin_tick)*self.engine.dt if self.origin_tick is not None else 0.,'sim_seconds':self.engine.tick*self.engine.dt,'host_seconds':host_s,'failure':self.failure,'stats':self.stats,'jobs':jobs,'events':self.engine.events,'thermal':self.engine.samples,'config':self.config,'hardware':{d:[{'core_id':c,'type':v.core_type.name,'frequency_mhz':v.dvfs_level().frequency_mhz,'voltage_v':v.dvfs_level().voltage_v,'performance_eta':v.core_type.performance_eta} for c,v in p.cores.items()] for d,p in self.engine.devices.items()}}
+        report={'schema':1,'step_s':self.engine.dt,'clock':'SIM','policy':'ready FIFO / oldest idle core / local only','job_source':'actual callback entry','completion':'first externally visible phase after full assumed WCET budget','origin_tick':self.origin_tick,'race_seconds':(self.engine.tick-self.origin_tick)*self.engine.dt if self.origin_tick is not None else 0.,'sim_seconds':self.engine.tick*self.engine.dt,'host_seconds':host_s,'failure':self.failure,'stop_reason':self.stop_reason,'stop_request':self.stop_request,'hardware_configuration':self.engine.platform_config,'stats':self.stats,'jobs':jobs,'events':self.engine.events,'thermal':self.engine.samples,'config':self.config,'hardware':{d:[{'core_id':c,'type':v.core_type.name,'frequency_mhz':v.dvfs_level().frequency_mhz,'voltage_v':v.dvfs_level().voltage_v,'performance_eta':v.core_type.performance_eta} for c,v in p.cores.items()] for d,p in self.engine.devices.items()}}
         (self.out/'trace.json').write_text(json.dumps(report,indent=2)+'\n')
 def main():
     p=argparse.ArgumentParser();p.add_argument('--output',required=True);p.add_argument('--seconds',type=float,default=30);p.add_argument('--vehicles',type=int);p.add_argument('--bootstrap',type=float);a=p.parse_args()

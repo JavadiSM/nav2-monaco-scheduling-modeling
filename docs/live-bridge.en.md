@@ -86,7 +86,7 @@ $$\boldsymbol\theta_{n+1}=\boldsymbol\theta_\infty+
  e^{-A^{-1}B\Delta}(\boldsymbol\theta_n-\boldsymbol\theta_\infty),\qquad
  \boldsymbol\theta_\infty=T_a\mathbf 1+B^{-1}\mathbf p.$$
 
-At any core temperature >= 55.6 degrees C, the **entire vehicle device** suspends both modeled cores. It resumes when every core is <= 55.45 degrees C. Ambient is 55 degrees C. Cooling power is 0.005 W for A7 and 0.015 W for A15; total device cooling power is 0.020 W. Normal idle powers are 0.05 W and 0.15 W. Thermal guards precede output delivery at coincident ticks, with at most one step of threshold-crossing quantization.
+At any core temperature >= 46.2 degrees C, the **entire vehicle device** suspends both modeled cores. It resumes when every core is <= 45.8 degrees C. Ambient is 45 degrees C; both cores start at 45 degrees C. These are independent parameters. Cooling power is 0.005 W for A7 and 0.015 W for A15; total device cooling power is 0.020 W. Normal idle powers are 0.05 W and 0.15 W. Thermal guards precede output delivery at coincident ticks, with at most one step of threshold-crossing quantization.
 
 Suspended jobs retain their remaining work. Their outputs, including final actuation from unbudgeted framework paths, are held while the device cools. The bridge issues no forced stop, zero command or vehicle shutdown for thermal reasons. Gazebo keeps evolving with its previously applied command. Ordinary Nav2 safety behavior remains active.
 
@@ -100,9 +100,9 @@ These are modeled temperatures and instantaneous powers, not laptop sensor measu
 
 ## Live presentation
 
-Three windows display the unchanged rear-following camera (approximately 0.75 m behind the vehicle), the fixed circuit overview, and the applied live Gantt. The scheduler window has two lanes, A7 and A15, and **2 s** windows: 0–2, 2–4, and so on. Bars grow from actual `start`, `budget_complete` and cooling events, rather than a prerecorded schedule. The current common simulation time is shown below the chart. Rendering polls at 100 ms host intervals; it does not change the 1 ms scheduling/physics step.
+Three windows display the unchanged rear-following camera (approximately 0.75 m behind the vehicle), the fixed circuit overview, and the applied live Gantt. The scheduler window has two lanes, A7 and A15, and **2 s** windows: 0–2, 2–4, and so on. Bars grow from actual `start`, `budget_complete` and cooling events, rather than a prerecorded schedule. The current common simulation time is shown below the chart, and each core's current modeled temperature is displayed beside its lane. Temperatures come directly from the applied RC model through live thermal samples. A sample for both cores is emitted every 10 model steps (0.010 s); the guards and thermal integration still run every 0.001 s. Rendering polls at 100 ms host intervals; it does not change the 1 ms scheduling/physics step.
 
-The local recording combines the two camera views on the left and the live Gantt on the right. It is labeled **4× host-recording playback**. The visible simulation clock is the experiment time; fourfold host playback does not imply fourfold simulation time when real computation pauses physics.
+The local recording combines the two camera views on the left and the live Gantt on the right. It is labeled **6× host-recording playback**. The visible simulation clock is the experiment time; sixfold host playback does not imply sixfold simulation time when real computation pauses physics.
 
 ![Real Gazebo views and the live scheduler](figures/live-bridge/three-view.png)
 
@@ -110,26 +110,33 @@ The launcher reads `vehicle_color` in `config/live_bridge.json`; red, blue, whit
 
 ## Retained verification trial
 
-The retained trial is `artifacts/live-bridge/single-1ms-live-01`. It advances **30 s after the common start**, plus 6.078 s of initialization: 36.078 s total simulation time in 220.832 host seconds. All six checked Nav2 lifecycle nodes were active. Action acceptance and initial hardware dispatch share tick 6078. The trial ends intentionally at its time limit; the mission was still running and its shutdown report contains `Interrupted.`, rather than a full-lap success.
+The retained trial is `artifacts/live-bridge/single-45c-max46p2-balance45p8-11m-01`. It advances **25.011 s after the common start**, plus 6.074 s of initialization: 31.085 s total simulation time in 282.493 host seconds. All six checked Nav2 lifecycle nodes were active. Action acceptance and initial hardware dispatch share tick 6074. The run stops intentionally when active-interval planar odometry reaches 11 m. The mission shutdown report contains `Interrupted.` because this is a distance-bounded preview, rather than a full-lap test.
 
 | Check | Result |
 | --- | ---: |
-| Matching physics/hardware tick pairs | 36,078 |
-| Actual-entry jobs | 1,944 |
-| Modeled completions | 1,942 |
-| FIFO / oldest-idle assignments checked | 1,943 |
-| Actual staging/readiness times checked | 1,943 |
-| Quantized completed compute budgets checked | 1,942 |
-| Selected precedence edges checked | 1,680 |
-| Path installation jobs with planner parent | 48 |
-| Planning jobs with BT goal parent | 49 |
-| DDS source-interval bindings | 311 |
-| Equivalent payload / goal UUID bindings | 97 |
-| Unresolved or external input lookups | 66 |
-| Whole-device cooling entries / exits | 117 / 117 |
+| Matching physics/hardware tick pairs | 31,085 |
+| Actual-entry jobs | 3,117 |
+| Modeled completions | 3,111 |
+| FIFO / oldest-idle assignments checked | 3,113 |
+| Actual staging/readiness times checked | 3,113 |
+| Quantized completed compute budgets checked | 3,113 |
+| Selected precedence edges checked | 2,372 |
+| Path installation jobs with planner parent | 99 |
+| Planning jobs with BT goal parent | 99 |
+| DDS source-interval bindings | 483 |
+| Equivalent payload / goal UUID bindings | 198 |
+| Unresolved or external input lookups | 92 |
+| Live per-core thermal samples matched to model | 2,501 |
+| Whole-device cooling entries / exits | 46 / 45 |
 | Validation errors | 0 |
 
-The actual vehicle traveled **11.489 m**, with 0 reported recoveries and 1 ordered targets passed before cutoff. There was no navigation-abort or transform error during this retained interval. The bridge recorded **655 moving odometry intervals entirely within whole-device cooling**: withholding computation output does not force the car to stop. Counts at the finite cutoff differ because one job had not started and another had not finished; incomplete jobs remain in the raw trace.
+The vehicle traveled **11.005907 m**, passed 1 ordered checkpoint, and reported 0 recoveries. No navigation-abort or transform error was observed during this interval. All 47 unit tests pass; the frozen scene check verifies 12 unchanged files.
+
+Whole-device cooling occupied **13.620 s (54.46%)** of the active interval. The trial ends during its last cooling interval, explaining the one unmatched cooling entry. The sampled temperature peaks were **45.8598 °C / 46.2043 °C** for A7/A15; the final samples were 45.6501 °C / 46.0109 °C. Tmax is checked every 1 ms, so a small threshold overshoot can occur before cooling starts. The hardware snapshot's standalone `control_epoch_s` is overridden by the live step; `thermal_guard_period_s` in the validation report records the effective value.
+
+The bridge recorded **357 moving odometry intervals entirely within cooling**. This is actual Gazebo movement under the previously applied command. The bridge gates Nav2 results and final `/cmd_vel` publication; it does not replace the Gazebo DiffDrive actuator or wheel/contact dynamics with virtual CPU jobs. The actuator retains its last target when a new command is withheld. Counts at the finite cutoff differ because some jobs remain staged, queued or unfinished; they are retained in the trace.
+
+An earlier 55 °C ambient / 55.6 °C Tmax trial spent 87.94% of its active interval cooling. Under those settings, the ordinary-idle A15 equilibrium was approximately 55.709 °C, already above Tmax. Ambient, initial temperature and thresholds are independent configuration fields in the current model. Ordinary idle and cooling retain their distinct powers.
 
 The unresolved/external lookups have no asserted predecessor. The verified edges therefore cover the selected bindings implemented by this adapter, not a claim of complete causal provenance for every ROS/TF/framework input. All 11 primary task families appear in the completed-job table.
 
@@ -149,17 +156,17 @@ Close an existing simulation first. From the repository in WSL:
 ```bash
 source scripts/environment.sh
 python3 scripts/build_live_bridge.py
-python3 scripts/run_live_bridge.py --seconds 30 --views --record
+python3 scripts/run_live_bridge.py --seconds 90 --distance 11 --views --record
 # Use the output directory printed by the runner:
 python3 scripts/analyze_live_bridge.py artifacts/live-bridge/<trial-directory>
 python3 -m unittest discover -s tests
 python3 scripts/verify_frozen_scene.py
 ```
 
-`--seconds` is the active interval after initialization and the common start. Bootstrap lasts at least 6 s of simulation and continues until the six checked Nav2 lifecycle nodes, the mission client and any requested views are ready. The barrier then holds physics until the real action is accepted and its first BT job is staged. The hardware begins from its configured initial state at that origin. `--gui` opens one camera; `--views` opens all three without recording; omit both for a headless run. Finite runs intentionally end ongoing missions and close their owned windows.
+`--seconds` bounds the active interval after initialization and the common start. `--distance 11` requests a clean stop after the observer records at least 11 m of active-interval planar odometry; polling can cause a small distance overshoot. Bootstrap lasts at least 6 s of simulation and continues until the six checked Nav2 lifecycle nodes, the mission client and any requested views are ready. The barrier then holds physics until the real action is accepted and its first BT job is staged. The hardware begins from its configured initial state at that origin. `--gui` opens one camera; `--views` opens all three without recording; omit both for a headless run. Finite runs intentionally end ongoing missions and close their owned windows.
 
 Runtime libraries are preloaded only into the Nav2 container, not into Gazebo or the physical ROS/Gazebo bridge. Baseline scene hashes remain unchanged. A derived copy of the original single-car world changes only its physics step to 0.001 s. Native application rate/smoother timing uses simulation time; DDS and OS clocks remain host clocks. The shared broker/Gazebo clock is acknowledged each step; ordinary ROS clock and sensor subscriptions are asynchronous. Lifecycle bond timeouts are disabled and BT action-acknowledgement timeout is 1000 ms in this launch so host-time infrastructure watchdogs tolerate deliberately paused simulation. Navigation/controller and geometric settings retain their baseline values.
 
-Build outputs remain under ignored `build/live-bridge`. Per-trial traces, logs, mission outcomes, observations, live events and clock pairs stay together under ignored `artifacts/live-bridge/<trial-directory>`. A configuration snapshot accompanies each trial. Socket and shared-clock files use a unique identifier under `/tmp`, because the Windows-mounted filesystem does not support these Unix sockets. The selected local movie is `artifacts/videos/live-fifo-single-4x.gif`; older captures and diagnostic trials are in ignored `.private` archives. Original task-characterization evidence remains under `artifacts/task-profiling`.
+Build outputs remain under ignored `build/live-bridge`. Per-trial traces, logs, mission outcomes, observations, live events and clock pairs stay together under ignored `artifacts/live-bridge/<trial-directory>`. Separate launch and hardware configuration snapshots accompany each trial, including the initial temperature, ambient, thresholds and inactive powers. Analysis uses that recorded hardware snapshot. Socket and shared-clock files use a unique identifier under `/tmp`, because the Windows-mounted filesystem does not support these Unix sockets. The selected local movie is `artifacts/videos/live-fifo-single-6x.gif`; older captures and diagnostic trials are in ignored `.private` archives. Original task-characterization evidence remains under `artifacts/task-profiling`.
 
-The bridge implements the local scheduling experiment. It does not establish deterministic replay of every native thread: unbudgeted infrastructure, host wait completion, the 0.002 s host quiet window and transport service order can still affect actual arrivals. It is not an instruction-level CPU/RTOS emulator. Deadline assignment, new policies and edge offloading remain separate work. A short trial validates bridge invariants and observed movement; it does not establish full-lap success under every workload.
+The local FIFO bridge is implemented for the measured task families. The next experiment compares baseline scheduling policies with the same route and hardware model. The bridge implements the local scheduling experiment. It does not establish deterministic replay of every native thread: unbudgeted infrastructure, host wait completion, the 0.002 s host quiet window and transport service order can still affect actual arrivals. It is not an instruction-level CPU/RTOS emulator. Deadline assignment, new policies and edge offloading remain separate work. A short trial validates bridge invariants and observed movement; it does not establish full-lap success under every workload.

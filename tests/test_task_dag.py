@@ -7,8 +7,15 @@ from tools.abstract_compute import load_platform, GraphJob, DependencyFIFOSchedu
 ROOT = Path(__file__).resolve().parents[1]
 
 class TaskGraphTests(unittest.TestCase):
-    def run_jobs(self, jobs, **kwargs):
-        s = DependencyFIFOScheduler(load_platform())
+    def run_jobs(self, jobs, *, thermal_headroom_c=None, **kwargs):
+        devices=load_platform()
+        if thermal_headroom_c is not None:
+            for device in devices.values():
+                ambient=device.thermal_spec.ambient_temperature_c
+                for core in device.cores.values():
+                    core.max_temperature_c=ambient+thermal_headroom_c
+                    core.balance_temperature_c=ambient+.75*thermal_headroom_c
+        s = DependencyFIFOScheduler(devices)
         return s, {j['job_id']: j for j in s.run_graph(jobs, **kwargs)}
 
     def test_child_and_join_wait_for_all_parents(self):
@@ -42,7 +49,7 @@ class TaskGraphTests(unittest.TestCase):
         self.assertEqual(self.run_jobs([])[1],{})
 
     def test_thermal_pause_blocks_child_until_actual_finish(self):
-        s,r=self.run_jobs([GraphJob(0,'hot',3600),GraphJob(1,'child',.1,parents=(0,))],max_time_s=60)
+        s,r=self.run_jobs([GraphJob(0,'hot',3600),GraphJob(1,'child',.1,parents=(0,))],max_time_s=60,thermal_headroom_c=.6)
         self.assertTrue(s.cooling_events)
         self.assertGreater(r[0]['finish_s'],r[0]['metrics']['time_s'])
         self.assertGreaterEqual(r[1]['start_s'],r[0]['finish_s'])

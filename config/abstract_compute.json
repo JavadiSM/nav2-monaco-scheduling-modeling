@@ -92,17 +92,18 @@
   },
   "scheduler_policy": "ready_hi_then_plan_rank_nonpreemptive",
   "thermal": {
-    "ambient_temperature_c": 55.0,
+    "ambient_temperature_c": 45.0,
     "reference_temperature_c": 35.0,
-    "max_temperature_c": 55.6,
-    "balance_temperature_c": 55.45,
+    "max_temperature_c": 46.2,
+    "balance_temperature_c": 45.8,
     "thermal_epoch_ms": 100.0,
     "coupling_base_conductance_range_w_per_k": [
       0.07,
       0.11
     ],
     "coupling_distance_attenuation": 0.8,
-    "control_epoch_s": 0.005
+    "control_epoch_s": 0.005,
+    "initial_temperature_c": 45.0
   },
   "physical_seed": 81371,
   "thermal_configuration_status": "confirmed"

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Record actual ROS odometry/commands with their simulation clock, without publishing."""
-import argparse,csv,time
+import argparse,csv,time,math
 from pathlib import Path
 import rclpy
 from rclpy.node import Node
@@ -13,13 +13,21 @@ import json
 
 def main():
     parser=argparse.ArgumentParser();parser.add_argument('--output',type=Path,required=True);parser.add_argument('--ready-file',type=Path);parser.add_argument('--vehicles',type=int,default=1);args=parser.parse_args()
-    rclpy.init();node=Node('live_bridge_observer');sim=[0];subs=[]
+    rclpy.init();node=Node('live_bridge_observer');sim=[0];subs=[];previous={};distances={};last_write=[0.]
     with args.output.open('w',newline='',buffering=1) as output:
         writer=csv.writer(output);writer.writerow(['host_mono_ns','sim_ns','device','topic','x','y','vx','wz'])
         subs.append(node.create_subscription(Clock,'/clock',lambda m:sim.__setitem__(0,m.clock.sec*10**9+m.clock.nanosec),10))
         for device,color in enumerate(('red','blue','white','green')[:args.vehicles]):
             ns='' if color=='red' else '/'+color
-            def odom(m,d=device):writer.writerow([time.monotonic_ns(),m.header.stamp.sec*10**9+m.header.stamp.nanosec,d,'odom',m.pose.pose.position.x,m.pose.pose.position.y,m.twist.twist.linear.x,m.twist.twist.angular.z])
+            def odom(m,d=device):
+                stamp=m.header.stamp.sec*10**9+m.header.stamp.nanosec;p=(m.pose.pose.position.x,m.pose.pose.position.y)
+                writer.writerow([time.monotonic_ns(),stamp,d,'odom',*p,m.twist.twist.linear.x,m.twist.twist.angular.z])
+                if args.ready_file and (args.ready_file.parent/'armed').exists():
+                    if d in previous:distances[d]=distances.get(d,0.)+math.dist(previous[d],p)
+                    previous[d]=p
+                    if time.monotonic()-last_write[0]>=.1:
+                        target=args.output.parent/'distance-progress.json';tmp=target.with_suffix('.tmp');tmp.write_text(json.dumps({'sim_ns':stamp,'distance_m':distances})+'\n');tmp.replace(target);last_write[0]=time.monotonic()
+
             def command(m,d=device):writer.writerow([time.monotonic_ns(),sim[0],d,'cmd_vel','','',m.linear.x,m.angular.z])
             subs.append(node.create_subscription(Odometry,ns+'/odom',odom,qos_profile_sensor_data))
             for topic in ('cmd_vel_nav','cmd_vel_smoothed','cmd_vel'):

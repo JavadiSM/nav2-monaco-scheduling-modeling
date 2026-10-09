@@ -16,7 +16,7 @@ def main():
     p=argparse.ArgumentParser();p.add_argument('trial',type=Path);p.add_argument('--output',type=Path,default=ROOT/'docs/figures/live-bridge');args=p.parse_args()
     trial=args.trial.resolve();out=args.output;out.mkdir(parents=True,exist_ok=True)
     t=json.loads((trial/'trace.json').read_text());jobs={j['job_id']:j for j in t['jobs']};dt=t['step_s'];step_ns=round(dt*1e9);end=round(t['sim_seconds']/dt)
-    tasks=load_tasks();devices=load_platform(device_classes=('vehicle',)*len(t['hardware']));errors=[];intervals={d:[] for d in devices};opened={}
+    tasks=load_tasks();devices=load_platform(trial/'hardware-config.json' if (trial/'hardware-config.json').exists() else None,device_classes=('vehicle',)*len(t['hardware']));errors=[];intervals={d:[] for d in devices};opened={}
     for e in t['events']:
         if e['kind']=='cooling_start':opened[e['device_id']]=e['tick']
         elif e['kind']=='cooling_end':intervals[e['device_id']].append((opened.pop(e['device_id']),e['tick']))
@@ -87,8 +87,25 @@ def main():
         for r in csv.DictReader(f):
             if r['topic']=='odom':odom[int(r['device'])].append((int(r['sim_ns'])/1e9,float(r['x']),float(r['y'])))
     moving={d:sum(a[0]<b[0] and math.dist(a[1:],b[1:])>1e-4 and any(x*dt<=a[0] and b[0]<=y*dt for x,y in intervals[d]) for a,b in zip(rows,rows[1:])) for d,rows in odom.items()}
+    live_thermal=[]
+    live_file=trial/'live-events.jsonl'
+    if live_file.exists():
+        with live_file.open() as stream:
+            for line in stream:
+                row=json.loads(line)
+                if row.get('kind')=='thermal':
+                    row.pop('kind');live_thermal.append(row)
+    if live_thermal and live_thermal!=t['thermal']:errors.append('Live per-core thermal samples differ from the applied model')
     summary={'trial':str(trial.relative_to(ROOT)),'step_s':dt,'sim_s':t['sim_seconds'],'host_s':t['host_seconds'],'jobs':len(jobs),'modeled_completions':sum(completed.values()),'completed_counts':dict(completed),'clock_pairs_verified':clock_rows,'dependency_edges_verified':deps,'dependency_types':dict(edge_types),'readiness_times_verified':readiness_checks,'selected_path_parents_verified':path_bindings,'selected_BT_goal_parents_verified':goal_bindings,'budgets_verified':budgets,'FIFO_assignments_verified':assignments,'validation_errors':errors,'cooling_entries':sum(e['kind']=='cooling_start' for e in t['events']),'cooling_exits':sum(e['kind']=='cooling_end' for e in t['events']),'exact_DDS_source_bindings':bindings['DDS_source_interval',True],'payload_or_UUID_bindings':bindings['equivalent_payload_or_goal_UUID',True],'unresolved_or_external_inputs':sum(n for (method,found),n in bindings.items() if not found),'moving_odometry_segments_during_cooling':moving,'trace_sha256':hashlib.sha256((trial/'trace.json').read_bytes()).hexdigest(),'outcome':'Intentional finite trial; no full-lap completion is claimed.'}
     summary['common_start']=common_start
+    summary['thermal_configuration']=t.get('hardware_configuration',{}).get('thermal',devices[0].thermal_spec.__dict__)
+    summary['thermal_guard_period_s']=dt
+    summary['live_thermal_samples_verified']=len(live_thermal) if live_thermal==t['thermal'] else 0
+    summary['stop_reason']=t.get('stop_reason','simulation-time limit')
+    summary['cooling_time_s']={d:sum(b-a for a,b in spans)*dt for d,spans in intervals.items()}
+    summary['cooling_fraction']={d:value/t['race_seconds'] for d,value in summary['cooling_time_s'].items()}
+    summary['peak_sampled_temperature_c']={d:[max(r['temperature_c'][c] for r in t['thermal'] if r['device_id']==d) for c in (0,1)] for d in devices}
+    summary['last_sampled_temperature_c']={d:next(r['temperature_c'] for r in reversed(t['thermal']) if r['device_id']==d) for d in devices}
     summary['vehicles']={}
     for color in ('red','blue','white','green')[:len(devices)]:
         r=json.loads((trial/(color+'-mission.json')).read_text());summary['vehicles'][color]={k:r.get(k) for k in ('passed','action_status','nav2_error_code','odometry_distance_m','ordered_targets_passed','navigation_recoveries','scheduler','error')}
@@ -124,7 +141,7 @@ def main():
         rows=[r for r in t['thermal'] if r['device_id']==d];time=[(r['tick']-(origin or 0))*dt for r in rows]
         for c,style in ((0,'--'),(1,'-')):axes[0].plot(time,[r['temperature_c'][c] for r in rows],style,color=colors[d],lw=.7,label=f'{("Red","Blue","White","Green")[d]} / {("A7","A15")[c]}')
         axes[1].plot(time,[sum(r['power_w']) for r in rows],color=colors[d],lw=.7)
-    for value,label in ((55.6,'Tmax'),(55.45,'Tbalance')):axes[0].axhline(value,color='#555',ls=':',label=label)
+    for value,label in ((devices[0].thermal_spec.max_temperature_c,'Tmax'),(devices[0].thermal_spec.balance_temperature_c,'Tbalance'),(devices[0].thermal_spec.ambient_temperature_c,'Ambient')):axes[0].axhline(value,color='#555',ls=':',label=label)
     axes[0].set(ylabel='Modeled temperature (°C)',title='Modeled thermal guards and instantaneous device power');axes[0].legend(ncol=5,fontsize=7);axes[1].set(xlabel='Time since common start (s)' if origin is not None else 'Simulation / hardware time (s)',ylabel='Modeled power (W)');fig.savefig(out/'thermal.png',dpi=150);plt.close(fig)
     points=[r for rows in odom.values() for r in rows] or [(0.,0.,0.)]
     bounds=dict(xlim=(min(r[1] for r in points)-.25,max(r[1] for r in points)+.25),ylim=(min(r[2] for r in points)-.25,max(r[2] for r in points)+.25))

@@ -12,10 +12,12 @@ FONT='/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'
 class LiveGantt:
     def __init__(self,config=None):
         cfg=config or {};self.dt=cfg.get('step_ns',1_000_000)/1e9;self.vehicles=cfg.get('vehicle_count',1);self.window_s=cfg.get('gantt_window_s',2.);self.color=cfg.get('vehicle_color','red')
+        self.thermal=cfg.get('thermal',{});self.temperatures={d:[self.thermal.get('initial_temperature_c',self.thermal.get('ambient_temperature_c',45.))]*2 for d in range(self.vehicles)}
         self.jobs={};self.segments=[];self.active={};self.cooling={};self.cooling_spans=[];self.tick=0;self.origin=None;self.ended=False
     def consume(self,e):
         self.tick=e['tick'];kind=e['kind'];jid=e.get('job_id')
-        if kind=='common_start':self.origin=e['origin_tick']
+        if kind=='thermal':self.temperatures[e['device_id']]=e['temperature_c']
+        elif kind=='common_start':self.origin=e['origin_tick']
         elif kind=='arrival':self.jobs[jid]=dict(task=e['task'],device=e['device_id'])
         elif kind=='start':
             self.jobs[jid]['core']=e['core_id'];self.active[jid]=self.tick
@@ -42,6 +44,7 @@ class LiveGantt:
         if window is None:window=self.window_s*math.floor(max(0.,elapsed-(1e-9 if self.ended else 0.))/self.window_s)
         g.text((28,18),'LIVE LOCAL FIFO  |  SINGLE VEHICLE  |  A7 + A15',fill='#172b43',font=font(27))
         g.text((28,59),f'Window {window:.0f}–{window+self.window_s:.0f} s   |   Actual arrivals · Q95 budgets · {self.dt:.3f} s steps',fill='#506078',font=font(18))
+        g.text((28,84),f'Modeled core temperatures  |  Ambient {self.thermal.get("ambient_temperature_c",45.):g} °C  |  Initial {self.thermal.get("initial_temperature_c",self.thermal.get("ambient_temperature_c",45.)):g} °C  |  Tmax {self.thermal.get("max_temperature_c",46.2):g} °C',fill='#506078',font=font(14))
         lanes=2*self.vehicles;x0,x1,y0,h=155,1248,115,376/(2*self.vehicles)
         base=0 if self.origin is None else self.origin
         x=lambda tick:x0+((tick-base)*self.dt-window)/self.window_s*(x1-x0)
@@ -49,6 +52,8 @@ class LiveGantt:
             y=y0+lane*h;g.rectangle((x0,y+2,x1,y+h-2),fill='#ffffff')
             car=self.color.title() if self.vehicles==1 else ('Red','Blue','White','Green')[lane//2]
             g.text((20,y+h/2-12),car+' / '+('A7' if lane%2==0 else 'A15'),fill=('#b52b32','#1a65b4','#606b76','#24874a')[lane//2],font=font(23))
+            temperature=self.temperatures[lane//2][lane%2]
+            g.text((20,y+h/2+18),f'{temperature:.2f} °C',fill='#33445a',font=font(20))
         for n in range(11):
             px=x0+n*(x1-x0)/10;g.line((px,y0-10,px,y0+lanes*h),fill='#dfe5ec');g.text((px-12,y0+lanes*h+10),f'{window+n*self.window_s/10:.1f}',fill='#566277',font=font(16))
         def span(a,b,lane,color,height=1):
@@ -69,7 +74,7 @@ class LiveGantt:
 
 def main():
     p=argparse.ArgumentParser();p.add_argument('--trial',type=Path,required=True);a=p.parse_args();a.trial.mkdir(parents=True,exist_ok=True)
-    root=tk.Tk();root.title(TITLE);root.geometry('1280x720');root.resizable(False,False);label=tk.Label(root,borderwidth=0);label.pack();cfg=json.loads((a.trial/'trial-config.json').read_text()) if (a.trial/'trial-config.json').exists() else {};model=LiveGantt(cfg);stream=[None];last=[None];last_window=[0]
+    root=tk.Tk();root.title(TITLE);root.geometry('1280x720');root.resizable(False,False);label=tk.Label(root,borderwidth=0);label.pack();cfg=json.loads((a.trial/'trial-config.json').read_text()) if (a.trial/'trial-config.json').exists() else {};thermal_file=a.trial/'hardware-config.json';cfg['thermal']=json.loads(thermal_file.read_text())['thermal'] if thermal_file.exists() else {};model=LiveGantt(cfg);stream=[None];last=[None];last_window=[0]
     def draw():
         if stream[0] is None:
             try:stream[0]=(a.trial/'live-events.jsonl').open()
