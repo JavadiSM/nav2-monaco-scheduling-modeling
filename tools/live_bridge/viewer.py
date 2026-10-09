@@ -12,7 +12,7 @@ FONT='/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'
 class LiveGantt:
     def __init__(self,config=None):
         cfg=config or {};self.dt=cfg.get('step_ns',1_000_000)/1e9;self.vehicles=cfg.get('vehicle_count',1);self.window_s=cfg.get('gantt_window_s',2.);self.color=cfg.get('vehicle_color','red')
-        self.thermal=cfg.get('thermal',{});self.temperatures={d:[self.thermal.get('initial_temperature_c',self.thermal.get('ambient_temperature_c',45.))]*2 for d in range(self.vehicles)}
+        self.budget_label='Mean / observed-max budgets' if cfg.get('schema_version',1)>=2 else 'Historical Q95 budgets';self.thermal=cfg.get('thermal',{});self.temperatures={d:[self.thermal.get('initial_temperature_c',self.thermal.get('ambient_temperature_c',45.))]*2 for d in range(self.vehicles)}
         self.jobs={};self.segments=[];self.active={};self.cooling={};self.cooling_spans=[];self.tick=0;self.origin=None;self.ended=False
     def consume(self,e):
         self.tick=e['tick'];kind=e['kind'];jid=e.get('job_id')
@@ -43,7 +43,7 @@ class LiveGantt:
         elapsed=0. if self.origin is None else max(0.,(self.tick-self.origin)*self.dt)
         if window is None:window=self.window_s*math.floor(max(0.,elapsed-(1e-9 if self.ended else 0.))/self.window_s)
         g.text((28,18),'LIVE LOCAL FIFO  |  SINGLE VEHICLE  |  A7 + A15',fill='#172b43',font=font(27))
-        g.text((28,59),f'Window {window:.0f}–{window+self.window_s:.0f} s   |   Actual arrivals · Q95 budgets · {self.dt:.3f} s steps',fill='#506078',font=font(18))
+        g.text((28,59),f'Window {window:.0f}–{window+self.window_s:.0f} s   |   Actual arrivals · {self.budget_label} · {self.dt:.3f} s steps',fill='#506078',font=font(18))
         g.text((28,84),f'Modeled core temperatures  |  Ambient {self.thermal.get("ambient_temperature_c",45.):g} °C  |  Initial {self.thermal.get("initial_temperature_c",self.thermal.get("ambient_temperature_c",45.)):g} °C  |  Tmax {self.thermal.get("max_temperature_c",46.2):g} °C',fill='#506078',font=font(14))
         lanes=2*self.vehicles;x0,x1,y0,h=155,1248,115,376/(2*self.vehicles)
         base=0 if self.origin is None else self.origin

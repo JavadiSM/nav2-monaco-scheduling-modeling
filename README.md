@@ -14,7 +14,9 @@ The current implementation includes extracted task parameters, explicit job depe
 
 ![Metric circuit map](docs/figures/metric-map/circuit-dimensions.png)
 
-## Live FIFO bridge preview
+## Recorded FIFO bridge preview
+
+This recording shows the earlier Q95 budget experiment. The current [bridge](docs/live-bridge.en.md) holds results until the complete host calculation is measured and the selected mean/observed-maximum budget finishes. All existing task families have HI criticality; synthetic LO workloads are a later step.
 
 **6× host-recording playback — displayed six times faster than the recording.** The visible clock shows simulation time; the bridge pauses physics while real callbacks calculate.
 
@@ -28,11 +30,11 @@ This bounded preview travels **11.006 m** in **25.011 s** of active simulation, 
 
 ## Applied local scheduling
 
-Jobs arrive from actual Nav2 callback entries; nominal periods are scheduler metadata, rather than synthetic release generators. Selected parents must finish before a child starts. Ready FIFO chooses the core that has been idle longest. Real callbacks calculate on the host, while their modeled Q95 budgets determine when results can be released.
+Jobs arrive from actual Nav2 callback entries; nominal periods are scheduler metadata, rather than synthetic release generators. Selected parents must finish before a child starts. Ready FIFO chooses the core that has been idle longest. Real callbacks calculate on the host. The current bridge selects the mean reference budget when actual CPU demand is at or below the measured mean, and otherwise selects the observed maximum. Buffered results are released only after that selected budget and all parent/thermal conditions complete.
 
-![First two seconds of the applied live FIFO schedule](docs/figures/live-bridge/applied-gantt.png)
+![First two seconds of the revised live FIFO schedule](docs/figures/dual-budget-bridge/applied-gantt.png)
 
-The local FIFO bridge is implemented and validated for this preview. **The next goal is to compare baseline scheduling algorithms** on the same route and modeled hardware, using common measurements and checking their effects on navigation. Edge offloading remains a later extension.
+The revised contract passes 56 unit tests. Its 8 s active validation checks 1,033 actual jobs, 811 selected dependency edges and 666 output-release events at their selected modeled finish, with zero validation errors and zero unresolved selected input bindings. The recorded preview and revised-budget validation are reported separately in the bridge documentation. **The next goal is to compare baseline scheduling algorithms** on the same route and modeled hardware, using common measurements and checking their effects on navigation. Edge offloading remains a later extension.
 
 [Bridge semantics and reproduction](docs/live-bridge.en.md) · [Validation results](docs/figures/live-bridge/validation.json) · [Task model](docs/task-execution.en.md) · [Earlier standalone FIFO replay](docs/figures/task-fifo/local-fifo-detail.png)
 

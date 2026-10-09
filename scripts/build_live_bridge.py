@@ -9,7 +9,7 @@ def main():
     flags=subprocess.check_output(['pkg-config','--cflags','--libs','gz-transport13','gz-msgs10'],env=env,text=True).split()
     inc=Path('/opt/ros/jazzy/include');includes=['-I'+str(p) for p in [inc,*sorted(p for p in inc.iterdir() if p.is_dir()),Path('/usr/include/eigen3')]]
     commands=[['g++','-O2','-std=c++17','-pthread',str(ROOT/'tools/live_bridge/stepper.cpp'),'-o',str(out/'stepper'),*flags],
-      ['g++','-O2','-std=c++17','-pthread','-shared','-fPIC',str(ROOT/'tools/live_bridge/nav2_adapter.cpp'),'-o',str(out/'libnav2_live_bridge.so'),*includes,'-L/opt/ros/jazzy/lib','-Wl,-rpath,/opt/ros/jazzy/lib','-lrclcpp','-lrcl','-lrcutils','-ldl']]
+      ['g++','-O2','-std=c++17','-pthread','-shared','-fPIC',str(ROOT/'tools/live_bridge/nav2_adapter.cpp'),'-o',str(out/'libnav2_live_bridge.so'),*includes,'-L/opt/ros/jazzy/lib','-Wl,-rpath,/opt/ros/jazzy/lib','-lrclcpp','-lrcl','-lrcutils','-lrmw','-lrosidl_runtime_c','-ldl']]
     metadata=[]
     for cmd in commands:
         p=subprocess.run(cmd,env=env,text=True,capture_output=True)

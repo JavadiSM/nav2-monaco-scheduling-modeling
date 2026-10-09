@@ -15,6 +15,9 @@ def main():
     if any(('gz sim -s' in line or 'gz sim -r -s' in line or 'ros2 launch' in line) and 'ps -eo' not in line for line in ps.splitlines()):raise SystemExit('A simulation is already active')
     config=json.loads((ROOT/'config/live_bridge.json').read_text());(out/'trial-config.json').write_text(json.dumps(config,indent=2)+'\n');count=config['vehicle_count']
     (out/'hardware-config.json').write_text((ROOT/'config/abstract_compute.json').read_text())
+    (out/'task-parameters.json').write_text((ROOT/'docs/evidence/dual-budget-parameters.json').read_text())
+    if (ROOT/'build/live-bridge/build.json').exists():
+        (out/'adapter-build.json').write_text((ROOT/'build/live-bridge/build.json').read_text())
     owned=[];handles=[];result={'output':str(out),'requested_sim_s':a.seconds,'requested_distance_m':a.distance,'scheduler_coupled_to_robot':True,'completed':False}
     def start(cmd,name):
         log=(out/(name+'.log')).open('w');handles.append(log);proc=subprocess.Popen(cmd,cwd=ROOT,stdout=log,stderr=subprocess.STDOUT,start_new_session=True);owned.append(proc);return proc

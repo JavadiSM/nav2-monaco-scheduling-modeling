@@ -1,4 +1,6 @@
-# Local heterogeneous task execution
+# Historical standalone task replay
+
+The standalone Q95 figures below are retained historical evidence. The current live system assigns every existing task HI criticality and selects mean/observed-maximum budgets using actual CPU measurements; see the [current bridge contract](live-bridge.en.md) and [dual-budget table](evidence/dual-budget-parameters.csv).
 
 The accepted scene is frozen. Eleven primary Nav2 work units use their exact 95%-ECDF assumed WCET from 57 complete missions. The executable model schedules concrete job dependencies on the vehicle's one A7 and one A15; server templates retain two A7 and two A15. The first baseline is local, nonpreemptive ready FIFO. The replay in this document is independent of ROS. The separate [live bridge](live-bridge.en.md) now applies these budgets to actual Nav2 outputs and advances Gazebo on the same 0.001 s clock. The current bridge uses one red vehicle and a 2 s live Gantt window.
 

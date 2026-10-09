@@ -8,7 +8,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib.patches import Patch
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT))
-from tools.abstract_compute.task_model import load_tasks
+from tools.abstract_compute.task_model import load_tasks,TaskSpec
 from tools.abstract_compute.hardware import load_platform
 from tools.live_bridge.engine import TASK_NAMES
 
@@ -16,7 +16,8 @@ def main():
     p=argparse.ArgumentParser();p.add_argument('trial',type=Path);p.add_argument('--output',type=Path,default=ROOT/'docs/figures/live-bridge');args=p.parse_args()
     trial=args.trial.resolve();out=args.output;out.mkdir(parents=True,exist_ok=True)
     t=json.loads((trial/'trace.json').read_text());jobs={j['job_id']:j for j in t['jobs']};dt=t['step_s'];step_ns=round(dt*1e9);end=round(t['sim_seconds']/dt)
-    tasks=load_tasks();devices=load_platform(trial/'hardware-config.json' if (trial/'hardware-config.json').exists() else None,device_classes=('vehicle',)*len(t['hardware']));errors=[];intervals={d:[] for d in devices};opened={}
+    dual=t.get('schema',1)>=2
+    tasks=({name:TaskSpec(**row) for name,row in t['task_parameters'].items()} if dual and t.get('task_parameters') else load_tasks(trial/'task-parameters.json' if (trial/'task-parameters.json').exists() else None,dual=dual));devices=load_platform(trial/'hardware-config.json' if (trial/'hardware-config.json').exists() else None,device_classes=('vehicle',)*len(t['hardware']));errors=[];intervals={d:[] for d in devices};opened={}
     for e in t['events']:
         if e['kind']=='cooling_start':opened[e['device_id']]=e['tick']
         elif e['kind']=='cooling_end':intervals[e['device_id']].append((opened.pop(e['device_id']),e['tick']))
@@ -43,10 +44,29 @@ def main():
             if jobs[pid]['finish_tick'] is None or jobs[pid]['finish_tick']>a:errors.append('Early child '+str(j['job_id']))
         occupancy[d,c].append((a,j['finish_tick'] or end,j['job_id']))
         if b is not None:
-            budgets+=1;actual=b-a-int(prefix[d][b]-prefix[d][a]);expected=math.ceil(tasks[j['task']].execution_s(devices[d].cores[c])/dt-1e-9)
+            budgets+=1;actual=b-a-int(prefix[d][b]-prefix[d][a]);spec=tasks[j['task']];core=devices[d].cores[c];duration=(spec.reference_work(j['selected_budget_s'])/(core.dvfs_level().frequency_mhz*core.core_type.performance_eta)) if dual else spec.execution_s(core);expected=math.ceil(duration/dt-1e-9)
             if actual!=expected:errors.append(f'Budget {j["job_id"]}: {actual} != {expected}')
         f=j['finish_tick']
         if f is not None and f<end and mask[d][f]:errors.append('Completion while cooling')
+    if dual:
+        for j in jobs.values():
+            if j['staged_tick'] is None:continue
+            if j['measured_cpu_ns'] is None:errors.append('Unmeasured staged job')
+            else:
+                mode,budget,exceeded=tasks[j['task']].select_budget(j['measured_cpu_ns'])
+                if (j['budget_mode'],j['selected_budget_s'],j['observed_max_exceeded'])!=(mode,budget,exceeded):errors.append('Wrong actual-CPU budget selection')
+            if j['criticality']!='HI':errors.append('Unexpected LO task')
+            if j.get('outputs_committed') and j['real_cpu_ns']!=j['measured_cpu_ns']:errors.append('CPU measurement changed after seal')
+        sealed={e['job_id']:e for e in t['events'] if e['kind']=='actual_computation_sealed'}
+        publications=[e for e in t['events'] if e['kind']=='publication']
+        for e in t['events']:
+            if e['kind']=='input_binding' and e['source_ns']:
+                matches=[v for v in publications if v['device_id']==e['device_id'] and v['signature']==e['signature'] and v['source_begin_ns']<=e['source_ns']<=v['source_end_ns']]
+                if len(matches)==1 and matches[0]['job_id']!=e['parent_id']:errors.append('Lost exact DDS producer binding')
+            if e['kind']=='publication' and e.get('job_id'):
+                j=jobs[e['job_id']];seal=sealed.get(j['job_id'])
+                if not seal or seal['tick']>e['tick']:errors.append('Output before complete actual measurement')
+                if j['finish_tick']!=e['tick']:errors.append('Output not delivered at selected modeled finish')
     for key,rows in occupancy.items():
         rows.sort()
         if any(a[1]>b[0] for a,b in zip(rows,rows[1:])):errors.append('Core overlap '+str(key))
@@ -98,6 +118,12 @@ def main():
     if live_thermal and live_thermal!=t['thermal']:errors.append('Live per-core thermal samples differ from the applied model')
     summary={'trial':str(trial.relative_to(ROOT)),'step_s':dt,'sim_s':t['sim_seconds'],'host_s':t['host_seconds'],'jobs':len(jobs),'modeled_completions':sum(completed.values()),'completed_counts':dict(completed),'clock_pairs_verified':clock_rows,'dependency_edges_verified':deps,'dependency_types':dict(edge_types),'readiness_times_verified':readiness_checks,'selected_path_parents_verified':path_bindings,'selected_BT_goal_parents_verified':goal_bindings,'budgets_verified':budgets,'FIFO_assignments_verified':assignments,'validation_errors':errors,'cooling_entries':sum(e['kind']=='cooling_start' for e in t['events']),'cooling_exits':sum(e['kind']=='cooling_end' for e in t['events']),'exact_DDS_source_bindings':bindings['DDS_source_interval',True],'payload_or_UUID_bindings':bindings['equivalent_payload_or_goal_UUID',True],'unresolved_or_external_inputs':sum(n for (method,found),n in bindings.items() if not found),'moving_odometry_segments_during_cooling':moving,'trace_sha256':hashlib.sha256((trial/'trace.json').read_bytes()).hexdigest(),'outcome':'Intentional finite trial; no full-lap completion is claimed.'}
     summary['common_start']=common_start
+    if dual:
+        summary['budget_policy']=t['config']['budget_policy']
+        summary['selected_budget_counts']=dict(collections.Counter(j['budget_mode'] for j in jobs.values() if j['budget_mode']))
+        summary['observed_max_exceeded_jobs']=sum(j['observed_max_exceeded'] for j in jobs.values())
+        summary['sealed_computations']=len(sealed)
+        summary['outputs_at_exact_selected_finish']=sum(e['kind']=='publication' and bool(e.get('job_id')) for e in t['events'])
     summary['thermal_configuration']=t.get('hardware_configuration',{}).get('thermal',devices[0].thermal_spec.__dict__)
     summary['thermal_guard_period_s']=dt
     summary['live_thermal_samples_verified']=len(live_thermal) if live_thermal==t['thermal'] else 0
@@ -113,10 +139,10 @@ def main():
     if summary['navigation_failed']:summary['outcome']='Bridge invariant validation and navigation outcome are separate: Nav2 aborted the mission; see vehicles and the retained launch log.'
     (out/'validation.json').write_text(json.dumps(summary,indent=2)+'\n')
     with (out/'task-summary.csv').open('w',newline='') as f:
-        w=csv.writer(f,lineterminator="\n");w.writerow(['task','jobs','completed','C_ref_Q95_s','T_metadata_s','mean_release_to_finish_s','mean_actual_thread_CPU_s'])
+        w=csv.writer(f,lineterminator="\n");w.writerow(['task','jobs','completed','C_ref_HI_max_s' if dual else 'C_ref_Q95_s','T_metadata_s','mean_release_to_finish_s','mean_actual_thread_CPU_s','C_ref_LO_mean_s','criticality','LO_budget_jobs','HI_budget_jobs'])
         for name in TASK_NAMES:
             rows=[j for j in jobs.values() if j['task']==name];done=[j for j in rows if j['finish_tick'] is not None];cpu=[j['real_cpu_ns']/1e9 for j in done if j['real_cpu_ns']]
-            w.writerow([name,len(rows),len(done),tasks[name].budget_s,tasks[name].period_s,np.mean([(j['finish_tick']-j['release_tick'])*dt for j in done]),np.mean(cpu) if cpu else ''])
+            w.writerow([name,len(rows),len(done),tasks[name].budget_s,tasks[name].period_s,np.mean([(j['finish_tick']-j['release_tick'])*dt for j in done]),np.mean(cpu) if cpu else '',tasks[name].budget_lo_s,tasks[name].criticality,sum(j.get('budget_mode')=='LO' for j in rows),sum(j.get('budget_mode')=='HI' for j in rows)])
     palette={name:plt.get_cmap('tab20')(i) for i,name in enumerate(TASK_NAMES)};first=min(j['start_tick'] for j in jobs.values() if j['task']=='control_iteration' and j['start_tick'] is not None)*dt;first=origin*dt if origin is not None else first;last=first+2.
     fig,ax=plt.subplots(figsize=(14,5.5),layout='constrained')
     for d,rows in intervals.items():

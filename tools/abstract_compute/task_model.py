@@ -17,6 +17,21 @@ class TaskSpec:
     observed_interval_s: float
     reference_frequency_mhz: float
     reference_eta: float
+    criticality: str = "HI"
+    budget_lo_s: float | None = None
+    budget_hi_s: float | None = None
+
+    def reference_work(self, seconds):
+        return seconds * self.reference_frequency_mhz * self.reference_eta
+
+    def select_budget(self, actual_cpu_ns):
+        if actual_cpu_ns < 0:
+            raise ValueError("CPU demand cannot be negative")
+        lo = self.budget_s if self.budget_lo_s is None else self.budget_lo_s
+        hi = self.budget_s if self.budget_hi_s is None else self.budget_hi_s
+        actual_s = actual_cpu_ns / 1e9
+        mode = "LO" if actual_s <= lo else "HI"
+        return mode, lo if mode == "LO" else hi, actual_s > hi
 
     @property
     def work_mcycles(self):
@@ -40,8 +55,8 @@ class TaskSpec:
         return self.execution_s(core, level_id) * level.frequency_mhz * 1e6
 
 
-def load_tasks(parameters=None, model_config=None):
-    parameters = Path(parameters or ROOT / 'docs/evidence/extracted-parameters.json')
+def load_tasks(parameters=None, model_config=None, *, dual=False):
+    parameters = Path(parameters or ROOT / ('docs/evidence/dual-budget-parameters.json' if dual else 'docs/evidence/extracted-parameters.json'))
     model_config = Path(model_config or ROOT / 'config/task_execution.json')
     config = json.loads(model_config.read_text())
     reference = config['reference']
@@ -50,11 +65,15 @@ def load_tasks(parameters=None, model_config=None):
         raise ValueError('Reference frequency and performance must be finite and positive')
     tasks = {}
     for name, row in json.loads(parameters.read_text())['tasks'].items():
-        c, period = row['C_model_s'], row['T_nominal_s']
+        c, period = row['C_HI_s'] if dual else row['C_model_s'], row['T_nominal_s']
+        lo, hi = (row['C_LO_s'], row['C_HI_s']) if dual else (c, c)
+        if not (math.isfinite(lo) and math.isfinite(hi) and 0 <= lo <= hi):
+            raise ValueError('Invalid LO/HI budgets')
         if not math.isfinite(c) or c < 0 or (period is not None and (not math.isfinite(period) or period <= 0)):
             raise ValueError('Invalid task budget or period')
         tasks[name] = TaskSpec(name, row['task_id'], row['class'], c, period,
-                              row['observed_mean_inter_entry_s'], frequency, eta)
+                              row['observed_mean_inter_entry_s'], frequency, eta,
+                              row.get('criticality', 'HI'), lo, hi)
     return tasks
 
 @dataclass(frozen=True)

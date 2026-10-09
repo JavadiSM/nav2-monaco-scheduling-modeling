@@ -28,15 +28,22 @@ class LiveJob:
     core_id:int|None=None
     remaining:float=0.
     real_cpu_ns:int=0
+    outputs_committed:bool=False
     publications:int=0
+    criticality:str="HI"
+    budget_mode:str|None=None
+    selected_budget_s:float|None=None
+    selected_work_mcycles:float|None=None
+    observed_max_exceeded:bool=False
+    measured_cpu_ns:int|None=None
 
 class LiveEngine:
-    def __init__(self,vehicle_count=1,step_ns=1_000_000,platform_path=None):
+    def __init__(self,vehicle_count=1,step_ns=1_000_000,platform_path=None,*,dual_budget=True,task_parameters=None):
         if step_ns not in (1_000_000,10_000_000):raise ValueError('Supported common lattices are 1 ms and 10 ms')
         self.step_ns=step_ns;self.dt=step_ns/1e9;self.tick=0
         platform_path=Path(platform_path) if platform_path is not None else Path(__file__).resolve().parents[2]/'config/abstract_compute.json'
         self.platform_config=json.loads(platform_path.read_text())
-        self.tasks=load_tasks();self.devices=load_platform(platform_path,device_classes=('vehicle',)*vehicle_count)
+        self.dual_budget=dual_budget;self.tasks=load_tasks(task_parameters,dual=dual_budget);self.devices=load_platform(platform_path,device_classes=('vehicle',)*vehicle_count)
         for d in self.devices.values():d.thermal_spec=replace(d.thermal_spec,control_epoch_s=self.dt)
         self.thermal={i:ThermalModel(d) for i,d in self.devices.items()}
         for m in self.thermal.values():m.validate_idle_recovery()
@@ -50,7 +57,7 @@ class LiveEngine:
     def arrive(self,device,task,parents=()):
         if device not in self.devices or task not in self.tasks:raise ValueError('Unknown live device/task')
         jid=self.next_id;self.next_id+=1
-        j=LiveJob(jid,device,task,self.tick,remaining=self.tasks[task].work_mcycles)
+        j=LiveJob(jid,device,task,self.tick,remaining=0. if self.dual_budget else self.tasks[task].work_mcycles,criticality=self.tasks[task].criticality)
         self.jobs[jid]=j;self.unfinished.add(jid)
         for p in parents:self.add_parent(jid,p)
         self.event('arrival',job_id=jid,device_id=device,task=task)
@@ -66,9 +73,19 @@ class LiveEngine:
             if p==jid:raise RuntimeError('Cyclic live dependency')
             if p not in seen:seen.add(p);frontier.extend(self.jobs[p].parents)
         if parent not in j.parents:j.parents.add(parent);self.event('dependency',job_id=jid,parent_id=parent)
-    def stage(self,jid,*,dispatch=True):
+    def stage(self,jid,cpu_ns=None,*,dispatch=True):
         j=self.jobs[jid]
-        if j.status=='shadow':j.status='queued';j.staged_tick=self.tick;self.event('result_staged',job_id=jid)
+        if j.status=='shadow':
+            spec=self.tasks[j.task]
+            if self.dual_budget:
+                if cpu_ns is None:raise RuntimeError('A complete actual CPU measurement is required before staging')
+                mode,budget,exceeded=spec.select_budget(cpu_ns)
+                j.measured_cpu_ns=cpu_ns;j.budget_mode=mode;j.selected_budget_s=budget;j.observed_max_exceeded=exceeded
+            else:j.budget_mode='Q95';j.selected_budget_s=spec.budget_s
+            j.selected_work_mcycles=spec.reference_work(j.selected_budget_s);j.remaining=j.selected_work_mcycles
+            j.status='queued';j.staged_tick=self.tick
+            self.event('budget_selected',job_id=jid,criticality=j.criticality,budget_mode=j.budget_mode,actual_cpu_ns=j.measured_cpu_ns,C_LO_s=spec.budget_lo_s,C_HI_s=spec.budget_hi_s,selected_budget_s=j.selected_budget_s,selected_work_mcycles=j.selected_work_mcycles,observed_max_exceeded=j.observed_max_exceeded)
+            self.event('result_staged',job_id=jid)
         if dispatch:self.dispatch()
     def dispatch(self):
         for jid in tuple(self.unfinished):

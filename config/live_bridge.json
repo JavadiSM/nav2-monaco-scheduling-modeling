@@ -1,10 +1,10 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "step_ns": 1000000,
   "placement": "local_only",
   "policy": "ready_FIFO_oldest_idle_core_nonpreemptive",
   "arrival_policy": "actual_callback_entry",
-  "budget_policy": "measured_Q95_assumed_WCET",
+  "budget_policy": "actual_CPU_mean_LO_observed_max_HI",
   "thermal_control_epoch_s": 0.001,
   "settle_quiet_host_s": 0.002,
   "host_computation_timeout_s": 30.0,
@@ -13,5 +13,8 @@
   "vehicle_count": 1,
   "vehicle_color": "red",
   "gantt_window_s": 2.0,
-  "action_ack_timeout_ms": 1000
+  "action_ack_timeout_ms": 1000,
+  "output_policy": "buffer_until_sealed_computation_and_selected_budget_completion",
+  "task_criticality": "HI",
+  "low_criticality_tasks_enabled": false
 }
