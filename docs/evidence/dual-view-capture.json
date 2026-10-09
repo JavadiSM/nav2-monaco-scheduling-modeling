@@ -10,20 +10,34 @@
   "ordered_targets_passed": 20,
   "elapsed_mission_wall_s": 353.887,
   "navigation_recoveries": 0,
-  "frames": 2154,
-  "dimensions": [
-    1280,
-    360
-  ],
   "requested_duration_s": null,
   "mission_completed_during_clip": true,
   "server_style": "minimal_blue_cabinets_with_antennas",
   "world_sha256": "60486aef1622fc29443bb694b7232d2737c523dd141adf1aa476144073bcee64",
-  "gif_sha256": "024d82d7a32346e3b16798f9c8aa984b2c1396e3b403538668ef749cccbec315",
   "mission_evidence": "docs/evidence/dual-view-full-course-mission.json",
-  "preview_frame": 120,
-  "preview_time_s": 20,
-  "gif_duration_s": 359.0,
   "readme_playback_speed": 4,
-  "readme_playback_duration_s": 89.75
+  "readme_playback_duration_s": 89.75,
+  "source_recording": {
+    "file": "artifacts/media-archive/pre-compression-20261009/dual-view.gif",
+    "sha256": "024d82d7a32346e3b16798f9c8aa984b2c1396e3b403538668ef749cccbec315",
+    "frames": 2154,
+    "dimensions": [
+      1280,
+      360
+    ],
+    "duration_s": 359.0,
+    "preview_frame": 120,
+    "preview_time_s": 20
+  },
+  "publication_gif": {
+    "file": "docs/media/dual-view-4x.gif",
+    "sha256": "862fbdb431008883a8b139a4409cea6817a56c06a254f380356686f7ee78d54f",
+    "bytes": 13522432,
+    "frames": 898,
+    "duration_s": 89.75,
+    "dimensions": [
+      896,
+      252
+    ]
+  }
 }

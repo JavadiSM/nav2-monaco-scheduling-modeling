@@ -18,7 +18,7 @@ The current implementation includes extracted task parameters, explicit job depe
 
 **4× playback - displayed four times faster than the recorded run.**
 
-Actual Gazebo footage from start to finish: approximately 0.75 m behind the vehicle on the left, and a fixed overview on the right.
+Compact GIF (approximately 13.5 MB), retaining the full start-to-finish interval. Actual Gazebo footage: approximately 0.75 m behind the vehicle on the left, and a fixed overview on the right.
 
 Verified mission: **20/20 ordered targets**, **353.9 s** mission wall time and **zero recoveries**.
 

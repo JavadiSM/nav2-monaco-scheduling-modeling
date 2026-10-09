@@ -1,0 +1,27 @@
+{
+  "source": "artifacts/media-archive/pre-compression-20261009/dual-view.gif",
+  "source_sha256": "024d82d7a32346e3b16798f9c8aa984b2c1396e3b403538668ef749cccbec315",
+  "source_bytes": 61328324,
+  "source_frames": 2154,
+  "source_dimensions": [
+    1280,
+    360
+  ],
+  "source_duration_s": 359.0,
+  "publication_file": "docs/media/dual-view-4x.gif",
+  "publication_sha256": "862fbdb431008883a8b139a4409cea6817a56c06a254f380356686f7ee78d54f",
+  "publication_bytes": 13522432,
+  "playback_speed": 4.0,
+  "width": 896,
+  "sampled_fps": 10,
+  "palette_colors": 80,
+  "dither": "none",
+  "full_interval_preserved": true,
+  "frames": 898,
+  "duration_s": 89.75,
+  "dimensions": [
+    896,
+    252
+  ],
+  "size_reduction_percent": 77.95075567367536
+}

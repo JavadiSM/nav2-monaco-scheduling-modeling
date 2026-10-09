@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Retime final GIFs without changing or dropping their encoded image frames."""
+import argparse
 from fractions import Fraction
 import hashlib
 import json
@@ -55,42 +56,47 @@ def validate(path):
         return dict(frames=im.n_frames, duration_s=duration / 1000, dimensions=list(im.size))
 
 def main():
-    evidence = []
-    for stem in ('full-course', 'dual-view'):
-        source = ROOT / 'docs/media' / (stem + '.gif')
-        original = source.read_bytes()
-        offsets = delays(original)
-        source_stats = validate(source)
-        assert len(offsets) == source_stats['frames']
-        variants = []
-        for speed in (Fraction(1), Fraction(2), Fraction(3), Fraction(4)):
-            target = source if speed == 1 else source.with_name(f'{stem}-{float(speed):g}x.gif')
-            altered = bytearray(original)
-            elapsed_original = elapsed_new = 0
-            for offset in offsets:
-                elapsed_original += int.from_bytes(original[offset:offset+2], 'little')
-                ticks = round(Fraction(elapsed_original) / speed) - elapsed_new
-                if not 2 <= ticks <= 65535:
-                    raise ValueError('Requested speed exceeds supported GIF delay range')
-                altered[offset:offset+2] = ticks.to_bytes(2, 'little')
-                elapsed_new += ticks
-            if speed != 1:
-                target.write_bytes(altered)
-            stats = validate(target)
-            assert stats['frames'] == source_stats['frames']
-            assert stats['dimensions'] == source_stats['dimensions']
-            assert abs(stats['duration_s'] - source_stats['duration_s']/float(speed)) <= .011
-            restored = bytearray(target.read_bytes())
-            for offset in offsets:
-                restored[offset:offset+2] = original[offset:offset+2]
-            assert bytes(restored) == original, 'Encoded visual data changed'
-            variants.append(dict(speed=float(speed), file=str(target.relative_to(ROOT)), **stats,
-                actual_speed=source_stats['duration_s']/stats['duration_s'],
-                encoded_images_unchanged=True, sha256=hashlib.sha256(target.read_bytes()).hexdigest()))
-            print(f'{target.name}: {stats["frames"]} frames, {stats["duration_s"]:.2f} s', flush=True)
-        assert source.read_bytes() == original, 'Original modified'
-        evidence.append(dict(source=str(source.relative_to(ROOT)), variants=variants))
-    (ROOT/'docs/evidence/gif-speed-variants.json').write_text(json.dumps(evidence, indent=2)+'\n')
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('source', type=Path, help='Original 1x GIF')
+    parser.add_argument('--output-dir', type=Path, default=ROOT/'artifacts/gif-speed-variants')
+    args = parser.parse_args()
+    source = args.source.resolve()
+    output = args.output_dir.resolve()
+    output.mkdir(parents=True, exist_ok=True)
+    original = source.read_bytes()
+    offsets = delays(original)
+    source_stats = validate(source)
+    assert len(offsets) == source_stats['frames']
+    variants = []
+    for speed in (Fraction(1), Fraction(2), Fraction(3), Fraction(4)):
+        name = source.name if speed == 1 else f'{source.stem}-{float(speed):g}x.gif'
+        target = output/name
+        altered = bytearray(original)
+        elapsed_original = elapsed_new = 0
+        for offset in offsets:
+            elapsed_original += int.from_bytes(original[offset:offset+2], 'little')
+            ticks = round(Fraction(elapsed_original) / speed) - elapsed_new
+            if not 2 <= ticks <= 65535:
+                raise ValueError('Requested speed exceeds supported GIF delay range')
+            altered[offset:offset+2] = ticks.to_bytes(2, 'little')
+            elapsed_new += ticks
+        if target != source:
+            target.write_bytes(altered)
+        elif speed != 1:
+            raise ValueError('Output would overwrite original')
+        stats = validate(target)
+        assert stats['frames'] == source_stats['frames']
+        assert stats['dimensions'] == source_stats['dimensions']
+        assert abs(stats['duration_s'] - source_stats['duration_s']/float(speed)) <= .011
+        restored = bytearray(target.read_bytes())
+        for offset in offsets:
+            restored[offset:offset+2] = original[offset:offset+2]
+        assert bytes(restored) == original, 'Encoded visual data changed'
+        variants.append(dict(speed=float(speed), file=target.name, **stats,
+            encoded_images_unchanged=True, sha256=hashlib.sha256(target.read_bytes()).hexdigest()))
+        print(f'{target.name}: {stats["frames"]} frames, {stats["duration_s"]:.2f} s', flush=True)
+    assert source.read_bytes() == original, 'Original modified'
+    (output/'manifest.json').write_text(json.dumps(dict(source=source.name, variants=variants),indent=2)+'\n')
 
 if __name__ == '__main__':
     main()

@@ -111,20 +111,21 @@ Earlier actual Gazebo scene, before the server cabinet visual update:
 
 ![Actual Gazebo scene](media/real-scene.png)
 
-The earlier successful overview-only full-course run (before the cabinet visual update; full interval sampled at 5 fps):
-
-![Successful full-course recording](media/full-course.gif)
-
 The current full-course two-camera recording: approximately 0.75 m behind the vehicle on the left, and the original fixed overview on the right. The moving vehicle follows upstream Nav2; the offline FIFO replay below is not yet connected to robot result delivery.
 
-![Third-person and overview cameras](media/dual-view.gif)
+**4× playback — displayed four times faster than the recorded run.**
+
+![Third-person and overview cameras](media/dual-view-4x.gif)
 
 To repeat the full-course two-camera capture, with no other Gazebo run active:
 
 ```bash
 source scripts/environment.sh
 python3 scripts/record_dual_view.py --full-course --timeout 1200
+python3 scripts/compress_publication_gif.py
 ```
+
+The full-speed recording remains under ignored `artifacts/dual-view/`. Only the compact 4× GIF is published. Optional local speed variants use `python3 scripts/make_gif_speed_variants.py artifacts/dual-view/dual-view.gif`; their default output is ignored `artifacts/gif-speed-variants/`.
 
 ## Local task scheduling baseline
 

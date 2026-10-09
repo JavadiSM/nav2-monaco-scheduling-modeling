@@ -34,7 +34,7 @@ def main():
         h=(out/(name+'.log')).open('w');handles.append(h)
         p=subprocess.Popen(cmd,cwd=ROOT,stdout=h,stderr=subprocess.STDOUT,start_new_session=True)
         owned.append(p);return p
-    evidence={'world_changed':False,'capture_type':'actual_Gazebo_pixels',
+    evidence={'world_changed':False,'capture_type':'actual_Gazebo_pixels','source_gif':'artifacts/dual-view/dual-view.gif',
               'left':'rigid third-person, 0.75 m behind in vehicle local x; height offset 0.25 m',
               'right':'fixed existing overview', 'scheduler_coupled_to_robot':False,
               'note':'Camera/motion demonstration; local FIFO is separately replayed from measured tasks.'}
@@ -95,22 +95,22 @@ def main():
                 '-vf','fps=6,palettegen=stats_mode=diff','-frames:v','1',str(palette)],check=True)
             subprocess.run(['ffmpeg','-y','-hide_banner','-loglevel','error','-i',str(temporary),'-i',str(palette),
                 '-filter_complex_threads','1','-filter_complex','[0:v]fps=6[v];[v][1:v]paletteuse=dither=bayer:bayer_scale=3',
-                '-loop','0',str(media/'dual-view.gif')],check=True)
+                '-loop','0',str(out/'dual-view.gif')],check=True)
             evidence.update(full_course=True,mission_passed=True,ordered_targets_passed=report['ordered_targets_passed'],
                 elapsed_mission_wall_s=report['elapsed_wall_seconds'],navigation_recoveries=report['navigation_recoveries'])
             from PIL import Image
-            with Image.open(media/'dual-view.gif') as image:
+            with Image.open(out/'dual-view.gif') as image:
                 for frame in range(image.n_frames):image.seek(frame);image.load()
             temporary.unlink()
         else:
             mission=launch(['bash',str(ROOT/'scripts/run_monaco.sh'),'--timeout','120'],'mission')
             time.sleep(7)
             command+=['-filter_complex',views+',split[c][d];[c]palettegen=stats_mode=diff[p];[d][p]paletteuse=dither=bayer:bayer_scale=3',
-                '-loop','0',str(media/'dual-view.gif')]
+                '-loop','0',str(out/'dual-view.gif')]
             with (out/'capture.log').open('w') as log:
                 subprocess.run(command,stdout=log,stderr=subprocess.STDOUT,check=True,timeout=args.seconds+60)
         from PIL import Image
-        with Image.open(media/'dual-view.gif') as im:
+        with Image.open(out/'dual-view.gif') as im:
             evidence['frames']=im.n_frames;evidence['dimensions']=list(im.size)
             im.seek(min(120 if args.full_course else 18,im.n_frames-1));im.convert('RGB').save(media/'dual-view-frame.png')
         evidence['window_ids']=ids;evidence['requested_duration_s']=None if args.full_course else args.seconds
