@@ -130,6 +130,7 @@ class Lap(Node):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--timeout', type=float, default=1500)
+    parser.add_argument('--output', type=Path, help='Optional per-experiment report destination.')
     parser.add_argument('--limit', type=int, default=0, help='Optional initial checkpoints only, for a short check.')
     parser.add_argument('--from-checkpoint', type=int, default=0, help='Simulation test only: teleport to this checkpoint and verify subsequent targets.')
     args = parser.parse_args()
@@ -137,7 +138,7 @@ def main():
         parser.error('Checkpoint must be between 0 and 19; limit must be nonnegative.')
     project = Path(__file__).resolve().parents[1]
     scene = json.loads((project / 'scenarios/monaco/scenario.json').read_text())
-    output = project / ('artifacts/monaco-checkpoint-test.json' if args.from_checkpoint else 'artifacts/monaco-run.json')
+    output = args.output or project / ('artifacts/monaco-checkpoint-test.json' if args.from_checkpoint else 'artifacts/monaco-run.json')
     if args.from_checkpoint:
         scene['start'] = scene['checkpoints'][args.from_checkpoint - 1]
     rclpy.init()
@@ -189,16 +190,22 @@ def main():
             p.pose.position.x, p.pose.position.y = target['x'], target['y']
             p.pose.orientation.z, p.pose.orientation.w = math.sin(target['yaw'] / 2), math.cos(target['yaw'] / 2)
             goal.poses.append(p)
+        report['goal_send_mono_ns'] = time.monotonic_ns()
+        report['goal_send_epoch_ns'] = time.time_ns()
         future = node.action.send_goal_async(goal, feedback_callback=node.feedback)
         if not node.until(future.done, 15):
             raise RuntimeError('NavigateThroughPoses acknowledgement timed out.')
         handle = future.result()
         if not handle.accepted:
             raise RuntimeError('NavigateThroughPoses was rejected.')
+        report['goal_accepted_mono_ns'] = time.monotonic_ns()
+        report['goal_accepted_sim_ns'] = node.get_clock().now().nanoseconds
         print('Upstream Nav2 accepted the checkpoint mission.', flush=True)
         result = handle.get_result_async()
         if not node.until(result.done, args.timeout):
             raise RuntimeError('Course timeout.')
+        report['action_result_mono_ns'] = time.monotonic_ns()
+        report['action_result_sim_ns'] = node.get_clock().now().nanoseconds
         message = result.result()
         report['action_status'] = message.status
         report['nav2_error_code'] = int(message.result.error_code)
@@ -225,6 +232,7 @@ def main():
     finally:
         report['start_wall_time'] = start_wall_time
         report['end_wall_time'] = time.time()
+        report['end_mono_ns'] = time.monotonic_ns()
         report['elapsed_wall_seconds'] = round(time.monotonic() - start, 3)
         report['valid_lidar_messages'] = node.scans
         report['odometry_distance_m'] = sum(math.dist(a, b) for a, b in zip(node.path, node.path[1:]))
