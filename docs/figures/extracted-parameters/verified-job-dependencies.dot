@@ -1,0 +1,27 @@
+digraph G {
+graph [rankdir=TB];
+node [shape=ellipse, fontname="DejaVu Sans"];
+"job_47351_93632" [label="J5[0]\nCollision check\nC = 0.0009203 s"];
+"job_47351_93928" [label="J4[0]\nCommand input\nC = 0.0000174 s"];
+"job_47351_94634" [label="J4[1]\nCommand input\nC = 0.0000174 s"];
+"job_47351_93628" [label="tau4[0]\nVelocity timer\nC = 0.0002771 s\nT = 0.05 s"];
+"job_47351_101411" [label="J6[0]\nPath install\nC = 0.0004197 s"];
+"job_47351_93866" [label="tau1[0]\nControl / MPPI\nC = 0.0100682 s\nT = 0.05 s"];
+"job_47351_94501" [label="tau1[1]\nControl / MPPI\nC = 0.0100682 s\nT = 0.05 s"];
+"job_47351_100117" [label="J1[0]\nPlanning action\nC = 0.0490757 s"];
+"job_47351_93023" [label="J3[0]\nNoise helper\nC = 0.0047086 s"];
+"job_47351_93896" [label="J3[1]\nNoise helper\nC = 0.0047086 s"];
+"job_47351_94521" [label="J3[2]\nNoise helper\nC = 0.0047086 s"];
+"job_47351_95797" [label="J2[0]\nAMCL scan\nC = 0.0064535 s"];
+"job_47351_95199" [label="tau3[0]\nGlobal map\nC = 0.0013906 s\nT = 1 s"];
+"job_47351_92939" [label="tau5[0]\nBT tick\nC = 0.0010347 s\nT = 0.01 s"];
+"job_47351_92563" [label="tau2[0]\nLocal map\nC = 0.0014484 s\nT = 0.2 s"];
+"job_47351_92563" -> "job_47351_93866";
+"job_47351_93023" -> "job_47351_93866";
+"job_47351_92563" -> "job_47351_94501";
+"job_47351_93896" -> "job_47351_94501";
+"job_47351_93866" -> "job_47351_93896";
+"job_47351_94501" -> "job_47351_94521";
+"job_47351_93866" -> "job_47351_93928";
+"job_47351_94501" -> "job_47351_94634";
+}

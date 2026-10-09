@@ -1,0 +1,247 @@
+{
+  "campaign": "full-v2-20261009",
+  "run": "run-001",
+  "nodes": {
+    "job_47351_93632": {
+      "task": "collision_check",
+      "index": "0",
+      "pid": 47351,
+      "scope_id": 93632,
+      "unmatched_representative": true
+    },
+    "job_47351_93928": {
+      "task": "velocity_command_callback",
+      "index": "0",
+      "pid": 47351,
+      "scope_id": 93928,
+      "unmatched_representative": false
+    },
+    "job_47351_94634": {
+      "task": "velocity_command_callback",
+      "index": "1",
+      "pid": 47351,
+      "scope_id": 94634,
+      "unmatched_representative": false
+    },
+    "job_47351_93628": {
+      "task": "velocity_smoothing_tick",
+      "index": "0",
+      "pid": 47351,
+      "scope_id": 93628,
+      "unmatched_representative": true
+    },
+    "job_47351_101411": {
+      "task": "controller_path_install",
+      "index": "0",
+      "pid": 47351,
+      "scope_id": 101411,
+      "unmatched_representative": true
+    },
+    "job_47351_93866": {
+      "task": "control_iteration",
+      "index": "0",
+      "pid": 47351,
+      "scope_id": 93866,
+      "unmatched_representative": false
+    },
+    "job_47351_94501": {
+      "task": "control_iteration",
+      "index": "1",
+      "pid": 47351,
+      "scope_id": 94501,
+      "unmatched_representative": false
+    },
+    "job_47351_100117": {
+      "task": "planning_request",
+      "index": "0",
+      "pid": 47351,
+      "scope_id": 100117,
+      "unmatched_representative": true
+    },
+    "job_47351_93023": {
+      "task": "mppi_noise_generation",
+      "index": "0",
+      "pid": 47351,
+      "scope_id": 93023,
+      "unmatched_representative": false
+    },
+    "job_47351_93896": {
+      "task": "mppi_noise_generation",
+      "index": "1",
+      "pid": 47351,
+      "scope_id": 93896,
+      "unmatched_representative": false
+    },
+    "job_47351_94521": {
+      "task": "mppi_noise_generation",
+      "index": "2",
+      "pid": 47351,
+      "scope_id": 94521,
+      "unmatched_representative": false
+    },
+    "job_47351_95797": {
+      "task": "amcl_scan_callback",
+      "index": "0",
+      "pid": 47351,
+      "scope_id": 95797,
+      "unmatched_representative": true
+    },
+    "job_47351_95199": {
+      "task": "global_costmap_update",
+      "index": "0",
+      "pid": 47351,
+      "scope_id": 95199,
+      "unmatched_representative": true
+    },
+    "job_47351_92939": {
+      "task": "bt_tick",
+      "index": "0",
+      "pid": 47351,
+      "scope_id": 92939,
+      "unmatched_representative": true
+    },
+    "job_47351_92563": {
+      "task": "local_costmap_update",
+      "index": "0",
+      "pid": 47351,
+      "scope_id": 92563,
+      "unmatched_representative": false
+    }
+  },
+  "edges": [
+    {
+      "from": "job_47351_92563",
+      "to": "job_47351_93866",
+      "type": "recorded_version_dependency",
+      "source_phase_edge": {
+        "from": "e47351_92581",
+        "to": "e47351_93884",
+        "type": "recorded_version_dependency",
+        "version": 34,
+        "resource": "local_costmap",
+        "referenced_scope_id": 92565
+      }
+    },
+    {
+      "from": "job_47351_93023",
+      "to": "job_47351_93866",
+      "type": "recorded_version_dependency",
+      "source_phase_edge": {
+        "from": "e47351_93053",
+        "to": "e47351_93889",
+        "type": "recorded_version_dependency",
+        "version": 58,
+        "resource": "mppi_noise",
+        "referenced_scope_id": 93023
+      }
+    },
+    {
+      "from": "job_47351_92563",
+      "to": "job_47351_94501",
+      "type": "recorded_version_dependency",
+      "source_phase_edge": {
+        "from": "e47351_92581",
+        "to": "e47351_94504",
+        "type": "recorded_version_dependency",
+        "version": 34,
+        "resource": "local_costmap",
+        "referenced_scope_id": 92565
+      }
+    },
+    {
+      "from": "job_47351_93896",
+      "to": "job_47351_94501",
+      "type": "recorded_version_dependency",
+      "source_phase_edge": {
+        "from": "e47351_93918",
+        "to": "e47351_94509",
+        "type": "recorded_version_dependency",
+        "version": 59,
+        "resource": "mppi_noise",
+        "referenced_scope_id": 93896
+      }
+    },
+    {
+      "from": "job_47351_93866",
+      "to": "job_47351_93896",
+      "type": "recorded_trigger_dependency",
+      "source_phase_edge": {
+        "from": "e47351_93894",
+        "to": "e47351_93897",
+        "type": "recorded_trigger_dependency",
+        "version": null,
+        "resource": "mppi_noise_ready_flag",
+        "referenced_scope_id": 93892
+      }
+    },
+    {
+      "from": "job_47351_94501",
+      "to": "job_47351_94521",
+      "type": "recorded_trigger_dependency",
+      "source_phase_edge": {
+        "from": "e47351_94519",
+        "to": "e47351_94522",
+        "type": "recorded_trigger_dependency",
+        "version": null,
+        "resource": "mppi_noise_ready_flag",
+        "referenced_scope_id": 94517
+      }
+    },
+    {
+      "from": "job_47351_93866",
+      "to": "job_47351_93928",
+      "type": "matched_message_and_callback",
+      "source_phase_edges": [
+        {
+          "from": "e47351_93923",
+          "to": "e47351_93926",
+          "type": "matched_message_dependency",
+          "topic": "/cmd_vel_nav",
+          "rmw_source_epoch_ns": 1791503374213478007,
+          "payload_signature": 5804111176216013587
+        },
+        {
+          "from": "e47351_93926",
+          "to": "s47351_93928_begin",
+          "type": "matched_callback_input",
+          "message_address": "0x7fd6ec1fdf60",
+          "selection_window_ns": 50000000
+        }
+      ]
+    },
+    {
+      "from": "job_47351_94501",
+      "to": "job_47351_94634",
+      "type": "matched_message_and_callback",
+      "source_phase_edges": [
+        {
+          "from": "e47351_94629",
+          "to": "e47351_94631",
+          "type": "matched_message_dependency",
+          "topic": "/cmd_vel_nav",
+          "rmw_source_epoch_ns": 1791503374263628498,
+          "payload_signature": 6849065345978700451
+        },
+        {
+          "from": "e47351_94631",
+          "to": "s47351_94634_begin",
+          "type": "matched_callback_input",
+          "message_address": "0x7fd6f4304130",
+          "selection_window_ns": 50000000
+        }
+      ]
+    }
+  ],
+  "acyclic": true,
+  "removed_same_thread_edges": 28,
+  "scope": "Matched state, trigger and DDS/input dependencies only; grouped by primary computational job. Edges originate/terminate at recorded phases, not necessarily at whole-job end/start.",
+  "standalone_vertices": [
+    "job_47351_95199",
+    "job_47351_93628",
+    "job_47351_92939",
+    "job_47351_100117",
+    "job_47351_95797",
+    "job_47351_93632",
+    "job_47351_101411"
+  ]
+}

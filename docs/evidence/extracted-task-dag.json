@@ -1,0 +1,125 @@
+{
+  "nodes": {
+    "bt": {
+      "task": "bt_tick",
+      "index": "b"
+    },
+    "global": {
+      "task": "global_costmap_update",
+      "index": "g"
+    },
+    "plan": {
+      "task": "planning_request",
+      "index": "a"
+    },
+    "path": {
+      "task": "controller_path_install",
+      "index": "p"
+    },
+    "local": {
+      "task": "local_costmap_update",
+      "index": "l"
+    },
+    "noise_old": {
+      "task": "mppi_noise_generation",
+      "index": "n"
+    },
+    "control": {
+      "task": "control_iteration",
+      "index": "k"
+    },
+    "noise_next": {
+      "task": "mppi_noise_generation",
+      "index": "n+1"
+    },
+    "command": {
+      "task": "velocity_command_callback",
+      "index": "u"
+    },
+    "smooth": {
+      "task": "velocity_smoothing_tick",
+      "index": "h"
+    },
+    "collision": {
+      "task": "collision_check",
+      "index": "x"
+    },
+    "amcl": {
+      "task": "amcl_scan_callback",
+      "index": "j"
+    }
+  },
+  "edges": [
+    {
+      "from": "amcl",
+      "to": "global",
+      "dependency": "selected map-to-odom TF state",
+      "evidence": "installed-version source and configuration; particular job selectors are model inputs"
+    },
+    {
+      "from": "bt",
+      "to": "plan",
+      "dependency": "action request",
+      "evidence": "installed-version source and configuration; particular job selectors are model inputs"
+    },
+    {
+      "from": "global",
+      "to": "plan",
+      "dependency": "selected committed global grid",
+      "evidence": "installed-version source and configuration; particular job selectors are model inputs"
+    },
+    {
+      "from": "plan",
+      "to": "path",
+      "dependency": "action path result",
+      "evidence": "installed-version source and configuration; particular job selectors are model inputs"
+    },
+    {
+      "from": "path",
+      "to": "control",
+      "dependency": "selected installed path",
+      "evidence": "installed-version source and configuration; particular job selectors are model inputs"
+    },
+    {
+      "from": "local",
+      "to": "control",
+      "dependency": "selected committed local grid",
+      "evidence": "installed-version source and configuration; particular job selectors are model inputs"
+    },
+    {
+      "from": "noise_old",
+      "to": "control",
+      "dependency": "selected committed noise",
+      "evidence": "installed-version source and configuration; particular job selectors are model inputs"
+    },
+    {
+      "from": "control",
+      "to": "noise_next",
+      "dependency": "noise generation trigger",
+      "evidence": "installed-version source and configuration; particular job selectors are model inputs"
+    },
+    {
+      "from": "control",
+      "to": "command",
+      "dependency": "command message",
+      "evidence": "installed-version source and configuration; particular job selectors are model inputs"
+    },
+    {
+      "from": "command",
+      "to": "smooth",
+      "dependency": "selected held command",
+      "evidence": "installed-version source and configuration; particular job selectors are model inputs"
+    },
+    {
+      "from": "smooth",
+      "to": "collision",
+      "dependency": "smoothed command message",
+      "evidence": "installed-version source and configuration; particular job selectors are model inputs"
+    }
+  ],
+  "acyclic": true,
+  "semantics": "Chosen scheduling abstraction: atomic output delivery at modeled job completion. Current ROS can publish/trigger before function return. This is not an extracted claim of whole-function completion precedence. Repeated helper jobs are indexed to unroll feedback.",
+  "isolated_nodes": [],
+  "isolation_scope": "These selected task families are connected. Disconnected representatives in the measured figure mean no matched edge in its window, not global independence.",
+  "task_parameters": "extracted-parameters.json"
+}

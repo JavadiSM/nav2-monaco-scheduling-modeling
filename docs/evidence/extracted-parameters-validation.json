@@ -1,0 +1,29 @@
+{
+  "primary_tasks": 11,
+  "successful_laps": 57,
+  "all_CDF_inverse_checks_passed": true,
+  "all_source_job_counts_match": true,
+  "periodic_tasks": 5,
+  "aperiodic_tasks": 6,
+  "model_graph_vertices": 12,
+  "model_graph_edges": 11,
+  "measured_graph_vertices": 15,
+  "measured_graph_edges": 8,
+  "removed_cpu_order_edges": 28,
+  "both_graphs_acyclic": true,
+  "new_simulations": 0,
+  "pdf_pages": 6,
+  "pdf_pages_visually_checked": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "new_diagram_time_units_checked": "s only",
+  "source_summary_hash_unchanged": true,
+  "CSV_JSON_parameters_agree": true,
+  "aperiodic_periods_unassigned": true,
+  "deadlines_and_priorities_unassigned": true,
+  "isolated_vertices_have_no_incident_edges": true,
+  "total_primary_jobs": 3882692
+}

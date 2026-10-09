@@ -1,0 +1,27 @@
+digraph G {
+graph [rankdir=TB];
+node [shape=ellipse, fontname="DejaVu Sans"];
+"bt" [label="tau5[b]\nBT tick\nC = 0.0010347 s\nT = 0.01 s"];
+"global" [label="tau3[g]\nGlobal map\nC = 0.0013906 s\nT = 1 s"];
+"plan" [label="J1[a]\nPlanning action\nC = 0.0490757 s"];
+"path" [label="J6[p]\nPath install\nC = 0.0004197 s"];
+"local" [label="tau2[l]\nLocal map\nC = 0.0014484 s\nT = 0.2 s"];
+"noise_old" [label="J3[n]\nNoise helper\nC = 0.0047086 s"];
+"control" [label="tau1[k]\nControl / MPPI\nC = 0.0100682 s\nT = 0.05 s"];
+"noise_next" [label="J3[n+1]\nNoise helper\nC = 0.0047086 s"];
+"command" [label="J4[u]\nCommand input\nC = 0.0000174 s"];
+"smooth" [label="tau4[h]\nVelocity timer\nC = 0.0002771 s\nT = 0.05 s"];
+"collision" [label="J5[x]\nCollision check\nC = 0.0009203 s"];
+"amcl" [label="J2[j]\nAMCL scan\nC = 0.0064535 s"];
+"amcl" -> "global";
+"bt" -> "plan";
+"global" -> "plan";
+"plan" -> "path";
+"path" -> "control";
+"local" -> "control";
+"noise_old" -> "control";
+"control" -> "noise_next";
+"control" -> "command";
+"command" -> "smooth";
+"smooth" -> "collision";
+}
