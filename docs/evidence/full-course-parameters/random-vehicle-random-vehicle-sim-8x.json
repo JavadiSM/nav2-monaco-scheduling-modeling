@@ -1,0 +1,11 @@
+{
+  "trial": "/mnt/c/Users/Asus/Documents/ChatGPT/Ros2/artifacts/full-course-20261010/comparison-01-random-attempt-04",
+  "source": "/mnt/c/Users/Asus/Documents/ChatGPT/Ros2/.private/media-backups/live-bridge/comparison-01-random-attempt-04.gif",
+  "source_frames": 5000,
+  "frames": 681,
+  "playback_clock": "SIM",
+  "speed": 8,
+  "frame_sim_interval_s": 0.4,
+  "frame_playback_interval_s": 0.05,
+  "alignment": "Recorded monotonic frame times mapped to acknowledged physics clock pairs; native image sampling is approximate."
+}

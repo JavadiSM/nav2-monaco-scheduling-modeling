@@ -3,6 +3,8 @@ from dataclasses import asdict,replace
 from tools.live_bridge.engine import LiveEngine
 from tools.live_bridge.dvfs import configured_selector,validate_job_execution
 
+from platform_fixtures import load_platform, LiveEngine
+
 
 class LiveDVFSTests(unittest.TestCase):
     def fixture(self,selector=None,lo=.02,hi=.04):

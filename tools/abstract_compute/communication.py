@@ -1,4 +1,4 @@
-"""Ideal user-defined geometric edge coverage; no transport is simulated."""
+"""Extensible geometric admission and task/data transport delays."""
 from math import hypot, isfinite
 from dataclasses import dataclass
 
@@ -10,8 +10,29 @@ def reachable_endpoints(position_xy, endpoints, *, radius_m=5.):
         raise ValueError('Position must be finite')
     return [e['id'] for e in endpoints if hypot(e['x']-x,e['y']-y)<=radius_m]
 
+def distance_delay_s(distance_m):
+    distance_m=float(distance_m)
+    if not isfinite(distance_m) or distance_m<0:raise ValueError('Invalid transmission distance')
+    if distance_m<1:return 0.
+    if distance_m<2:return .003
+    if distance_m<3:return .004
+    if distance_m<=5:return .005
+    return .010
+
+
+def task_upload_cost_s(*,distance_m,task_size_bytes=None,**kwargs):
+    return distance_delay_s(distance_m)
+
+
+def edge_data_cost_s(*,distance_m,edge_size_bytes=None,**kwargs):
+    return distance_delay_s(distance_m)
+
+
 def communication_cost_s(*args, **kwargs):
-    return 0.
+    distance=kwargs.get('distance_m')
+    if distance is None and 'position_xy' in kwargs and 'endpoint' in kwargs:
+        p,e=kwargs['position_xy'],kwargs['endpoint'];distance=hypot(p[0]-e['x'],p[1]-e['y'])
+    return distance_delay_s(0. if distance is None else distance)
 
 
 def send_eligible(position_xy, endpoint, *, radius_m=5., **kwargs):

@@ -83,15 +83,15 @@
   "device_classes": {
     "vehicle": {
       "lp_cores": 1,
-      "hp_cores": 1,
+      "hp_cores": 0,
       "thermal": {
         "max_temperature_c": 46.2,
         "balance_temperature_c": 45.6
       }
     },
     "server": {
-      "lp_cores": 2,
-      "hp_cores": 2,
+      "lp_cores": 0,
+      "hp_cores": 1,
       "thermal": {
         "max_temperature_c": 46.5,
         "balance_temperature_c": 46.0
@@ -113,6 +113,5 @@
     "control_epoch_s": 0.005,
     "initial_temperature_c": 45.0
   },
-  "physical_seed": 81371,
   "thermal_configuration_status": "confirmed"
 }

@@ -12,8 +12,11 @@ FONT='/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'
 class LiveGantt:
     def __init__(self,config=None):
         cfg=config or {};self.dt=cfg.get('step_ns',1_000_000)/1e9;self.vehicles=cfg.get('vehicle_count',1);self.window_s=cfg.get('gantt_window_s',2.);self.color=cfg.get('vehicle_color','red')
-        self.budget_label='Mean / observed-max budgets' if cfg.get('schema_version',1)>=2 else 'Historical Q95 budgets';self.thermal=cfg.get('thermal',{});self.temperatures={d:[self.thermal.get('initial_temperature_c',self.thermal.get('ambient_temperature_c',45.))]*2 for d in range(self.vehicles)}
-        self.policy_name=cfg.get('policy','ready_FIFO_oldest_idle_core_nonpreemptive')
+        self.budget_label='Mean / observed-max budgets' if cfg.get('schema_version',1)>=2 else 'Historical Q95 budgets';self.thermal=cfg.get('thermal',{});self.server_thermal=cfg.get('server_thermal',{});self.temperatures={d:[self.thermal.get('initial_temperature_c',self.thermal.get('ambient_temperature_c',45.))]*2 for d in range(self.vehicles)}
+        self.layouts=cfg.get('core_layouts',{'vehicle':['A7','A15'],'server':['A7','A7','A15','A15']})
+        self.temperatures={d:[self.thermal.get('initial_temperature_c',45.)]*len(self.layouts['vehicle']) for d in range(self.vehicles)}
+        self.policy_name=cfg.get('policy','ready_FIFO_oldest_idle_core_nonpreemptive');self.placement=cfg.get('placement','local');self.edge_enabled=cfg.get('edge_enabled',False);self.selected_rsu=self.vehicles if self.edge_enabled else None
+        scene=json.loads((Path(__file__).resolve().parents[2]/'scenarios/monaco/scenario.json').read_text());self.rsu_names={self.vehicles+i:e['id'] for i,e in enumerate(scene['servers'])}
         self.jobs={};self.segments=[];self.active={};self.cooling={};self.cooling_spans=[];self.tick=0;self.origin=None;self.ended=False
     def consume(self,e):
         self.tick=e['tick'];kind=e['kind'];jid=e.get('job_id')
@@ -23,6 +26,7 @@ class LiveGantt:
         elif kind=='arrival':self.jobs[jid]=dict(task=e['task'],device=e['device_id'])
         elif kind=='start':
             self.jobs[jid]['core']=e['core_id'];self.active[jid]=self.tick
+            if e['device_id']>=self.vehicles:self.selected_rsu=e['device_id']
         elif kind=='budget_complete':self.close(jid);self.jobs[jid]['budget_done']=True
         elif kind=='cooling_start':
             d=e['device_id'];self.cooling[d]=self.tick
@@ -39,44 +43,67 @@ class LiveGantt:
         a=self.active.pop(jid,None)
         if a is not None:self.segments.append((jid,a,self.tick))
         # A cooling boundary closes only the current segment, not its remaining budget.
+    def prune_before(self,tick):
+        """Bound presentation history after the previous window image is saved."""
+        self.segments=[span for span in self.segments if span[2]>=tick]
+        self.cooling_spans=[span for span in self.cooling_spans if span[2]>=tick]
+        keep=set(self.active)|{span[0] for span in self.segments}
+        self.jobs={jid:row for jid,row in self.jobs.items()
+                   if jid in keep or not row.get('finished')}
+
     def image(self,window=None):
         im=Image.new('RGB',(1280,720),'#f8fafc');g=ImageDraw.Draw(im)
         font=lambda n:ImageFont.truetype(FONT,n)
         elapsed=0. if self.origin is None else max(0.,(self.tick-self.origin)*self.dt)
         if window is None:window=self.window_s*math.floor(max(0.,elapsed-(1e-9 if self.ended else 0.))/self.window_s)
-        g.text((28,18),('LIVE LOCAL FIFO' if self.policy_name=='ready_FIFO_oldest_idle_core_nonpreemptive' else 'LIVE '+self.policy_name)+'  |  SINGLE VEHICLE  |  A7 + A15',fill='#172b43',font=font(27))
+        title=('LIVE '+self.placement.upper()+' | FIFO / SHORTEST FINISH QUEUE') if self.edge_enabled else ('LIVE LOCAL FIFO' if self.policy_name=='ready_FIFO_oldest_idle_core_nonpreemptive' else 'LIVE '+self.policy_name)
+        policy_color={'local':'#c62828','offload':'#238b45','random':'#1565c0','greedy':'#e6a000'}.get(self.placement,'#172b43')
+        g.rectangle((0,0,1280,7),fill=policy_color)
+        g.text((28,18),title+' | SINGLE VEHICLE',fill=policy_color,font=font(25))
         g.text((28,59),f'Window {window:.0f}–{window+self.window_s:.0f} s   |   Actual arrivals · {self.budget_label} · {self.dt:.3f} s steps',fill='#506078',font=font(18))
-        g.text((28,84),f'Modeled core temperatures  |  Ambient {self.thermal.get("ambient_temperature_c",45.):g} °C  |  Initial {self.thermal.get("initial_temperature_c",self.thermal.get("ambient_temperature_c",45.)):g} °C  |  Tmax {self.thermal.get("max_temperature_c",46.2):g} °C',fill='#506078',font=font(14))
-        lanes=2*self.vehicles;x0,x1,y0,h=155,1248,115,376/(2*self.vehicles)
+        temperature_label=f'Modeled core temperatures | Ambient {self.thermal.get("ambient_temperature_c",45.):g} °C | Initial {self.thermal.get("initial_temperature_c",45.):g} °C | Vehicle Tmax {self.thermal.get("max_temperature_c",46.2):g} °C'
+        if self.edge_enabled:temperature_label+=f' | RSU Tmax {self.server_thermal.get("max_temperature_c",46.5):g} °C'
+        g.text((28,84),temperature_label,fill='#506078',font=font(14))
+        displayed=list(range(self.vehicles))+([self.selected_rsu] if self.selected_rsu is not None else [])
+        lane_ids=[(d,c) for d in displayed for c in range(len(self.layouts['vehicle' if d<self.vehicles else 'server']))]
+        lane_index={key:i for i,key in enumerate(lane_ids)}
+        lanes=len(lane_ids);x0,x1,y0,h=185,1248,115,376/lanes
         base=0 if self.origin is None else self.origin
         x=lambda tick:x0+((tick-base)*self.dt-window)/self.window_s*(x1-x0)
-        for lane in range(lanes):
+        for lane,(d,cid) in enumerate(lane_ids):
             y=y0+lane*h;g.rectangle((x0,y+2,x1,y+h-2),fill='#ffffff')
-            car=self.color.title() if self.vehicles==1 else ('Red','Blue','White','Green')[lane//2]
-            g.text((20,y+h/2-12),car+' / '+('A7' if lane%2==0 else 'A15'),fill=('#b52b32','#1a65b4','#606b76','#24874a')[lane//2],font=font(23))
-            temperature=self.temperatures[lane//2][lane%2]
-            g.text((20,y+h/2+18),f'{temperature:.2f} °C',fill='#33445a',font=font(20))
+            car=self.color.title() if d<self.vehicles else self.rsu_names[d]
+            core_type=self.layouts['vehicle' if d<self.vehicles else 'server'][cid]
+            if d>=self.vehicles:
+                g.text((12,y+5),car,fill='#16496a',font=font(13))
+                g.text((12,y+23),core_type+' core '+str(cid),fill='#16496a',font=font(12))
+            else:g.text((12,y+7),car+' / '+core_type+' '+str(cid),fill='#16496a',font=font(15 if lanes>2 else 21))
+            temperature=self.temperatures.get(d,[45.]*4)[cid]
+            g.text((12,y+(40 if d>=self.vehicles else 30)),f'{temperature:.2f} °C',fill='#33445a',font=font(14 if lanes>2 else 20))
         for n in range(11):
             px=x0+n*(x1-x0)/10;g.line((px,y0-10,px,y0+lanes*h),fill='#dfe5ec');g.text((px-12,y0+lanes*h+10),f'{window+n*self.window_s/10:.1f}',fill='#566277',font=font(16))
         def span(a,b,lane,color,height=1):
             left=max(x0,x(a));right=min(x1,x(b))
             if right<=x0 or left>=x1 or b<a:return
             right=max(left+1,right);y=y0+lane*h
-            margin=5 if height==2 else h*.28
+            margin=5 if height>1 else h*.28
             g.rectangle((left,y+margin,right,y+height*h-margin),fill=color)
-        for d,a,b in self.cooling_spans+[(d,a,self.tick) for d,a in self.cooling.items()]:span(a,b,2*d,'#f7dede',2)
+        for d,a,b in self.cooling_spans+[(d,a,self.tick) for d,a in self.cooling.items()]:
+            if (d,0) in lane_index:span(a,b,lane_index[d,0],'#f7dede',len(self.layouts['vehicle' if d<self.vehicles else 'server']))
         for jid,a,b in self.segments+[(j,a,self.tick) for j,a in self.active.items()]:
-            row=self.jobs[jid];span(a,b,2*row['device']+row['core'],COLORS[TASK_NAMES.index(row['task'])])
+            row=self.jobs[jid];key=(row['device'],row['core'])
+            if key in lane_index:span(a,b,lane_index[key],COLORS[TASK_NAMES.index(row['task'])])
         for i,(name,c) in enumerate(zip(LABELS,COLORS)):
             col,row=i%4,i//4;px=25+col*310;py=552+row*28;g.rectangle((px,py+3,px+17,py+20),fill=c);g.text((px+25,py),name,fill='#33445a',font=font(17))
         g.rectangle((955,611,972,628),fill='#f7dede');g.text((980,608),'Device cooling',fill='#33445a',font=font(17))
         state='Preparing / waiting for common start' if self.origin is None else ('Trial complete' if self.ended else 'Running on common simulation clock')
-        g.text((28,656),state,fill='#506078',font=font(18));g.text((806,650),f't = {elapsed:8.3f} s',fill='#102c4c',font=font(32))
+        if self.edge_enabled:state+=' | RSU panel follows latest executing server'
+        g.text((28,656),state,fill='#506078',font=font(13 if self.edge_enabled else 18));g.text((806,650),f't = {elapsed:8.3f} s',fill='#102c4c',font=font(32))
         return im
 
 def main():
     p=argparse.ArgumentParser();p.add_argument('--trial',type=Path,required=True);a=p.parse_args();a.trial.mkdir(parents=True,exist_ok=True)
-    root=tk.Tk();root.title(TITLE);root.geometry('1280x720');root.resizable(False,False);label=tk.Label(root,borderwidth=0);label.pack();cfg=json.loads((a.trial/'trial-config.json').read_text()) if (a.trial/'trial-config.json').exists() else {};thermal_file=a.trial/'hardware-config.json';hardware=json.loads(thermal_file.read_text()) if thermal_file.exists() else {};cfg['thermal']={**hardware.get('thermal',{}),**hardware.get('device_classes',{}).get('vehicle',{}).get('thermal',{})};model=LiveGantt(cfg);stream=[None];last=[None];last_window=[0]
+    root=tk.Tk();root.title(TITLE);root.geometry('1280x720');root.resizable(False,False);label=tk.Label(root,borderwidth=0);label.pack();cfg=json.loads((a.trial/'trial-config.json').read_text()) if (a.trial/'trial-config.json').exists() else {};thermal_file=a.trial/'hardware-config.json';hardware=json.loads(thermal_file.read_text()) if thermal_file.exists() else {};cfg['thermal']={**hardware.get('thermal',{}),**hardware.get('device_classes',{}).get('vehicle',{}).get('thermal',{})};cfg['server_thermal']={**hardware.get('thermal',{}),**hardware.get('device_classes',{}).get('server',{}).get('thermal',{})};cfg['core_layouts']={k:['A7']*v['lp_cores']+['A15']*v['hp_cores'] for k,v in hardware['device_classes'].items()};model=LiveGantt(cfg);stream=[None];last=[None];last_window=[0]
     def draw():
         if stream[0] is None:
             try:stream[0]=(a.trial/'live-events.jsonl').open()
@@ -94,6 +121,7 @@ def main():
             if window!=last_window[0] and not model.ended:
                 previous=model.image(last_window[0]);previous.save(a.trial/'gantt-previous-window.png')
                 if last_window[0]==0:previous.save(a.trial/'gantt-first-window.png')
+                model.prune_before((model.origin or 0)+round(window/model.dt))
             im=model.image();photo=ImageTk.PhotoImage(im);label.configure(image=photo);label.image=photo;last[0]=key;last_window[0]=window
             if model.ended:im.save(a.trial/'live-gantt.png')
         root.after(100,draw)

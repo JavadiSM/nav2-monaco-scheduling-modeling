@@ -57,7 +57,7 @@ def main():
         ax.annotate(f"CP{cp['id']:02}",(cp['x'],cp['y']),xytext=(5,-11),textcoords='offset points',fontsize=7,color='#775200')
     for endpoint in scene['servers']:
         ax.scatter(endpoint['x'],endpoint['y'],s=38,marker='s',c='#0089bc',edgecolors='white',linewidths=.6,zorder=6)
-        ax.annotate(endpoint['id'].replace('edge_','E'),(endpoint['x'],endpoint['y']),xytext=(5,6),textcoords='offset points',fontsize=7,color='#00658b')
+        ax.annotate(endpoint['id'],(endpoint['x'],endpoint['y']),xytext=(7,7),textcoords='offset points',fontsize=11,color='#005077',weight='bold',bbox={'facecolor':'white','edgecolor':'none','alpha':.85,'pad':1.5},zorder=8)
     for name,color in [('start','#009956'),('finish','#d43241')]:
         p=scene[name];ax.scatter(p['x'],p['y'],s=65,c=color,zorder=7)
         ax.annotate(name.upper(),(p['x'],p['y']),xytext=(-60,8),textcoords='offset points',fontsize=9,color=color,weight='bold')

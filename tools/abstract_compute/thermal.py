@@ -1,6 +1,7 @@
 """An RC network advanced exactly over constant-power intervals."""
 from collections import OrderedDict
 import numpy as np
+import math
 from .primitives import nonnegative_float
 
 
@@ -38,6 +39,7 @@ class ThermalModel:
             raise ValueError('RC network must be stable')
         self.thermal_state_matrix_per_s = -self.B / capacity[:, None]
         self._transitions = OrderedDict()
+        self._equilibrium_cache = OrderedDict()
 
     def _vector(self, values, fallback):
         count = len(self.core_ids)
@@ -54,7 +56,11 @@ class ThermalModel:
     def steady_temperature_c(self, power_vector_w):
         power = np.maximum(self._vector(power_vector_w, np.zeros(len(self.core_ids))), 0.)
         ambient = self.processor.thermal_spec.ambient_temperature_c
-        return ambient + np.linalg.solve(self.B, power)
+        key=tuple(power)
+        if key not in self._equilibrium_cache:
+            self._equilibrium_cache[key]=ambient+np.linalg.solve(self.B,power)
+            if len(self._equilibrium_cache)>128:self._equilibrium_cache.popitem(last=False)
+        return self._equilibrium_cache[key].copy()
 
     def transition_matrix(self, duration_s):
         elapsed = nonnegative_float(duration_s)
@@ -74,6 +80,15 @@ class ThermalModel:
         initial = self._vector(temperature_c, self.temperature_vector_c())
         equilibrium = self.steady_temperature_c(power_vector_w)
         return equilibrium + self.transition_matrix(duration_s) @ (initial - equilibrium)
+
+    def evolve_single_core_c(self, temperature_c, power_w, duration_s):
+        """Scalar form of the same exact RC transition for a one-core device."""
+        if len(self.core_ids)!=1:raise ValueError('Scalar evolution requires one core')
+        key=round(duration_s,15)
+        if not hasattr(self,'_scalar_decay'):self._scalar_decay={}
+        if key not in self._scalar_decay:self._scalar_decay[key]=math.exp(-float(self.B[0,0])/float(self.A[0,0])*duration_s)
+        equilibrium=self.processor.thermal_spec.ambient_temperature_c+power_w/float(self.B[0,0])
+        return equilibrium+self._scalar_decay[key]*(temperature_c-equilibrium)
 
     def validate_idle_recovery(self):
         power = [self.processor.cores[n].core_type.cooling_power_w for n in self.core_ids]

@@ -1,0 +1,151 @@
+{
+  "passed": true,
+  "movies": [
+    {
+      "policy": "local",
+      "view": "vehicle",
+      "file": "docs/media/local-full-course-8x.gif",
+      "bytes": 32727639,
+      "frames": 682,
+      "duration_s": 34.1,
+      "dimensions": [
+        1440,
+        540
+      ],
+      "sha256": "7af950993adeddd6480c7edd5d82d83f0e37df0192bbc1c0b4d6b74a96b4d4de",
+      "simulation_seconds": 272.205,
+      "effective_playback_speed": 7.982551319648093,
+      "source_hash_matches": true,
+      "last_frame_decoded": true
+    },
+    {
+      "policy": "local",
+      "view": "rsu",
+      "file": "docs/media/local-nearest-rsus-8x.gif",
+      "bytes": 5920379,
+      "frames": 682,
+      "duration_s": 34.1,
+      "dimensions": [
+        1280,
+        720
+      ],
+      "sha256": "19e5ecf32e763b8bb309a72c590bd4680da3f2f183e154fa37bae51089fc1906",
+      "simulation_seconds": 272.205,
+      "effective_playback_speed": 7.982551319648093,
+      "source_hash_matches": true,
+      "last_frame_decoded": true
+    },
+    {
+      "policy": "random",
+      "view": "vehicle",
+      "file": "docs/media/random-full-course-8x.gif",
+      "bytes": 35584207,
+      "frames": 681,
+      "duration_s": 34.05,
+      "dimensions": [
+        1440,
+        540
+      ],
+      "sha256": "3536dca21c9e5621922f84b8b7ad40d7ef468d060b3d5a9c09fb06addf870ba5",
+      "simulation_seconds": 271.964,
+      "effective_playback_speed": 7.987195301027901,
+      "source_hash_matches": true,
+      "last_frame_decoded": true
+    },
+    {
+      "policy": "random",
+      "view": "rsu",
+      "file": "docs/media/random-nearest-rsus-8x.gif",
+      "bytes": 13883361,
+      "frames": 681,
+      "duration_s": 34.05,
+      "dimensions": [
+        1280,
+        720
+      ],
+      "sha256": "91fef95fada6a57dc8cf1d9950cc8df95a496363162ae8f79d2b31045661c299",
+      "simulation_seconds": 271.964,
+      "effective_playback_speed": 7.987195301027901,
+      "source_hash_matches": true,
+      "last_frame_decoded": true
+    },
+    {
+      "policy": "offload",
+      "view": "vehicle",
+      "file": "docs/media/offload-full-course-8x.gif",
+      "bytes": 31612176,
+      "frames": 688,
+      "duration_s": 34.4,
+      "dimensions": [
+        1440,
+        540
+      ],
+      "sha256": "01a191b9801b0980bb4aa9b78614e4f71e8ee80ad6a3623e0704b337df6f0d47",
+      "simulation_seconds": 274.647,
+      "effective_playback_speed": 7.983924418604651,
+      "source_hash_matches": true,
+      "last_frame_decoded": true
+    },
+    {
+      "policy": "offload",
+      "view": "rsu",
+      "file": "docs/media/offload-nearest-rsus-8x.gif",
+      "bytes": 13202909,
+      "frames": 688,
+      "duration_s": 34.4,
+      "dimensions": [
+        1280,
+        720
+      ],
+      "sha256": "84a75fb9c612c005b88cde2307347220c5d7991fb250419dbf799a685dd77952",
+      "simulation_seconds": 274.647,
+      "effective_playback_speed": 7.983924418604651,
+      "source_hash_matches": true,
+      "last_frame_decoded": true
+    },
+    {
+      "policy": "greedy",
+      "view": "vehicle",
+      "file": "docs/media/greedy-full-course-8x.gif",
+      "bytes": 35252329,
+      "frames": 680,
+      "duration_s": 34.0,
+      "dimensions": [
+        1440,
+        540
+      ],
+      "sha256": "ec86698520715f75c2e5a4c20ea8a30e4cbf49ace15053f72fd284077226ddd7",
+      "simulation_seconds": 271.284,
+      "effective_playback_speed": 7.978941176470588,
+      "source_hash_matches": true,
+      "last_frame_decoded": true
+    },
+    {
+      "policy": "greedy",
+      "view": "rsu",
+      "file": "docs/media/greedy-nearest-rsus-8x.gif",
+      "bytes": 11767495,
+      "frames": 680,
+      "duration_s": 34.0,
+      "dimensions": [
+        1280,
+        720
+      ],
+      "sha256": "cbd6207f2a09691a371fc47382936627951148f31888b01213a55ca15b62714b",
+      "simulation_seconds": 271.284,
+      "effective_playback_speed": 7.978941176470588,
+      "source_hash_matches": true,
+      "last_frame_decoded": true
+    }
+  ],
+  "broken_README_links": [],
+  "balanced_counts": {
+    "local": 1,
+    "random": 1,
+    "offload": 1,
+    "greedy": 1
+  },
+  "calibration_laps": 3,
+  "sample_SD_undefined_for_one_run": true,
+  "default_parameters_match_frozen": true
+}

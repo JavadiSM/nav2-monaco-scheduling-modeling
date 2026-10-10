@@ -1,0 +1,11 @@
+{
+  "verified_at_utc": "2026-10-10T04:42:12.850852+00:00",
+  "cutoff_iso": "2026-10-10T08:00:00+03:30",
+  "campaign_status": "cutoff",
+  "manifest_finished_unix_s": 1791606579.4687488,
+  "latest_retained_clock_host_epoch_ns": 1791606575024827528,
+  "latest_physics_ns": 4617000000,
+  "latest_hardware_ns": 4617000000,
+  "remaining_runtime_pids": [],
+  "passed": true
+}

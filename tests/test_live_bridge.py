@@ -1,5 +1,7 @@
 import math,unittest
 from tools.live_bridge.engine import LiveEngine
+from platform_fixtures import load_platform, LiveEngine
+
 
 class LiveBridgeTests(unittest.TestCase):
     def test_only_observed_entries_create_jobs(self):
@@ -89,6 +91,33 @@ class LiveProtocolTests(unittest.TestCase):
         b.packet(c,(PUBLISH,jid,123,100,200,0,0));b.packet(c,(LOOKUP,123,0,150,0,0,0));self.assertEqual(PACKET.unpack(c.replies[-1])[1],jid)
         b.packet(c,(LOOKUP,123,0,250,0,0,0));self.assertEqual(PACKET.unpack(c.replies[-1])[1],0)
         b.packet(c,(LOOKUP,123,1,150,0,0,0));self.assertEqual(PACKET.unpack(c.replies[-1])[1],0)
+    def test_mutex_wait_after_completion_keeps_publication_on_same_tick(self):
+        from tools.live_bridge.broker import ENTER,STAGE,WAIT,RESUME,PUBLISH,END
+        b,c=self.fixture();b.packet(c,(ENTER,0,0,0,0,0,0));jid=b.clients[c]['job'];b.packet(c,(STAGE,jid,0,0,0,0,0));b.engine.dispatch()
+        while not b.engine.deliverable(jid):b.engine.advance()
+        b.release();tick=b.engine.tick;self.assertTrue(b.clients[c]['busy'])
+        b.packet(c,(WAIT,0,0,0,0,0,0));self.assertTrue(b.clients[c]['busy'])
+        b.packet(c,(RESUME,0,0,0,0,0,0));b.packet(c,(PUBLISH,jid,123,100,200,0,0))
+        publication=b.engine.events[-1];self.assertEqual(publication['kind'],'publication');self.assertEqual(publication['tick'],tick)
+        b.packet(c,(END,jid,1000,0,0,0,0));self.assertFalse(b.clients[c]['busy'])
+    def test_computation_mutex_wait_still_allows_modeled_work_to_advance(self):
+        from tools.live_bridge.broker import ENTER,WAIT,RESUME
+        b,c=self.fixture();b.packet(c,(ENTER,0,0,0,0,0,0));jid=b.clients[c]['job']
+        self.assertNotEqual(b.engine.jobs[jid].status,'completed');b.packet(c,(WAIT,0,0,0,0,0,0));self.assertFalse(b.clients[c]['busy'])
+        b.packet(c,(RESUME,0,0,0,0,0,0));self.assertTrue(b.clients[c]['busy'])
+    def test_distance_cutoff_waits_only_for_released_output_commits(self):
+        b,c=self.fixture();b.config={'settle_quiet_host_s':.002};b.last_activity=1.
+        j=b.engine.arrive(0,'bt_tick');b.engine.stage(j)
+        while not b.engine.deliverable(j):b.engine.advance()
+        b.engine.finish(j)
+        self.assertFalse(b.cutoff_quiescent(2.))
+        b.engine.jobs[j].outputs_committed=True
+        self.assertTrue(b.cutoff_quiescent(2.))
+        waiting=b.engine.arrive(0,'planning_request');b.engine.stage(waiting)
+        self.assertTrue(b.cutoff_quiescent(2.))
+        b.clients[c]['busy']=True;self.assertFalse(b.cutoff_quiescent(2.))
+        b.clients[c]['busy']=False;self.assertFalse(b.cutoff_quiescent(1.001))
+
     def test_unclassified_actuation_is_held_during_device_cooling(self):
         from tools.live_bridge.broker import DEVICE_GATE,PUBLISH
         b,c=self.fixture();b.engine.cooling[0]=True;b.packet(c,(DEVICE_GATE,0,0,0,0,0,0));b.release();self.assertFalse(c.replies);self.assertFalse(b.engine.jobs)

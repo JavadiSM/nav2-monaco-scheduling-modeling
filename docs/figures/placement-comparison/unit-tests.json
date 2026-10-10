@@ -1,0 +1,11 @@
+{
+  "command": "python3 -m unittest discover -s tests -v",
+  "passed": true,
+  "tests": 89,
+  "output_sha256": "26ef8ebcab4afd3ee54d536ae8ed67c5a6e8b42ac52a2e4cb198fbc848a43daa",
+  "device_reaction_checks": [
+    "all cores of affected device",
+    "other device unaffected",
+    "last active overrun ends boost"
+  ]
+}

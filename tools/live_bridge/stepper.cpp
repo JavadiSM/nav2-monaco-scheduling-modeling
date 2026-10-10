@@ -4,6 +4,8 @@
 #include <gz/msgs/world_control.pb.h>
 #include <gz/msgs/boolean.pb.h>
 #include <gz/msgs/twist.pb.h>
+#include <gz/msgs/pose_v.pb.h>
+#include <iomanip>
 #include <sstream>
 #include <array>
 #include <cstring>
@@ -16,6 +18,13 @@ int main() {
   long long now=0; // A freshly launched paused world starts at zero; ignore a delayed initial clock.
   node.Subscribe<gz::msgs::Clock>("/world/monaco/clock",[&](const gz::msgs::Clock& c){
     std::lock_guard<std::mutex> guard(mutex);now=c.sim().sec()*1000000000LL+c.sim().nsec();cv.notify_all();
+  });
+  long long pose_ns=0;double pose_x=0,pose_y=0;
+  node.Subscribe<gz::msgs::Pose_V>("/model/racecar/pose",[&](const gz::msgs::Pose_V& msg){
+    if(!msg.pose_size())return;
+    std::lock_guard<std::mutex> guard(mutex);
+    auto stamp=msg.pose(0).header().stamp();pose_ns=stamp.sec()*1000000000LL+stamp.nsec();
+    pose_x=msg.pose(0).position().x();pose_y=msg.pose(0).position().y();cv.notify_all();
   });
   std::array<uint64_t,4> commands{};
   auto hash=[](const void* p,size_t n,uint64_t h){auto b=(const unsigned char*)p;for(size_t i=0;i<n;i++){h^=b[i];h*=1099511628211ULL;}return h;};
@@ -36,6 +45,13 @@ int main() {
     if(!cv.wait_for(lock,std::chrono::seconds(3),[&]{return now>before;})) {
       std::cerr<<"No increasing simulation clock after step\n";return 3;
     }
-    std::cout<<now<<std::endl;
+    // PosePublisher runs in PostUpdate on the same 1 ms lattice. Before the
+    // spawned model first exists, only the increasing world clock is required.
+    if(pose_ns>0&&!cv.wait_for(lock,std::chrono::seconds(3),[&]{return pose_ns>=now;})){
+      std::cerr<<"Missing ground-truth pose for acknowledged physics step\n";return 5;
+    }
+    std::cout<<now;
+    if(pose_ns>0)std::cout<<" "<<pose_ns<<" "<<std::setprecision(17)<<pose_x<<" "<<pose_y;
+    std::cout<<std::endl;
   }
 }

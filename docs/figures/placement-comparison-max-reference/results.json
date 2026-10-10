@@ -1,0 +1,1012 @@
+{
+  "manifest": {
+    "status": "complete",
+    "target_distance_m": 50.0,
+    "replicates_per_policy": 1,
+    "started_unix_s": 1791570140.6040146,
+    "trials": [
+      {
+        "policy": "local",
+        "trial": "local-01",
+        "status": "complete",
+        "exit_code": 0,
+        "validation_exit_code": 0,
+        "metrics": {
+          "trial": "local-01",
+          "placement": "local",
+          "colour": "red",
+          "distance_m": 50.01369892640061,
+          "target_reached": true,
+          "race_seconds": 113.446,
+          "host_seconds": 717.5070831589983,
+          "jobs": 10345,
+          "completed": 10345,
+          "unfinished": 0,
+          "overrun_count": 1036,
+          "overruns_per_1000_jobs": 100.14499758337361,
+          "deadline_met": 8495,
+          "deadline_missed": 1850,
+          "deadline_pending_not_due": 0,
+          "deadline_meet_rate": 0.8211696471725471,
+          "average_response_s": 0.04745094248429193,
+          "response_std_s": 0.13705912069988413,
+          "response_p95_s": 0.499,
+          "thermal_cooling_entries_total": 143,
+          "thermal_violations_per_device": 5.5,
+          "devices": 26,
+          "devices_used": 1,
+          "offloaded_jobs": 0,
+          "nonzero_task_uploads": 0,
+          "nonzero_parent_transfers": 0,
+          "validation_errors": 0
+        }
+      },
+      {
+        "policy": "offload",
+        "trial": "offload-01",
+        "status": "complete",
+        "exit_code": 0,
+        "validation_exit_code": 0,
+        "metrics": {
+          "ordered_targets_passed": 6,
+          "trial": "offload-01",
+          "placement": "offload",
+          "colour": "green",
+          "distance_m": 50.01673025098198,
+          "target_reached": true,
+          "race_seconds": 111.858,
+          "host_seconds": 932.9101606740005,
+          "jobs": 20513,
+          "completed": 20510,
+          "unfinished": 3,
+          "overrun_count": 2515,
+          "overruns_per_1000_jobs": 122.60517720469946,
+          "deadline_met": 16829,
+          "deadline_missed": 3681,
+          "deadline_pending_not_due": 3,
+          "deadline_meet_rate": 0.8205265724037055,
+          "average_response_s": 0.0139054119941492,
+          "response_std_s": 0.03513087370882487,
+          "response_p95_s": 0.031,
+          "thermal_cooling_entries_total": 118,
+          "thermal_violations_per_device": 4.538461538461538,
+          "devices": 26,
+          "devices_used": 13,
+          "offloaded_jobs": 20513,
+          "nonzero_task_uploads": 20513,
+          "nonzero_parent_transfers": 85,
+          "validation_errors": 0,
+          "input_bindings": 4962,
+          "exact_DDS_bindings_checked": 3781,
+          "unresolved_input_bindings": 0
+        }
+      },
+      {
+        "policy": "random",
+        "trial": "random-01",
+        "status": "complete",
+        "exit_code": 0,
+        "validation_exit_code": 0,
+        "metrics": {
+          "ordered_targets_passed": 6,
+          "trial": "random-01",
+          "placement": "random",
+          "colour": "blue",
+          "distance_m": 50.01815583447872,
+          "target_reached": true,
+          "race_seconds": 112.031,
+          "host_seconds": 914.7898779970128,
+          "jobs": 21159,
+          "completed": 21158,
+          "unfinished": 1,
+          "overrun_count": 2156,
+          "overruns_per_1000_jobs": 101.89517463018102,
+          "deadline_met": 17453,
+          "deadline_missed": 3706,
+          "deadline_pending_not_due": 0,
+          "deadline_meet_rate": 0.8248499456496053,
+          "average_response_s": 0.01298246526136686,
+          "response_std_s": 0.04803203962053667,
+          "response_p95_s": 0.029,
+          "thermal_cooling_entries_total": 37,
+          "thermal_violations_per_device": 1.4230769230769231,
+          "devices": 26,
+          "devices_used": 22,
+          "completed_outputs_committed": 21158,
+          "offloaded_jobs": 15341,
+          "nonzero_task_uploads": 15341,
+          "nonzero_parent_transfers": 11464,
+          "validation_errors": 0,
+          "input_bindings": 4984,
+          "exact_DDS_bindings_checked": 3835,
+          "unresolved_input_bindings": 0
+        }
+      }
+    ],
+    "finished_unix_s": 1791572765.5720048
+  },
+  "summary": [
+    {
+      "policy": "local",
+      "n_runs": 1,
+      "overrun_count_mean": 1036.0,
+      "overrun_count_sample_sd": null,
+      "deadline_meet_rate_mean": 0.8211696471725471,
+      "deadline_meet_rate_sample_sd": null,
+      "average_response_s_mean": 0.04745094248429193,
+      "average_response_s_sample_sd": null,
+      "thermal_violations_per_device_mean": 5.5,
+      "thermal_violations_per_device_sample_sd": null,
+      "completed_jobs": 10345,
+      "unfinished_jobs": 0,
+      "pooled_response_s": 0.04745094248429193,
+      "pooled_deadline_meet_rate": 0.8211696471725471
+    },
+    {
+      "policy": "offload",
+      "n_runs": 1,
+      "overrun_count_mean": 2515.0,
+      "overrun_count_sample_sd": null,
+      "deadline_meet_rate_mean": 0.8205265724037055,
+      "deadline_meet_rate_sample_sd": null,
+      "average_response_s_mean": 0.0139054119941492,
+      "average_response_s_sample_sd": null,
+      "thermal_violations_per_device_mean": 4.538461538461538,
+      "thermal_violations_per_device_sample_sd": null,
+      "completed_jobs": 20510,
+      "unfinished_jobs": 3,
+      "pooled_response_s": 0.0139054119941492,
+      "pooled_deadline_meet_rate": 0.8205265724037055
+    },
+    {
+      "policy": "random",
+      "n_runs": 1,
+      "overrun_count_mean": 2156.0,
+      "overrun_count_sample_sd": null,
+      "deadline_meet_rate_mean": 0.8248499456496053,
+      "deadline_meet_rate_sample_sd": null,
+      "average_response_s_mean": 0.01298246526136686,
+      "average_response_s_sample_sd": null,
+      "thermal_violations_per_device_mean": 1.4230769230769231,
+      "thermal_violations_per_device_sample_sd": null,
+      "completed_jobs": 21158,
+      "unfinished_jobs": 1,
+      "pooled_response_s": 0.01298246526136686,
+      "pooled_deadline_meet_rate": 0.8248499456496053
+    }
+  ],
+  "inputs": {
+    "deadlines": {
+      "units": "s",
+      "C_basis": "HI observed maximum at the declared reference normalization",
+      "relative_to": "actual callback arrival",
+      "tasks": {
+        "amcl_scan_callback": {
+          "C_i_s": 0.019939,
+          "T_i_s": null,
+          "uniform_factor": 0.8068329642737092,
+          "drawn_deadline_s": 0.016087442474653487,
+          "D_i_s": 0.016087442474653487,
+          "period_adjustment": false
+        },
+        "bt_tick": {
+          "C_i_s": 0.0194456,
+          "T_i_s": 0.01,
+          "uniform_factor": 1.142526867587137,
+          "drawn_deadline_s": 0.02221712045635243,
+          "D_i_s": 0.014722800000000001,
+          "period_adjustment": true
+        },
+        "collision_check": {
+          "C_i_s": 0.013556200000000001,
+          "T_i_s": null,
+          "uniform_factor": 1.1549523264627002,
+          "drawn_deadline_s": 0.01565676472799366,
+          "D_i_s": 0.01565676472799366,
+          "period_adjustment": false
+        },
+        "control_iteration": {
+          "C_i_s": 0.0306778,
+          "T_i_s": 0.05,
+          "uniform_factor": 0.8546781300847196,
+          "drawn_deadline_s": 0.02621964473911301,
+          "D_i_s": 0.02621964473911301,
+          "period_adjustment": false
+        },
+        "controller_path_install": {
+          "C_i_s": 0.0023685,
+          "T_i_s": null,
+          "uniform_factor": 0.8217257022290898,
+          "drawn_deadline_s": 0.0019462573257295992,
+          "D_i_s": 0.0019462573257295992,
+          "period_adjustment": false
+        },
+        "global_costmap_update": {
+          "C_i_s": 0.0099746,
+          "T_i_s": 1.0,
+          "uniform_factor": 1.0061503027772978,
+          "drawn_deadline_s": 0.010035946810082434,
+          "D_i_s": 0.010035946810082434,
+          "period_adjustment": false
+        },
+        "local_costmap_update": {
+          "C_i_s": 0.0076756,
+          "T_i_s": 0.2,
+          "uniform_factor": 1.082164357992939,
+          "drawn_deadline_s": 0.008306260746210603,
+          "D_i_s": 0.008306260746210603,
+          "period_adjustment": false
+        },
+        "mppi_noise_generation": {
+          "C_i_s": 0.015244,
+          "T_i_s": null,
+          "uniform_factor": 1.031692661829316,
+          "drawn_deadline_s": 0.015727122936926095,
+          "D_i_s": 0.015727122936926095,
+          "period_adjustment": false
+        },
+        "planning_request": {
+          "C_i_s": 0.0818079,
+          "T_i_s": null,
+          "uniform_factor": 1.1808510323089763,
+          "drawn_deadline_s": 0.0966029431660295,
+          "D_i_s": 0.0966029431660295,
+          "period_adjustment": false
+        },
+        "velocity_command_callback": {
+          "C_i_s": 0.0038323999999999997,
+          "T_i_s": null,
+          "uniform_factor": 1.0854853413843584,
+          "drawn_deadline_s": 0.004160014022321415,
+          "D_i_s": 0.004160014022321415,
+          "period_adjustment": false
+        },
+        "velocity_smoothing_tick": {
+          "C_i_s": 0.0162255,
+          "T_i_s": 0.05,
+          "uniform_factor": 0.9761868295788291,
+          "drawn_deadline_s": 0.01583911940333129,
+          "D_i_s": 0.01583911940333129,
+          "period_adjustment": false
+        }
+      }
+    },
+    "hardware": {
+      "schema_version": 2,
+      "core_types": {
+        "A7": {
+          "name": "Cortex-A7",
+          "family": "ARM_LP",
+          "eta": 1.0,
+          "frequency_range_mhz": [
+            800,
+            1600
+          ],
+          "l": 5,
+          "voltage_range_v": [
+            0.9,
+            1.1
+          ],
+          "power": {
+            "reference_active_range_w": [
+              0.2,
+              0.5
+            ],
+            "reference_intercept_w": 0.15,
+            "reference_activity_slope_w": 0.4,
+            "leakage_ref_w": 0.05,
+            "leakage_gamma_per_k": 0.015,
+            "idle_w": 0.05,
+            "cooling_power_w": 0.005,
+            "dvfs_scaling_mode": "voltage_frequency",
+            "effective_switching_capacitance_f": null
+          },
+          "thermal": {
+            "capacitance_range_j_per_k": [
+              0.08,
+              0.12
+            ],
+            "ambient_resistance_range_k_per_w": [
+              5.0,
+              7.0
+            ]
+          },
+          "max_voltage_v": 1.1
+        },
+        "A15": {
+          "name": "Cortex-A15",
+          "family": "ARM_HP",
+          "eta": 1.8,
+          "frequency_range_mhz": [
+            1000,
+            2000
+          ],
+          "l": 5,
+          "voltage_range_v": [
+            1.1,
+            1.3
+          ],
+          "power": {
+            "reference_active_range_w": [
+              0.8,
+              2.0
+            ],
+            "reference_intercept_w": 0.55,
+            "reference_activity_slope_w": 1.55,
+            "leakage_ref_w": 0.15,
+            "leakage_gamma_per_k": 0.02,
+            "idle_w": 0.15,
+            "cooling_power_w": 0.015,
+            "dvfs_scaling_mode": "voltage_frequency",
+            "effective_switching_capacitance_f": null
+          },
+          "thermal": {
+            "capacitance_range_j_per_k": [
+              0.12,
+              0.18
+            ],
+            "ambient_resistance_range_k_per_w": [
+              4.0,
+              6.0
+            ]
+          },
+          "max_voltage_v": 1.3
+        }
+      },
+      "device_classes": {
+        "vehicle": {
+          "lp_cores": 1,
+          "hp_cores": 1,
+          "thermal": {
+            "max_temperature_c": 46.2,
+            "balance_temperature_c": 45.6
+          }
+        },
+        "server": {
+          "lp_cores": 2,
+          "hp_cores": 2,
+          "thermal": {
+            "max_temperature_c": 46.5,
+            "balance_temperature_c": 46.0
+          }
+        }
+      },
+      "scheduler_policy": "ready_hi_then_plan_rank_nonpreemptive",
+      "thermal": {
+        "ambient_temperature_c": 45.0,
+        "reference_temperature_c": 35.0,
+        "max_temperature_c": 46.2,
+        "balance_temperature_c": 45.6,
+        "thermal_epoch_ms": 100.0,
+        "coupling_base_conductance_range_w_per_k": [
+          0.07,
+          0.11
+        ],
+        "coupling_distance_attenuation": 0.8,
+        "control_epoch_s": 0.005,
+        "initial_temperature_c": 45.0
+      },
+      "thermal_configuration_status": "confirmed",
+      "realized_physical_parameters": {
+        "0": {
+          "device_class": "vehicle",
+          "coupling_base_conductance_w_per_k": 0.08074330212579023,
+          "cores": {
+            "0": {
+              "thermal_capacitance_j_per_k": 0.11419662569572417,
+              "ambient_resistance_k_per_w": 6.356744393369378
+            },
+            "1": {
+              "thermal_capacitance_j_per_k": 0.14533020037554684,
+              "ambient_resistance_k_per_w": 5.694925424458076
+            }
+          }
+        },
+        "1": {
+          "device_class": "server",
+          "coupling_base_conductance_w_per_k": 0.07391304426484924,
+          "cores": {
+            "0": {
+              "thermal_capacitance_j_per_k": 0.11208758892784362,
+              "ambient_resistance_k_per_w": 6.577319581303705
+            },
+            "1": {
+              "thermal_capacitance_j_per_k": 0.11138575382386331,
+              "ambient_resistance_k_per_w": 5.7862257495290415
+            },
+            "2": {
+              "thermal_capacitance_j_per_k": 0.14293444399421476,
+              "ambient_resistance_k_per_w": 5.83473623843133
+            },
+            "3": {
+              "thermal_capacitance_j_per_k": 0.15587072849125222,
+              "ambient_resistance_k_per_w": 4.556813377074099
+            }
+          }
+        },
+        "2": {
+          "device_class": "server",
+          "coupling_base_conductance_w_per_k": 0.07959301653241983,
+          "cores": {
+            "0": {
+              "thermal_capacitance_j_per_k": 0.09482366161397458,
+              "ambient_resistance_k_per_w": 5.236185430349015
+            },
+            "1": {
+              "thermal_capacitance_j_per_k": 0.08425090360014435,
+              "ambient_resistance_k_per_w": 5.855048873788235
+            },
+            "2": {
+              "thermal_capacitance_j_per_k": 0.16275295286508357,
+              "ambient_resistance_k_per_w": 4.969966668760405
+            },
+            "3": {
+              "thermal_capacitance_j_per_k": 0.13581171406185252,
+              "ambient_resistance_k_per_w": 5.634628927897641
+            }
+          }
+        },
+        "3": {
+          "device_class": "server",
+          "coupling_base_conductance_w_per_k": 0.07038132752118231,
+          "cores": {
+            "0": {
+              "thermal_capacitance_j_per_k": 0.11474314028893504,
+              "ambient_resistance_k_per_w": 6.723480615516275
+            },
+            "1": {
+              "thermal_capacitance_j_per_k": 0.10325722377407212,
+              "ambient_resistance_k_per_w": 5.904403982112572
+            },
+            "2": {
+              "thermal_capacitance_j_per_k": 0.14511416556471818,
+              "ambient_resistance_k_per_w": 4.04216444398808
+            },
+            "3": {
+              "thermal_capacitance_j_per_k": 0.1586197266876807,
+              "ambient_resistance_k_per_w": 5.536041475068682
+            }
+          }
+        },
+        "4": {
+          "device_class": "server",
+          "coupling_base_conductance_w_per_k": 0.09191449477799626,
+          "cores": {
+            "0": {
+              "thermal_capacitance_j_per_k": 0.09023752377108261,
+              "ambient_resistance_k_per_w": 6.4472953270065565
+            },
+            "1": {
+              "thermal_capacitance_j_per_k": 0.108578350102603,
+              "ambient_resistance_k_per_w": 5.302351240073376
+            },
+            "2": {
+              "thermal_capacitance_j_per_k": 0.12414087985624671,
+              "ambient_resistance_k_per_w": 4.043600830681517
+            },
+            "3": {
+              "thermal_capacitance_j_per_k": 0.14140438031396485,
+              "ambient_resistance_k_per_w": 5.855507040638686
+            }
+          }
+        },
+        "5": {
+          "device_class": "server",
+          "coupling_base_conductance_w_per_k": 0.0859852843601263,
+          "cores": {
+            "0": {
+              "thermal_capacitance_j_per_k": 0.11540077024189274,
+              "ambient_resistance_k_per_w": 6.947796026490487
+            },
+            "1": {
+              "thermal_capacitance_j_per_k": 0.09163431136952646,
+              "ambient_resistance_k_per_w": 6.704755253331017
+            },
+            "2": {
+              "thermal_capacitance_j_per_k": 0.13774920247812067,
+              "ambient_resistance_k_per_w": 4.946313977404932
+            },
+            "3": {
+              "thermal_capacitance_j_per_k": 0.14680379915793965,
+              "ambient_resistance_k_per_w": 5.245680617231795
+            }
+          }
+        },
+        "6": {
+          "device_class": "server",
+          "coupling_base_conductance_w_per_k": 0.10364074030035607,
+          "cores": {
+            "0": {
+              "thermal_capacitance_j_per_k": 0.1056797621856045,
+              "ambient_resistance_k_per_w": 6.552392840776977
+            },
+            "1": {
+              "thermal_capacitance_j_per_k": 0.09828999192429935,
+              "ambient_resistance_k_per_w": 6.231772210743952
+            },
+            "2": {
+              "thermal_capacitance_j_per_k": 0.16788747718468713,
+              "ambient_resistance_k_per_w": 4.051342482597803
+            },
+            "3": {
+              "thermal_capacitance_j_per_k": 0.17266167563824797,
+              "ambient_resistance_k_per_w": 4.05359464480137
+            }
+          }
+        },
+        "7": {
+          "device_class": "server",
+          "coupling_base_conductance_w_per_k": 0.07823461834483701,
+          "cores": {
+            "0": {
+              "thermal_capacitance_j_per_k": 0.11239855214109883,
+              "ambient_resistance_k_per_w": 5.537116658036194
+            },
+            "1": {
+              "thermal_capacitance_j_per_k": 0.10437960219310766,
+              "ambient_resistance_k_per_w": 6.027010453373498
+            },
+            "2": {
+              "thermal_capacitance_j_per_k": 0.1470094457376704,
+              "ambient_resistance_k_per_w": 5.769038169839806
+            },
+            "3": {
+              "thermal_capacitance_j_per_k": 0.170489538123135,
+              "ambient_resistance_k_per_w": 5.7725126636637105
+            }
+          }
+        },
+        "8": {
+          "device_class": "server",
+          "coupling_base_conductance_w_per_k": 0.10165102966193106,
+          "cores": {
+            "0": {
+              "thermal_capacitance_j_per_k": 0.11225381147688408,
+              "ambient_resistance_k_per_w": 5.230631302750096
+            },
+            "1": {
+              "thermal_capacitance_j_per_k": 0.10660663989324701,
+              "ambient_resistance_k_per_w": 6.3910258352009945
+            },
+            "2": {
+              "thermal_capacitance_j_per_k": 0.14285400615303862,
+              "ambient_resistance_k_per_w": 5.1449788817063835
+            },
+            "3": {
+              "thermal_capacitance_j_per_k": 0.14757985361550052,
+              "ambient_resistance_k_per_w": 5.338613269396818
+            }
+          }
+        },
+        "9": {
+          "device_class": "server",
+          "coupling_base_conductance_w_per_k": 0.09657802000238519,
+          "cores": {
+            "0": {
+              "thermal_capacitance_j_per_k": 0.10476449409492108,
+              "ambient_resistance_k_per_w": 5.994491404184133
+            },
+            "1": {
+              "thermal_capacitance_j_per_k": 0.10081947152765387,
+              "ambient_resistance_k_per_w": 6.32647440898147
+            },
+            "2": {
+              "thermal_capacitance_j_per_k": 0.17243689627994385,
+              "ambient_resistance_k_per_w": 4.186801034122183
+            },
+            "3": {
+              "thermal_capacitance_j_per_k": 0.1630761229683556,
+              "ambient_resistance_k_per_w": 5.077264027291902
+            }
+          }
+        },
+        "10": {
+          "device_class": "server",
+          "coupling_base_conductance_w_per_k": 0.10960639759245316,
+          "cores": {
+            "0": {
+              "thermal_capacitance_j_per_k": 0.1076998410054043,
+              "ambient_resistance_k_per_w": 6.097585864489743
+            },
+            "1": {
+              "thermal_capacitance_j_per_k": 0.11085102637298686,
+              "ambient_resistance_k_per_w": 6.121203085053596
+            },
+            "2": {
+              "thermal_capacitance_j_per_k": 0.1595356810548963,
+              "ambient_resistance_k_per_w": 4.0507709520584845
+            },
+            "3": {
+              "thermal_capacitance_j_per_k": 0.17859545367954657,
+              "ambient_resistance_k_per_w": 4.5582894747149325
+            }
+          }
+        },
+        "11": {
+          "device_class": "server",
+          "coupling_base_conductance_w_per_k": 0.09260905883596371,
+          "cores": {
+            "0": {
+              "thermal_capacitance_j_per_k": 0.0803693695485289,
+              "ambient_resistance_k_per_w": 5.039877370650887
+            },
+            "1": {
+              "thermal_capacitance_j_per_k": 0.11014781327227793,
+              "ambient_resistance_k_per_w": 5.664635697737925
+            },
+            "2": {
+              "thermal_capacitance_j_per_k": 0.1491358998818357,
+              "ambient_resistance_k_per_w": 4.7487424291727685
+            },
+            "3": {
+              "thermal_capacitance_j_per_k": 0.1455598430805508,
+              "ambient_resistance_k_per_w": 5.930784634102616
+            }
+          }
+        },
+        "12": {
+          "device_class": "server",
+          "coupling_base_conductance_w_per_k": 0.09010437164398809,
+          "cores": {
+            "0": {
+              "thermal_capacitance_j_per_k": 0.11426599313584518,
+              "ambient_resistance_k_per_w": 5.80561344244323
+            },
+            "1": {
+              "thermal_capacitance_j_per_k": 0.10084492731084024,
+              "ambient_resistance_k_per_w": 6.868761198916276
+            },
+            "2": {
+              "thermal_capacitance_j_per_k": 0.1571606211597963,
+              "ambient_resistance_k_per_w": 4.5024068244206035
+            },
+            "3": {
+              "thermal_capacitance_j_per_k": 0.1584273964622788,
+              "ambient_resistance_k_per_w": 4.822903298640408
+            }
+          }
+        },
+        "13": {
+          "device_class": "server",
+          "coupling_base_conductance_w_per_k": 0.10255676887874154,
+          "cores": {
+            "0": {
+              "thermal_capacitance_j_per_k": 0.09553619777372581,
+              "ambient_resistance_k_per_w": 6.588285533193196
+            },
+            "1": {
+              "thermal_capacitance_j_per_k": 0.09297397042614552,
+              "ambient_resistance_k_per_w": 6.668167349411667
+            },
+            "2": {
+              "thermal_capacitance_j_per_k": 0.17899116400656986,
+              "ambient_resistance_k_per_w": 5.670420878327484
+            },
+            "3": {
+              "thermal_capacitance_j_per_k": 0.17562662375338584,
+              "ambient_resistance_k_per_w": 5.83396188232058
+            }
+          }
+        },
+        "14": {
+          "device_class": "server",
+          "coupling_base_conductance_w_per_k": 0.07553676044616724,
+          "cores": {
+            "0": {
+              "thermal_capacitance_j_per_k": 0.08363858462757946,
+              "ambient_resistance_k_per_w": 6.9099191197661
+            },
+            "1": {
+              "thermal_capacitance_j_per_k": 0.10554031480798803,
+              "ambient_resistance_k_per_w": 6.737330920306351
+            },
+            "2": {
+              "thermal_capacitance_j_per_k": 0.16307549825968898,
+              "ambient_resistance_k_per_w": 4.403196523732543
+            },
+            "3": {
+              "thermal_capacitance_j_per_k": 0.15614515288028522,
+              "ambient_resistance_k_per_w": 4.414313927940611
+            }
+          }
+        },
+        "15": {
+          "device_class": "server",
+          "coupling_base_conductance_w_per_k": 0.08991145911598233,
+          "cores": {
+            "0": {
+              "thermal_capacitance_j_per_k": 0.10063322383231493,
+              "ambient_resistance_k_per_w": 5.7347309373131425
+            },
+            "1": {
+              "thermal_capacitance_j_per_k": 0.11898956879426861,
+              "ambient_resistance_k_per_w": 5.711632949945117
+            },
+            "2": {
+              "thermal_capacitance_j_per_k": 0.1523250878739057,
+              "ambient_resistance_k_per_w": 5.588679059605688
+            },
+            "3": {
+              "thermal_capacitance_j_per_k": 0.17995557131602052,
+              "ambient_resistance_k_per_w": 5.192240926701521
+            }
+          }
+        },
+        "16": {
+          "device_class": "server",
+          "coupling_base_conductance_w_per_k": 0.07147041115633875,
+          "cores": {
+            "0": {
+              "thermal_capacitance_j_per_k": 0.11464311160078106,
+              "ambient_resistance_k_per_w": 6.921307369559217
+            },
+            "1": {
+              "thermal_capacitance_j_per_k": 0.10430764641535986,
+              "ambient_resistance_k_per_w": 6.671499062654335
+            },
+            "2": {
+              "thermal_capacitance_j_per_k": 0.14308678040292108,
+              "ambient_resistance_k_per_w": 5.754591707836339
+            },
+            "3": {
+              "thermal_capacitance_j_per_k": 0.16066825690243758,
+              "ambient_resistance_k_per_w": 4.812293699985589
+            }
+          }
+        },
+        "17": {
+          "device_class": "server",
+          "coupling_base_conductance_w_per_k": 0.09063827469391125,
+          "cores": {
+            "0": {
+              "thermal_capacitance_j_per_k": 0.11084800082598188,
+              "ambient_resistance_k_per_w": 6.059882912801353
+            },
+            "1": {
+              "thermal_capacitance_j_per_k": 0.0910009713770864,
+              "ambient_resistance_k_per_w": 5.189519297244883
+            },
+            "2": {
+              "thermal_capacitance_j_per_k": 0.1798446218873053,
+              "ambient_resistance_k_per_w": 4.3166387598080345
+            },
+            "3": {
+              "thermal_capacitance_j_per_k": 0.14672076088424235,
+              "ambient_resistance_k_per_w": 4.9137158328506185
+            }
+          }
+        },
+        "18": {
+          "device_class": "server",
+          "coupling_base_conductance_w_per_k": 0.0829444157119636,
+          "cores": {
+            "0": {
+              "thermal_capacitance_j_per_k": 0.11507076043584333,
+              "ambient_resistance_k_per_w": 5.448593664004036
+            },
+            "1": {
+              "thermal_capacitance_j_per_k": 0.09290589134807965,
+              "ambient_resistance_k_per_w": 5.182214266275035
+            },
+            "2": {
+              "thermal_capacitance_j_per_k": 0.1480687387614326,
+              "ambient_resistance_k_per_w": 5.493029809947792
+            },
+            "3": {
+              "thermal_capacitance_j_per_k": 0.16716543630166378,
+              "ambient_resistance_k_per_w": 4.959713000998006
+            }
+          }
+        },
+        "19": {
+          "device_class": "server",
+          "coupling_base_conductance_w_per_k": 0.10846743101343627,
+          "cores": {
+            "0": {
+              "thermal_capacitance_j_per_k": 0.11148572505309547,
+              "ambient_resistance_k_per_w": 5.546377682358033
+            },
+            "1": {
+              "thermal_capacitance_j_per_k": 0.09701167701142106,
+              "ambient_resistance_k_per_w": 5.516404360933116
+            },
+            "2": {
+              "thermal_capacitance_j_per_k": 0.12935439511000899,
+              "ambient_resistance_k_per_w": 4.757393456720864
+            },
+            "3": {
+              "thermal_capacitance_j_per_k": 0.12445592659308356,
+              "ambient_resistance_k_per_w": 4.293832789631995
+            }
+          }
+        },
+        "20": {
+          "device_class": "server",
+          "coupling_base_conductance_w_per_k": 0.10357031081182062,
+          "cores": {
+            "0": {
+              "thermal_capacitance_j_per_k": 0.10602169476087,
+              "ambient_resistance_k_per_w": 6.4438128076983645
+            },
+            "1": {
+              "thermal_capacitance_j_per_k": 0.1050415270386865,
+              "ambient_resistance_k_per_w": 5.450029361890356
+            },
+            "2": {
+              "thermal_capacitance_j_per_k": 0.17127266158026036,
+              "ambient_resistance_k_per_w": 5.665264008191258
+            },
+            "3": {
+              "thermal_capacitance_j_per_k": 0.13283442797264516,
+              "ambient_resistance_k_per_w": 5.816830547035121
+            }
+          }
+        },
+        "21": {
+          "device_class": "server",
+          "coupling_base_conductance_w_per_k": 0.08661059175529306,
+          "cores": {
+            "0": {
+              "thermal_capacitance_j_per_k": 0.11326039242632205,
+              "ambient_resistance_k_per_w": 5.391655219638786
+            },
+            "1": {
+              "thermal_capacitance_j_per_k": 0.08758672790506258,
+              "ambient_resistance_k_per_w": 6.161323284114173
+            },
+            "2": {
+              "thermal_capacitance_j_per_k": 0.14867152771939135,
+              "ambient_resistance_k_per_w": 4.819506417738613
+            },
+            "3": {
+              "thermal_capacitance_j_per_k": 0.13619381712611864,
+              "ambient_resistance_k_per_w": 5.516748388057481
+            }
+          }
+        },
+        "22": {
+          "device_class": "server",
+          "coupling_base_conductance_w_per_k": 0.08172914424251979,
+          "cores": {
+            "0": {
+              "thermal_capacitance_j_per_k": 0.10388884447341257,
+              "ambient_resistance_k_per_w": 5.509683196279432
+            },
+            "1": {
+              "thermal_capacitance_j_per_k": 0.10982562659734779,
+              "ambient_resistance_k_per_w": 6.0328519568603225
+            },
+            "2": {
+              "thermal_capacitance_j_per_k": 0.16749434234466437,
+              "ambient_resistance_k_per_w": 5.69529038184386
+            },
+            "3": {
+              "thermal_capacitance_j_per_k": 0.17014350604142175,
+              "ambient_resistance_k_per_w": 5.40187369313287
+            }
+          }
+        },
+        "23": {
+          "device_class": "server",
+          "coupling_base_conductance_w_per_k": 0.09190107262389352,
+          "cores": {
+            "0": {
+              "thermal_capacitance_j_per_k": 0.11865881942355144,
+              "ambient_resistance_k_per_w": 6.468975148068803
+            },
+            "1": {
+              "thermal_capacitance_j_per_k": 0.10061287787270105,
+              "ambient_resistance_k_per_w": 5.9847754144032415
+            },
+            "2": {
+              "thermal_capacitance_j_per_k": 0.17699975750605912,
+              "ambient_resistance_k_per_w": 4.023051927780243
+            },
+            "3": {
+              "thermal_capacitance_j_per_k": 0.12500817884923895,
+              "ambient_resistance_k_per_w": 4.939439798384751
+            }
+          }
+        },
+        "24": {
+          "device_class": "server",
+          "coupling_base_conductance_w_per_k": 0.09932929843619176,
+          "cores": {
+            "0": {
+              "thermal_capacitance_j_per_k": 0.09856514272976477,
+              "ambient_resistance_k_per_w": 6.503080985595354
+            },
+            "1": {
+              "thermal_capacitance_j_per_k": 0.0995127064046463,
+              "ambient_resistance_k_per_w": 6.408763291959323
+            },
+            "2": {
+              "thermal_capacitance_j_per_k": 0.12233837156751555,
+              "ambient_resistance_k_per_w": 4.077408252209933
+            },
+            "3": {
+              "thermal_capacitance_j_per_k": 0.12593485596489284,
+              "ambient_resistance_k_per_w": 4.351259576394183
+            }
+          }
+        },
+        "25": {
+          "device_class": "server",
+          "coupling_base_conductance_w_per_k": 0.07471523693228228,
+          "cores": {
+            "0": {
+              "thermal_capacitance_j_per_k": 0.108062131948908,
+              "ambient_resistance_k_per_w": 5.271754052115669
+            },
+            "1": {
+              "thermal_capacitance_j_per_k": 0.10676653289218674,
+              "ambient_resistance_k_per_w": 5.068765767402467
+            },
+            "2": {
+              "thermal_capacitance_j_per_k": 0.12206106993648126,
+              "ambient_resistance_k_per_w": 5.234603786794881
+            },
+            "3": {
+              "thermal_capacitance_j_per_k": 0.1651084724755359,
+              "ambient_resistance_k_per_w": 4.671202855037853
+            }
+          }
+        }
+      }
+    }
+  },
+  "experiment_settings": {
+    "intra_device_policy": "ready_FIFO_shortest_finish_queue_nonpreemptive",
+    "dvfs": "maximum",
+    "step_s": 0.001,
+    "upload_radius_m": 5.0,
+    "random_candidates": "vehicle and covered RSUs",
+    "transfer_types": [
+      "task_upload",
+      "edge_data"
+    ],
+    "implicit_result_return_delay": false
+  },
+  "evidence": [
+    {
+      "trial": "local-01",
+      "files_sha256": {
+        "trace.json": "0aa6b0fb0ca4621694a717768d82e5e7cbf84ff91146abad207def85f2dcfe3d",
+        "jobs.csv": "99e18d48dd3e539d41f7ca905cfe90c565e16860da983ef035490ee4fd18cdd7",
+        "transfers.csv": "47836b94e0861f588cea2dde545cdc2fe27d5d14744376dc016ec5a5e107cd85",
+        "clock-pairs.csv": "e61c8b3129bdedff24d4d74be9387872ba2685cfcd8c392ae085da42cd124666",
+        "protocol.jsonl": "73577bcffbd58b419ab17fbbf62564f05da2a1023b629ff96b8d8c287fae36be",
+        "run.json": "4f78a47e8f43a7330a044566820f229a2d59a043ffa44724625ca3c81a9f485d",
+        "validation.json": "47067e59211f730a789e7ce549c4844f118ac4212eaa05ff313eec418816d9d5"
+      }
+    },
+    {
+      "trial": "offload-01",
+      "files_sha256": {
+        "trace.json": "b1039a795fccbc83cb6e81a97494f15a45694090f23476edcc0fffa19ec9982e",
+        "jobs.csv": "e00426625b9ccb28b147bcddd14a633254746f23400834e7564da3076d607b77",
+        "transfers.csv": "4650bb91e52a769813b99b13740c50917217ae5af3b31f342fe23b4a3498e12b",
+        "clock-pairs.csv": "72f2ff69e108332b8853d979a6b6e1531018ead6879bdc1ff674cb57f34aca7a",
+        "protocol.jsonl": "2ae43148f1a04f5c4afb35f3f35a5f6bfb4994664b58bbbf096b2400777b7758",
+        "run.json": "87b47c34ed3af82f7fa44b77e18266d2da991643e59235c2696f7ce95e07bfa0",
+        "validation.json": "47067e59211f730a789e7ce549c4844f118ac4212eaa05ff313eec418816d9d5"
+      }
+    },
+    {
+      "trial": "random-01",
+      "files_sha256": {
+        "trace.json": "eaef618fab8adf328162b0ee15c5d671d38d758e5a8b628897ab96c71d0ee79f",
+        "jobs.csv": "f9a93a46eba9215c31c33d8373e8b765192f3daa007e96bd574c28afd622c03c",
+        "transfers.csv": "18578c1f5a763d54d5e8c3360d5a7f839f723844404d5cdf4023f141468bfed7",
+        "clock-pairs.csv": "c4a84d230a8e966938698f3d55441adf244420f5c1f731942c91240c32d5b284",
+        "protocol.jsonl": "639d2d36366fe215948a6a435894abc295441df34ecf60319ca838d4f609b136",
+        "run.json": "10489eb6adfb6f33ce10a8c900782ae30466715be0bfc4ba18ab7ba3336103b4",
+        "validation.json": "47067e59211f730a789e7ce549c4844f118ac4212eaa05ff313eec418816d9d5"
+      }
+    }
+  ],
+  "uncertainty": "Sample SD is undefined for one run; no error bars or confidence claim.",
+  "response_censoring": "Completed jobs only; unfinished jobs retained separately.",
+  "deadline_denominator": "All completed jobs plus unfinished jobs whose absolute deadlines have passed by the observation cutoff.",
+  "thermal_denominator": "All 26 modeled devices, including idle devices, in every run."
+}

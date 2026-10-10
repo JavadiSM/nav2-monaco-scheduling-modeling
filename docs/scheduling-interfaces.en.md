@@ -1,57 +1,75 @@
 # Scheduling and communication extension interfaces
 
-## Independent scheduling policies
+Device placement and scheduling inside each device are independent interfaces. The `local`, `offload`, `random` and `greedy` experiments use the same per-device FIFO / shortest predicted finish-time queue policy and normal middle DVFS with the same device-wide maximum-frequency reaction after overrun.
 
-`SchedulingPolicy` in `tools/live_bridge/policies.py` defines two hooks, both accepting keyword arguments and extensible context:
+## Placement
+
+`DevicePlacement.choose(*, owner_device, position_xy, endpoints, **kwargs)` returns an execution device and its recorded candidate sets. `owner_device` identifies the original ROS vehicle namespace; it never changes when computation is offloaded. `position_xy` is Gazebo ground truth at the current acknowledged physics tick.
+
+- `local`: select the vehicle.
+- `offload`: select the nearest RSU within the inclusive 5 m send-time range, breaking equal-distance ties by device ID; use the vehicle if no RSU qualifies.
+- `random`: uniformly select the vehicle or an RSU inside the same 5 m range, using system randomness. Selection draws are retained as actual device IDs in the trace.
+- `greedy`: select the eligible device with the lowest current maximum core temperature; equal temperatures use device ID. Eligibility includes the vehicle and all RSUs inside the same 5 m range. It does not optimize queue delay, parent placement or transmission cost. The recorded placement event includes the temperature snapshot used for selection.
+
+A job's selected device remains fixed throughout execution. Initial task admission is separate from parent-data transfer and reception. RSU-to-RSU data can cross distances greater than 5 m; accepted arrivals are not rechecked against vehicle coverage.
+
+## Per-device policies
+
+`SchedulingPolicy` in `tools/live_bridge/policies.py` exposes two keyword-based hooks:
 
 ```python
 class MyPolicy:
     name = 'my_nonpreemptive_policy'
 
     def assignments(self, *, engine, device_id, ready_jobs, free_cores, **kwargs):
-        # Return Assignment(job_id, core_id) objects for any selected subset.
-        # Order jobs and choose their cores here.
-        return []
+        return []  # Assignment(job_id, core_id) for selected eligible jobs.
 
     def dvfs_level(self, *, engine, job, core, **kwargs):
-        # Return a valid paired operating-point ID, or None for maximum.
-        return None
+        return None  # Maximum paired frequency/voltage by default.
 ```
 
-Inject an instance into `LiveEngine(scheduling_policy=MyPolicy())` or `Broker(..., scheduling_policy=MyPolicy())`. The default `ReadyFIFOOldestIdle` class implements the existing baseline. FIFO ordering and oldest-idle-core assignment belong exclusively to that class; another policy can replace both without editing the execution engine. Its operating point remains maximum throughout every job by default.
+Inject an instance into `LiveEngine(scheduling_policy=MyPolicy())` or `Broker(..., scheduling_policy=MyPolicy())`. The engine rejects early children, occupied cores, duplicate assignments and invalid operating points before applying a dispatch batch.
 
-The engine computes actual eligibility and exposes only ready jobs and currently free local cores. It validates every proposed assignment before applying any of the batch, rejecting blocked children, occupied cores and duplicate job/core use. Selected predecessor completion, whole-device cooling and exact output gates are shared execution constraints. Policies may deliberately leave cores idle. The current interface supports nonpreemptive job dispatch with per-interval DVFS; job preemption, migration and remote placement need separate extensions.
+`FIFOShortestFinish` maps newly eligible jobs in `(ready_tick, release_tick, job_id)` order to per-core queues. For each core it predicts the current tick plus running remaining service, all FIFO reservations and the new job's service at the selected operating point. It chooses the smallest predicted finish; ties use core ID. Only a free core's eligible queue head can start. This prediction holds the currently selected rate and excludes future thermal pauses or boost transitions; actual execution always enforces whole-device cooling. Blocked children do not reserve cores. There is no job preemption or migration.
 
-A separately supplied `dvfs_selector(engine, job, core)` can override the policy's normal operating-point hook for experiments. The engine's per-job maximum-point remainder rule takes precedence over both hooks. Invalid paired point IDs fail explicitly. Policy identity is recorded in the trace and live display. The analyzer checks FIFO-specific ordering only for the named FIFO baseline; ownership, precedence, work accounting and output timing remain checked for every policy.
+The historical `ReadyFIFOOldestIdle` class remains explicitly selectable; it is a different policy, not an invariant of the engine. A custom `dvfs_selector(engine, job, core)` may override the normal operating-point hook. `overrun_policy='device_maximum_until_overruns_complete'` is a system reaction, independent of the placement algorithm. After any HI-selected job crosses its LO work, every core of its device uses its own maximum paired point. The device returns to normal selection after the last active overrun job finishes. Other devices are unaffected. The active set survives cooling pauses. Per-job and no-boost variants remain separately selectable.
 
-## Communication cost and request admission
-
-The current live baseline remains local; these functions prepare future offloading without silently enabling it. `CommunicationModel` in `tools/abstract_compute/communication.py` accepts a custom `cost_function(**kwargs)` returning a finite, nonnegative **duration in seconds**. The default `communication_cost_s(*args, **kwargs)` returns **0.0 s**.
+## Two independent communication costs
 
 ```python
-model = CommunicationModel(radius_m=5.0, cost_function=my_cost)
-request = model.send_request(
-    position_xy=(vehicle_x, vehicle_y), endpoint=rsu,
-    send_time_s=now_s, payload_bytes=input_size, job_id=job_id)
-result = model.send_result(
-    request, send_time_s=server_finish_s,
-    position_xy=current_vehicle_position, payload_bytes=result_size,
-    job_id=job_id)
+def my_upload(*, distance_m, task_size_bytes=None, **kwargs):
+    return 0.003  # seconds
+
+def my_edge(*, distance_m, edge_size_bytes=None, **kwargs):
+    return 0.004  # seconds
+
+engine = LiveEngine(
+    edge_config={'placement': 'offload', 'coverage_radius_m': 5.0},
+    upload_cost=my_upload,
+    data_cost=my_edge,
+)
 ```
 
-Both directions call the same cost function. Its context contains `direction`, `endpoint_id`, `send_time_s` and the extra supplied keyword arguments. The returned transmission retains send time, delay and arrival time = send time + delay.
+`task_upload_cost_s` receives the vehicle-to-selected-device distance and an optional task size. `edge_data_cost_s` receives the parent-device-to-child-device distance and an optional edge size. Additional context includes source/target device IDs, job, parent ID, send time and engine, so a replacement can use bandwidth, payloads or other future parameters without changing the interface. The current model ignores the optional sizes.
 
-Request coverage is inclusive Euclidean distance **<= 5 m**, evaluated only at request sending. An out-of-range request is rejected. Once admitted, its result may be returned and received after the vehicle has left coverage: there is no result-time position recheck. Server execution cannot return a result before the request's modeled arrival. The custom cost function still determines return delay, which is currently zero. No bandwidth, congestion, loss or radio attenuation is assumed beyond this explicit idealization.
+| Send-time distance (m) | Delay (s) |
+| --- | ---: |
+| [0, 1) | 0 |
+| [1, 2) | 0.003 |
+| [2, 3) | 0.004 |
+| [3, 5] | 0.005 |
+| (5, infinity) | 0.010 |
 
-## Endpoint configuration and placement
+Same-device transfers take zero time. The functions must return finite nonnegative seconds. The engine rounds each duration up to the common lattice and records send/arrival ticks. Parent data can be sent only after modeled parent completion and after the child destination is known. The child waits for its task upload and every selected parent transfer. Results remain buffered until the selected device finishes the modeled computation and its thermal gate permits delivery. The live placement experiment charges these two transfer types, without an additional implicit result-return hop.
 
-| Device class | A7 cores | A15 cores | Initial / ambient (°C) | Tmax (°C) | Tbalance (°C) |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| Vehicle | 1 | 1 | 45 / 45 | 46.2 | 45.6 |
-| RSU | 2 | 2 | 45 / 45 | 46.5 | 46.0 |
+`CommunicationModel` retains its standalone request/result convenience interface for extensions; live placement uses the two independently replaceable functions above. Link contention, packet loss and payload serialization are not included in the distance-only model.
 
-`config/abstract_compute.json` supplies shared thermal defaults plus per-class `thermal` overrides. `load_platform` resolves these separately for each device. `load_edge_resources()` binds every scene RSU to its own four-core processor, position and independent physical realization. This mapping does not spawn a moving vehicle or activate offloading.
+## Hardware and trace identity
 
-The circuit now has **25 RSUs**: the original 19 checkpoint-associated cabinets, roadside start/finish cabinets and four inserted cabinets. Consecutive order follows route station on the open start-to-finish track; separation is Euclidean XY distance. Every consecutive gap is <= 10 m; the measured maximum is **9.595640 m**. Start/finish cabinets are beside the road at those route stations, preserving the vehicle's start and finish clearance. Added cabinets reuse the same blue appearance and antennas.
+Each of the 25 RSUs is bound to its own processor through `load_edge_resources`: one A15 core, Tmax 46.5 degrees C and Tbalance 46.0 degrees C. The vehicle has one A7, Tmax 46.2 and Tbalance 45.6. Initial and ambient temperatures are 45 degrees C. Ordinary idle and special cooling powers remain distinct.
 
-[scripts/extend_rsu_layout.py](../scripts/extend_rsu_layout.py) preserves the centreline, map, checkpoints, existing endpoint poses and all non-RSU world elements. Its updated manifest validates the explicitly authorized endpoint additions. [Placement evidence](evidence/rsu-layout.json), [metric map](figures/metric-map/circuit-dimensions.png) and [5 m send-time coverage](figures/metric-map/edge-coverage-5m.png) retain the resulting geometry.
+Physical RC parameters are sampled with system randomness. Their explicit realized values can be saved using `physical_realization(devices)` and loaded through `realized_physical_parameters` in a hardware JSON. Reusing these values gives all four policies the same actual modeled hardware without relying on a random initialization key.
+
+Trace schema 4 keeps both `owner_device` and execution `device`, per-job deadlines, exact placement positions, uploads, parent transfers, core queue reservations, work segments, thermal events and original publication ownership. `analyze_placement_trial.py` independently checks these invariants and exports original per-job and per-transfer CSVs.
+
+The current relative deadline is `uniform(1.1,1.3) * W_HI / (2000 MHz * 1.8)`, computed from HI normalized work and maximum A15 speed. Queueing, transfer costs and thermal pauses never enter deadline construction. The sampled per-family values are saved in `config/task_deadlines.json`; nominal ROS activation periods remain seconds and do not scale with CPU frequency.

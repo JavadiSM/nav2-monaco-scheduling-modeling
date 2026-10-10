@@ -18,15 +18,15 @@ def main():
     for e in servers:
         ax.add_patch(Circle((e['x'],e['y']),5,facecolor='#09a5ae',edgecolor='#007f88',alpha=.10,lw=.8))
         ax.plot(e['x'],e['y'],'s',color='#007f88',ms=4)
-        ax.annotate(e['id'].replace('edge_','E'),(e['x'],e['y']),xytext=(3,4),textcoords='offset points',fontsize=8)
+        ax.annotate(e['id'],(e['x'],e['y']),xytext=(3,4),textcoords='offset points',fontsize=11,weight='bold',bbox={'facecolor':'white','edgecolor':'none','alpha':.85,'pad':1.5})
     ax.plot([p[0] for p in route],[p[1] for p in route],color='#223449',lw=3)
     for name,c in [('start','#18a674'),('finish','#d94760')]:
         p=scene[name];ax.plot(p['x'],p['y'],'o',color=c,ms=8);ax.annotate(name.upper(),(p['x'],p['y']),xytext=(-45,-20),textcoords='offset points',fontsize=9)
     ax.set_aspect('equal');ax.grid(alpha=.15);ax.set_xlabel('x (m)');ax.set_ylabel('y (m)')
-    ax.set_title(f'Fixed circuit | {len(servers)} RSUs | 5 m send-time coverage | communication cost = 0 s',loc='left',fontweight='bold')
+    ax.set_title(f'Fixed circuit | {len(servers)} RSUs | 5 m send-time coverage | distance-based task / edge delays',loc='left',fontweight='bold')
     fig.tight_layout();out=ROOT/'docs/figures/metric-map';fig.savefig(out/'edge-coverage-5m.png',dpi=170);fig.savefig(out/'edge-coverage-5m.svg')
     svg=out/'edge-coverage-5m.svg';svg.write_text('\n'.join(line.rstrip() for line in svg.read_text().splitlines())+'\n')
     counts=[len(reachable_endpoints(p,servers)) for p in route]
-    (ROOT/'docs/evidence/edge-coverage.json').write_text(json.dumps(dict(radius_m=5,communication_cost_s=0,active_offloading=False,
+    (ROOT/'docs/evidence/edge-coverage.json').write_text(json.dumps(dict(radius_m=5,communication_cost_model="piecewise distance",active_offloading=True,
        evaluated_centreline_points=len(route),uncovered_centreline_points=counts.count(0),minimum_visible_servers=min(counts),maximum_visible_servers=max(counts)),indent=2)+'\n')
 if __name__=='__main__':main()

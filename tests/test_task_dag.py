@@ -5,6 +5,8 @@ from pathlib import Path
 from tools.abstract_compute import load_platform, GraphJob, DependencyFIFOScheduler, load_tasks, instantiate_graph, periodic_jobs
 
 ROOT = Path(__file__).resolve().parents[1]
+from platform_fixtures import load_platform, LiveEngine
+
 
 class TaskGraphTests(unittest.TestCase):
     def run_jobs(self, jobs, *, thermal_headroom_c=None, **kwargs):
@@ -57,7 +59,7 @@ class TaskGraphTests(unittest.TestCase):
         self.assertTrue(all(e['device_id']==0 for e in s.events if 'device_id' in e))
 
     def test_random_dags_no_early_child_no_core_overlap(self):
-        rng=random.Random(4242)
+        rng=random.SystemRandom()
         for trial in range(10):
             jobs=[GraphJob(i,'x',rng.uniform(.01,2),rng.random()*.03,tuple(j for j in range(i) if rng.random()<.05)) for i in range(50)]
             s,r=self.run_jobs(jobs,max_time_s=20)

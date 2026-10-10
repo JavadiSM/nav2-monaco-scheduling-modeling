@@ -18,5 +18,13 @@ __pycache__/
 
 # Publish the selected compact recordings.
 docs/media/*.gif
-!docs/media/dual-view-4x.gif
-!docs/media/live-fifo-8x.gif
+
+# Current full-course comparisons, including four-nearest-RSU recordings.
+!docs/media/local-full-course-8x.gif
+!docs/media/local-nearest-rsus-8x.gif
+!docs/media/random-full-course-8x.gif
+!docs/media/random-nearest-rsus-8x.gif
+!docs/media/offload-full-course-8x.gif
+!docs/media/offload-nearest-rsus-8x.gif
+!docs/media/greedy-full-course-8x.gif
+!docs/media/greedy-nearest-rsus-8x.gif

@@ -1,0 +1,4 @@
+policy,n_runs,overrun_count_mean,overrun_count_sample_sd,deadline_meet_rate_mean,deadline_meet_rate_sample_sd,average_response_s_mean,average_response_s_sample_sd,thermal_violations_per_device_mean,thermal_violations_per_device_sample_sd,completed_jobs,unfinished_jobs,pooled_response_s,pooled_deadline_meet_rate
+local,1,1036.0,,0.8211696471725471,,0.04745094248429193,,5.5,,10345,0,0.04745094248429193,0.8211696471725471
+offload,1,2515.0,,0.8205265724037055,,0.0139054119941492,,4.538461538461538,,20510,3,0.0139054119941492,0.8205265724037055
+random,1,2156.0,,0.8248499456496053,,0.01298246526136686,,1.4230769230769231,,21158,1,0.01298246526136686,0.8248499456496053

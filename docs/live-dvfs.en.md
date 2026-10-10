@@ -1,6 +1,8 @@
 # Live per-job DVFS
 
-The live vehicle has one Cortex-A7 and one Cortex-A15. Vehicle Tmax is **46.2 °C**, ambient and initial core temperatures are **45 °C**, and vehicle Tbalance is **45.6 °C**. RSUs use Tmax = 46.5 °C and Tbalance = 46.0 °C. Ready FIFO and oldest-idle-core assignment remain the active, replaceable baseline; see [policy and communication interfaces](scheduling-interfaces.en.md). Ordinary arrivals do not preempt or migrate jobs; changing the operating point changes the speed of the job already occupying its core.
+**Current placement experiment:** one A7 vehicle at level 2 (1200 MHz / 1.0 V), one A15 per RSU at level 2 (1500 MHz / 1.2 V). `device_maximum_until_overruns_complete` overrides normal selection after an overrun: all cores of the affected device use their maximum paired point until the last active overrun job finishes. Other devices are unaffected; this is a common system reaction, not part of placement.
+
+The current live vehicle has one Cortex-A7; each RSU has one Cortex-A15. Vehicle Tmax is **46.2 °C**, ambient and initial core temperatures are **45 °C**, and vehicle Tbalance is **45.6 °C**. RSUs use Tmax = 46.5 °C and Tbalance = 46.0 °C. Ready FIFO / shortest predicted finish queues are the active, replaceable baseline; see [policy and communication interfaces](scheduling-interfaces.en.md). Ordinary arrivals do not preempt or migrate jobs; changing the operating point changes the speed of the job already occupying its core.
 
 ## Paired operating points
 
@@ -26,7 +28,7 @@ $$q_{j,n}=\begin{cases}\min\{w_{j,n},\eta_k f_{k,l(n)}\delta\},&\text{job active
 
 $$w_{j,n+1}=w_{j,n}-q_{j,n},\qquad w_{j,0}=W_j.$$
 
-A frequency change preserves w and all previously completed work. Completion is the first lattice boundary where w reaches zero. The last interval occupies a full tick; its charged work is clamped to the remaining work. Power uses the selected paired point for that interval. The coupled thermal model receives those powers on the same lattice. During cooling, both cores consume no job work, retain their assigned jobs and use cooling power. Ordinary idle retains its separate idle-power definition.
+A frequency change preserves w and all previously completed work. Completion is the first lattice boundary where w reaches zero. The last interval occupies a full tick; its charged work is clamped to the remaining work. Power uses the selected paired point for that interval. The coupled thermal model receives those powers on the same lattice. During cooling, all cores of the affected device consume no job work, retain their assigned jobs and use cooling power. Ordinary idle retains its separate idle-power definition.
 
 The adapter seals the actual host calculation before selecting its total budget. Buffered outputs still wait for selected modeled completion, parent completion and thermal permission, then flush before the next physics step. DVFS changes this modeled completion time; it does not bypass the output gate.
 
@@ -36,7 +38,7 @@ All existing tasks still have HI criticality. There are no LO tasks or global mo
 
 $$W_i^{LO}=C_i^{LO} f_{ref}\eta_{ref}.$$
 
-For such a job, the overrun boundary is the first common-lattice boundary at which accumulated consumed work reaches W_i^LO. From that boundary onward, any remaining work uses level 4 regardless of scheduler requests. A threshold crossed inside an interval is detected at its end, within one 1 ms tick; no fractional physics step is introduced. If the same tick completes the whole budget, there is no remainder to accelerate. The selected HI demand remains the total demand, rather than adding C_HI after C_LO. The next job receives its own normal DVFS decision.
+For such a job, the overrun boundary is the first common-lattice boundary at which accumulated consumed work reaches W_i^LO. With `remaining_work_at_maximum_point`, from that boundary onward any remaining work uses level 4 regardless of scheduler requests. With the current `device_maximum_until_overruns_complete` configuration, every core of the affected device switches to maximum until the last active overrun job finishes. The active set is retained during cooling; no job is dropped. Normal selection resumes afterwards. A threshold crossed inside an interval is detected at its end, within one 1 ms tick; no fractional physics step is introduced. If the same tick completes the whole budget, there is no remainder to accelerate. The selected HI demand remains the total demand, rather than adding C_HI after C_LO. The next job receives its own normal DVFS decision.
 
 ## Scheduler interface
 
@@ -68,7 +70,7 @@ These are proposed experiments, not newly enabled schedulers. Apply every priori
 
 | Candidate | Ready-job priority / core assignment | Additional input |
 | --- | --- | --- |
-| FIFO baseline | Oldest ready job; oldest-idle core; maximum DVFS | None; current default |
+| FIFO baseline | Oldest ready job; oldest-idle core; maximum DVFS | None; historical configuration |
 | FIFO + earliest finish | Same ready-job order; choose the core with the earliest predicted finish at maximum DVFS | Explicit conservative prediction of busy/cooling availability |
 | Ready EDF + earliest finish | Earliest absolute deadline among ready jobs; earliest predicted finish core | User-defined relative deadlines, including event-driven jobs |
 | DAG rank + earliest finish | Descending known successor-path cost among ready jobs; earliest predicted finish core | A defined graph instance or declared structural lookahead; an online HEFT-inspired adaptation |
@@ -101,4 +103,4 @@ The earlier DVFS development check passed **64 unit tests**, including mid-job c
 Some newly queued/running jobs remain incomplete at the intentional cutoff. One completed budget in the low-point trial was still thermally blocked, so its output correctly remained held. Neither trial aborted navigation. These are functional checks of work accounting and release semantics; two short trials do not establish a scheduling-performance ranking or full-course success.
 
 
-The later [current-policy preview](live-bridge.en.md#current-policyrsu-preview) uses the final vehicle thresholds 46.2 / 45.6 °C, the replaceable FIFO policy and 25 RSUs. All 71 tests pass after the interface and placement changes. Its default maximum-point execution is validated independently; the low-point development trace above remains the evidence for within-job frequency changes.
+The retained [local-policy preview](live-bridge.en.md#current-policyrsu-preview) uses the final vehicle thresholds 46.2 / 45.6 °C, the replaceable FIFO policy and 25 RSUs. All 71 tests pass after the interface and placement changes. Its default maximum-point execution is validated independently; the low-point development trace above remains the evidence for within-job frequency changes.

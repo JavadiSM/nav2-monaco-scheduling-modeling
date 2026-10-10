@@ -1,1 +1,4 @@
 *.pdf binary
+
+# CSV exports retain standard CRLF record endings.
+*.csv whitespace=cr-at-eol

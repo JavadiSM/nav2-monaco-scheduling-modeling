@@ -1,0 +1,27 @@
+{
+  "source": "artifacts/full-course-20261010/media/greedy-vehicle-sim-8x.gif",
+  "source_sha256": "097668d91b996908f3b96b63651da1bc8c03b46806898ae63a1325d1609e8ed1",
+  "source_bytes": 60441795,
+  "source_frames": 680,
+  "source_dimensions": [
+    1440,
+    540
+  ],
+  "source_duration_s": 34.0,
+  "publication_file": "docs/media/greedy-full-course-8x.gif",
+  "publication_sha256": "ec86698520715f75c2e5a4c20ea8a30e4cbf49ace15053f72fd284077226ddd7",
+  "publication_bytes": 35252329,
+  "playback_speed": 1.0,
+  "width": 1440,
+  "sampled_fps": 20,
+  "palette_colors": 96,
+  "dither": "none",
+  "full_interval_preserved": true,
+  "frames": 680,
+  "duration_s": 34.0,
+  "dimensions": [
+    1440,
+    540
+  ],
+  "size_reduction_percent": 41.67557565092168
+}

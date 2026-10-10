@@ -1,0 +1,832 @@
+{
+  "manifest": {
+    "status": "complete",
+    "target_distance_m": 50.0,
+    "replicates_per_policy": 1,
+    "randomness": "system entropy; realized inputs retained",
+    "started_unix_s": 1791575522.9611185,
+    "trials": [
+      {
+        "policy": "local",
+        "trial": "local-01",
+        "status": "complete",
+        "exit_code": 0,
+        "validation_exit_code": 0,
+        "metrics": {
+          "ordered_targets_passed": 6,
+          "trial": "local-01",
+          "placement": "local",
+          "colour": "red",
+          "distance_m": 50.0241612855917,
+          "target_reached": true,
+          "race_seconds": 111.908,
+          "host_seconds": 805.9450176949904,
+          "jobs": 18318,
+          "completed": 18312,
+          "unfinished": 6,
+          "overrun_count": 1482,
+          "overruns_per_1000_jobs": 80.90402882410744,
+          "deadline_met": 8654,
+          "deadline_missed": 9662,
+          "deadline_pending_not_due": 2,
+          "deadline_meet_rate": 0.472483074907185,
+          "average_response_s": 0.018428079947575362,
+          "response_std_s": 0.05306261855299725,
+          "response_p95_s": 0.045,
+          "thermal_cooling_entries_total": 53,
+          "thermal_violations_per_device": 2.0384615384615383,
+          "devices": 26,
+          "devices_used": 1,
+          "completed_outputs_committed": 18312,
+          "offloaded_jobs": 0,
+          "nonzero_task_uploads": 0,
+          "nonzero_parent_transfers": 0,
+          "validation_errors": 0,
+          "input_bindings": 4608,
+          "exact_DDS_bindings_checked": 3647,
+          "unresolved_input_bindings": 0,
+          "completed_outputs_pending_commit": 0,
+          "selected_budget_modes": {
+            "LO": {
+              "jobs": 16836,
+              "deadline_evaluable": 16834,
+              "deadline_met": 8654,
+              "deadline_meet_rate": 0.5140786503504812
+            },
+            "HI": {
+              "jobs": 1482,
+              "deadline_evaluable": 1482,
+              "deadline_met": 0,
+              "deadline_meet_rate": 0.0
+            }
+          }
+        }
+      },
+      {
+        "policy": "offload",
+        "trial": "offload-01",
+        "status": "complete",
+        "exit_code": 0,
+        "validation_exit_code": 0,
+        "metrics": {
+          "ordered_targets_passed": 6,
+          "trial": "offload-01",
+          "placement": "offload",
+          "colour": "green",
+          "distance_m": 50.014114182938464,
+          "target_reached": true,
+          "race_seconds": 112.675,
+          "host_seconds": 744.6325971990009,
+          "jobs": 11963,
+          "completed": 11959,
+          "unfinished": 4,
+          "overrun_count": 1027,
+          "overruns_per_1000_jobs": 85.84803143024325,
+          "deadline_met": 4450,
+          "deadline_missed": 7513,
+          "deadline_pending_not_due": 0,
+          "deadline_meet_rate": 0.37198027250689625,
+          "average_response_s": 0.042780249184714444,
+          "response_std_s": 0.09483186788021858,
+          "response_p95_s": 0.294,
+          "thermal_cooling_entries_total": 212,
+          "thermal_violations_per_device": 8.153846153846153,
+          "devices": 26,
+          "devices_used": 13,
+          "completed_outputs_committed": 11959,
+          "offloaded_jobs": 11963,
+          "nonzero_task_uploads": 11963,
+          "nonzero_parent_transfers": 96,
+          "validation_errors": 0,
+          "input_bindings": 2988,
+          "exact_DDS_bindings_checked": 2334,
+          "unresolved_input_bindings": 0,
+          "completed_outputs_pending_commit": 0,
+          "selected_budget_modes": {
+            "LO": {
+              "jobs": 10936,
+              "deadline_evaluable": 10936,
+              "deadline_met": 4450,
+              "deadline_meet_rate": 0.40691294806144845
+            },
+            "HI": {
+              "jobs": 1027,
+              "deadline_evaluable": 1027,
+              "deadline_met": 0,
+              "deadline_meet_rate": 0.0
+            }
+          }
+        }
+      },
+      {
+        "policy": "random",
+        "trial": "random-01",
+        "status": "complete",
+        "exit_code": 0,
+        "validation_exit_code": 0,
+        "metrics": {
+          "ordered_targets_passed": 6,
+          "trial": "random-01",
+          "placement": "random",
+          "colour": "blue",
+          "distance_m": 50.00589607043589,
+          "target_reached": true,
+          "race_seconds": 111.797,
+          "host_seconds": 930.1433199610037,
+          "jobs": 22350,
+          "completed": 22349,
+          "unfinished": 1,
+          "overrun_count": 2181,
+          "overruns_per_1000_jobs": 97.58389261744966,
+          "deadline_met": 9491,
+          "deadline_missed": 12858,
+          "deadline_pending_not_due": 1,
+          "deadline_meet_rate": 0.42467224484316973,
+          "average_response_s": 0.011878741778155625,
+          "response_std_s": 0.029598451745370968,
+          "response_p95_s": 0.031,
+          "thermal_cooling_entries_total": 31,
+          "thermal_violations_per_device": 1.1923076923076923,
+          "devices": 26,
+          "devices_used": 22,
+          "completed_outputs_committed": 22349,
+          "offloaded_jobs": 16117,
+          "nonzero_task_uploads": 16117,
+          "nonzero_parent_transfers": 12285,
+          "validation_errors": 0,
+          "input_bindings": 5319,
+          "exact_DDS_bindings_checked": 4146,
+          "unresolved_input_bindings": 0,
+          "completed_outputs_pending_commit": 0,
+          "selected_budget_modes": {
+            "LO": {
+              "jobs": 20168,
+              "deadline_evaluable": 20168,
+              "deadline_met": 9491,
+              "deadline_meet_rate": 0.4705969853232844
+            },
+            "HI": {
+              "jobs": 2181,
+              "deadline_evaluable": 2181,
+              "deadline_met": 0,
+              "deadline_meet_rate": 0.0
+            }
+          }
+        }
+      }
+    ],
+    "finished_unix_s": 1791578065.379264
+  },
+  "summary": [
+    {
+      "policy": "local",
+      "n_runs": 1,
+      "overrun_count_mean": 1482.0,
+      "overrun_count_sample_sd": null,
+      "deadline_meet_rate_mean": 0.472483074907185,
+      "deadline_meet_rate_sample_sd": null,
+      "average_response_s_mean": 0.018428079947575362,
+      "average_response_s_sample_sd": null,
+      "thermal_violations_per_device_mean": 2.0384615384615383,
+      "thermal_violations_per_device_sample_sd": null,
+      "completed_jobs": 18312,
+      "unfinished_jobs": 6,
+      "pooled_response_s": 0.018428079947575362,
+      "pooled_deadline_meet_rate": 0.472483074907185
+    },
+    {
+      "policy": "offload",
+      "n_runs": 1,
+      "overrun_count_mean": 1027.0,
+      "overrun_count_sample_sd": null,
+      "deadline_meet_rate_mean": 0.37198027250689625,
+      "deadline_meet_rate_sample_sd": null,
+      "average_response_s_mean": 0.042780249184714444,
+      "average_response_s_sample_sd": null,
+      "thermal_violations_per_device_mean": 8.153846153846153,
+      "thermal_violations_per_device_sample_sd": null,
+      "completed_jobs": 11959,
+      "unfinished_jobs": 4,
+      "pooled_response_s": 0.042780249184714444,
+      "pooled_deadline_meet_rate": 0.37198027250689625
+    },
+    {
+      "policy": "random",
+      "n_runs": 1,
+      "overrun_count_mean": 2181.0,
+      "overrun_count_sample_sd": null,
+      "deadline_meet_rate_mean": 0.42467224484316973,
+      "deadline_meet_rate_sample_sd": null,
+      "average_response_s_mean": 0.011878741778155625,
+      "average_response_s_sample_sd": null,
+      "thermal_violations_per_device_mean": 1.1923076923076923,
+      "thermal_violations_per_device_sample_sd": null,
+      "completed_jobs": 22349,
+      "unfinished_jobs": 1,
+      "pooled_response_s": 0.011878741778155625,
+      "pooled_deadline_meet_rate": 0.42467224484316973
+    }
+  ],
+  "inputs": {
+    "deadlines": {
+      "schema_version": 2,
+      "units": "s",
+      "work_units": "normalized Mcycles",
+      "C_basis": "HI observed maximum at the declared reference normalization",
+      "deadline_reference": {
+        "core": "Cortex-A15",
+        "frequency_mhz": 2000.0,
+        "eta": 1.8
+      },
+      "formula": "D_i = uniform(1.1,1.3) * W_HI / (f_A15_max * eta_A15)",
+      "excluded_costs": [
+        "queueing",
+        "communication",
+        "thermal effects",
+        "cooling"
+      ],
+      "relative_to": "actual callback arrival",
+      "period_policy": "unchanged activation period in seconds",
+      "tasks": {
+        "amcl_scan_callback": {
+          "C_HI_reference_s": 0.019939,
+          "W_HI_mcycles": 19.939,
+          "reference_frequency_mhz": 1000.0,
+          "reference_eta": 1.0,
+          "T_i_s": null,
+          "release_rate_hz": null,
+          "ideal_A15_max_HI_s": 0.005538611111111111,
+          "uniform_factor": 1.298195671103697,
+          "D_i_s": 0.007190200968371282
+        },
+        "bt_tick": {
+          "C_HI_reference_s": 0.0194456,
+          "W_HI_mcycles": 19.4456,
+          "reference_frequency_mhz": 1000.0,
+          "reference_eta": 1.0,
+          "T_i_s": 0.01,
+          "release_rate_hz": 100.0,
+          "ideal_A15_max_HI_s": 0.005401555555555555,
+          "uniform_factor": 1.268389416434067,
+          "D_i_s": 0.006851275898947303
+        },
+        "collision_check": {
+          "C_HI_reference_s": 0.013556200000000001,
+          "W_HI_mcycles": 13.5562,
+          "reference_frequency_mhz": 1000.0,
+          "reference_eta": 1.0,
+          "T_i_s": null,
+          "release_rate_hz": null,
+          "ideal_A15_max_HI_s": 0.003765611111111111,
+          "uniform_factor": 1.2594020406347681,
+          "D_i_s": 0.0047424183175702895
+        },
+        "control_iteration": {
+          "C_HI_reference_s": 0.0306778,
+          "W_HI_mcycles": 30.6778,
+          "reference_frequency_mhz": 1000.0,
+          "reference_eta": 1.0,
+          "T_i_s": 0.05,
+          "release_rate_hz": 20.0,
+          "ideal_A15_max_HI_s": 0.008521611111111112,
+          "uniform_factor": 1.2353820472584287,
+          "D_i_s": 0.010527445380384618
+        },
+        "controller_path_install": {
+          "C_HI_reference_s": 0.0023685,
+          "W_HI_mcycles": 2.3685,
+          "reference_frequency_mhz": 1000.0,
+          "reference_eta": 1.0,
+          "T_i_s": null,
+          "release_rate_hz": null,
+          "ideal_A15_max_HI_s": 0.0006579166666666667,
+          "uniform_factor": 1.2154419896018536,
+          "D_i_s": 0.0007996595423255528
+        },
+        "global_costmap_update": {
+          "C_HI_reference_s": 0.0099746,
+          "W_HI_mcycles": 9.9746,
+          "reference_frequency_mhz": 1000.0,
+          "reference_eta": 1.0,
+          "T_i_s": 1.0,
+          "release_rate_hz": 1.0,
+          "ideal_A15_max_HI_s": 0.0027707222222222226,
+          "uniform_factor": 1.2883217497438577,
+          "D_i_s": 0.0035695817013875236
+        },
+        "local_costmap_update": {
+          "C_HI_reference_s": 0.0076756,
+          "W_HI_mcycles": 7.6756,
+          "reference_frequency_mhz": 1000.0,
+          "reference_eta": 1.0,
+          "T_i_s": 0.2,
+          "release_rate_hz": 5.0,
+          "ideal_A15_max_HI_s": 0.002132111111111111,
+          "uniform_factor": 1.1258369730251452,
+          "D_i_s": 0.002400409519486612
+        },
+        "mppi_noise_generation": {
+          "C_HI_reference_s": 0.015244,
+          "W_HI_mcycles": 15.244,
+          "reference_frequency_mhz": 1000.0,
+          "reference_eta": 1.0,
+          "T_i_s": null,
+          "release_rate_hz": null,
+          "ideal_A15_max_HI_s": 0.004234444444444444,
+          "uniform_factor": 1.2785814339683224,
+          "D_i_s": 0.005414082049836974
+        },
+        "planning_request": {
+          "C_HI_reference_s": 0.0818079,
+          "W_HI_mcycles": 81.8079,
+          "reference_frequency_mhz": 1000.0,
+          "reference_eta": 1.0,
+          "T_i_s": null,
+          "release_rate_hz": null,
+          "ideal_A15_max_HI_s": 0.022724416666666667,
+          "uniform_factor": 1.2093935102438316,
+          "D_i_s": 0.02748276204074343
+        },
+        "velocity_command_callback": {
+          "C_HI_reference_s": 0.0038323999999999997,
+          "W_HI_mcycles": 3.8324,
+          "reference_frequency_mhz": 1000.0,
+          "reference_eta": 1.0,
+          "T_i_s": null,
+          "release_rate_hz": null,
+          "ideal_A15_max_HI_s": 0.0010645555555555556,
+          "uniform_factor": 1.24954720959052,
+          "D_i_s": 0.0013302124238985303
+        },
+        "velocity_smoothing_tick": {
+          "C_HI_reference_s": 0.0162255,
+          "W_HI_mcycles": 16.2255,
+          "reference_frequency_mhz": 1000.0,
+          "reference_eta": 1.0,
+          "T_i_s": 0.05,
+          "release_rate_hz": 20.0,
+          "ideal_A15_max_HI_s": 0.004507083333333333,
+          "uniform_factor": 1.2159896944548767,
+          "D_i_s": 0.0054805668853826674
+        }
+      }
+    },
+    "hardware": {
+      "schema_version": 2,
+      "core_types": {
+        "A7": {
+          "name": "Cortex-A7",
+          "family": "ARM_LP",
+          "eta": 1.0,
+          "frequency_range_mhz": [
+            800,
+            1600
+          ],
+          "l": 5,
+          "voltage_range_v": [
+            0.9,
+            1.1
+          ],
+          "power": {
+            "reference_active_range_w": [
+              0.2,
+              0.5
+            ],
+            "reference_intercept_w": 0.15,
+            "reference_activity_slope_w": 0.4,
+            "leakage_ref_w": 0.05,
+            "leakage_gamma_per_k": 0.015,
+            "idle_w": 0.05,
+            "cooling_power_w": 0.005,
+            "dvfs_scaling_mode": "voltage_frequency",
+            "effective_switching_capacitance_f": null
+          },
+          "thermal": {
+            "capacitance_range_j_per_k": [
+              0.08,
+              0.12
+            ],
+            "ambient_resistance_range_k_per_w": [
+              5.0,
+              7.0
+            ]
+          },
+          "max_voltage_v": 1.1
+        },
+        "A15": {
+          "name": "Cortex-A15",
+          "family": "ARM_HP",
+          "eta": 1.8,
+          "frequency_range_mhz": [
+            1000,
+            2000
+          ],
+          "l": 5,
+          "voltage_range_v": [
+            1.1,
+            1.3
+          ],
+          "power": {
+            "reference_active_range_w": [
+              0.8,
+              2.0
+            ],
+            "reference_intercept_w": 0.55,
+            "reference_activity_slope_w": 1.55,
+            "leakage_ref_w": 0.15,
+            "leakage_gamma_per_k": 0.02,
+            "idle_w": 0.15,
+            "cooling_power_w": 0.015,
+            "dvfs_scaling_mode": "voltage_frequency",
+            "effective_switching_capacitance_f": null
+          },
+          "thermal": {
+            "capacitance_range_j_per_k": [
+              0.12,
+              0.18
+            ],
+            "ambient_resistance_range_k_per_w": [
+              4.0,
+              6.0
+            ]
+          },
+          "max_voltage_v": 1.3
+        }
+      },
+      "device_classes": {
+        "vehicle": {
+          "lp_cores": 1,
+          "hp_cores": 0,
+          "thermal": {
+            "max_temperature_c": 46.2,
+            "balance_temperature_c": 45.6
+          }
+        },
+        "server": {
+          "lp_cores": 0,
+          "hp_cores": 1,
+          "thermal": {
+            "max_temperature_c": 46.5,
+            "balance_temperature_c": 46.0
+          }
+        }
+      },
+      "scheduler_policy": "ready_hi_then_plan_rank_nonpreemptive",
+      "thermal": {
+        "ambient_temperature_c": 45.0,
+        "reference_temperature_c": 35.0,
+        "max_temperature_c": 46.2,
+        "balance_temperature_c": 45.6,
+        "thermal_epoch_ms": 100.0,
+        "coupling_base_conductance_range_w_per_k": [
+          0.07,
+          0.11
+        ],
+        "coupling_distance_attenuation": 0.8,
+        "control_epoch_s": 0.005,
+        "initial_temperature_c": 45.0
+      },
+      "thermal_configuration_status": "confirmed",
+      "realized_physical_parameters": {
+        "0": {
+          "device_class": "vehicle",
+          "coupling_base_conductance_w_per_k": 0.08239019658227903,
+          "cores": {
+            "0": {
+              "thermal_capacitance_j_per_k": 0.0975541437824341,
+              "ambient_resistance_k_per_w": 5.768427081631327
+            }
+          }
+        },
+        "1": {
+          "device_class": "server",
+          "coupling_base_conductance_w_per_k": 0.09254627087706477,
+          "cores": {
+            "0": {
+              "thermal_capacitance_j_per_k": 0.1680635246036086,
+              "ambient_resistance_k_per_w": 4.9959257791268685
+            }
+          }
+        },
+        "2": {
+          "device_class": "server",
+          "coupling_base_conductance_w_per_k": 0.1037643593453487,
+          "cores": {
+            "0": {
+              "thermal_capacitance_j_per_k": 0.1426951372705321,
+              "ambient_resistance_k_per_w": 4.171591246241807
+            }
+          }
+        },
+        "3": {
+          "device_class": "server",
+          "coupling_base_conductance_w_per_k": 0.07256840588053087,
+          "cores": {
+            "0": {
+              "thermal_capacitance_j_per_k": 0.13309981109864139,
+              "ambient_resistance_k_per_w": 4.94726611167966
+            }
+          }
+        },
+        "4": {
+          "device_class": "server",
+          "coupling_base_conductance_w_per_k": 0.09695011305547646,
+          "cores": {
+            "0": {
+              "thermal_capacitance_j_per_k": 0.17279350075414207,
+              "ambient_resistance_k_per_w": 5.95934877863954
+            }
+          }
+        },
+        "5": {
+          "device_class": "server",
+          "coupling_base_conductance_w_per_k": 0.07647335285987919,
+          "cores": {
+            "0": {
+              "thermal_capacitance_j_per_k": 0.12068183948891067,
+              "ambient_resistance_k_per_w": 5.137989837253312
+            }
+          }
+        },
+        "6": {
+          "device_class": "server",
+          "coupling_base_conductance_w_per_k": 0.10167909756104557,
+          "cores": {
+            "0": {
+              "thermal_capacitance_j_per_k": 0.16655788203769015,
+              "ambient_resistance_k_per_w": 5.721944030586372
+            }
+          }
+        },
+        "7": {
+          "device_class": "server",
+          "coupling_base_conductance_w_per_k": 0.09996817981500766,
+          "cores": {
+            "0": {
+              "thermal_capacitance_j_per_k": 0.15406138543430903,
+              "ambient_resistance_k_per_w": 4.2935155053323495
+            }
+          }
+        },
+        "8": {
+          "device_class": "server",
+          "coupling_base_conductance_w_per_k": 0.08522727944030628,
+          "cores": {
+            "0": {
+              "thermal_capacitance_j_per_k": 0.1560373078764905,
+              "ambient_resistance_k_per_w": 5.659029773917469
+            }
+          }
+        },
+        "9": {
+          "device_class": "server",
+          "coupling_base_conductance_w_per_k": 0.07870201899244668,
+          "cores": {
+            "0": {
+              "thermal_capacitance_j_per_k": 0.16808262754165007,
+              "ambient_resistance_k_per_w": 4.757112898976694
+            }
+          }
+        },
+        "10": {
+          "device_class": "server",
+          "coupling_base_conductance_w_per_k": 0.07018231694761007,
+          "cores": {
+            "0": {
+              "thermal_capacitance_j_per_k": 0.17980364239826882,
+              "ambient_resistance_k_per_w": 4.8600049885961845
+            }
+          }
+        },
+        "11": {
+          "device_class": "server",
+          "coupling_base_conductance_w_per_k": 0.07769507628225293,
+          "cores": {
+            "0": {
+              "thermal_capacitance_j_per_k": 0.13311643371577658,
+              "ambient_resistance_k_per_w": 4.816425045452853
+            }
+          }
+        },
+        "12": {
+          "device_class": "server",
+          "coupling_base_conductance_w_per_k": 0.0830715760004293,
+          "cores": {
+            "0": {
+              "thermal_capacitance_j_per_k": 0.1679948352207274,
+              "ambient_resistance_k_per_w": 4.089896669918266
+            }
+          }
+        },
+        "13": {
+          "device_class": "server",
+          "coupling_base_conductance_w_per_k": 0.09884888668364537,
+          "cores": {
+            "0": {
+              "thermal_capacitance_j_per_k": 0.15353685561355557,
+              "ambient_resistance_k_per_w": 5.235325539895382
+            }
+          }
+        },
+        "14": {
+          "device_class": "server",
+          "coupling_base_conductance_w_per_k": 0.08378994615938486,
+          "cores": {
+            "0": {
+              "thermal_capacitance_j_per_k": 0.12897440276579114,
+              "ambient_resistance_k_per_w": 5.632067559065593
+            }
+          }
+        },
+        "15": {
+          "device_class": "server",
+          "coupling_base_conductance_w_per_k": 0.10365822643687916,
+          "cores": {
+            "0": {
+              "thermal_capacitance_j_per_k": 0.17703441121071822,
+              "ambient_resistance_k_per_w": 4.724708182995177
+            }
+          }
+        },
+        "16": {
+          "device_class": "server",
+          "coupling_base_conductance_w_per_k": 0.07299952356922734,
+          "cores": {
+            "0": {
+              "thermal_capacitance_j_per_k": 0.15287068562435638,
+              "ambient_resistance_k_per_w": 4.12148170644444
+            }
+          }
+        },
+        "17": {
+          "device_class": "server",
+          "coupling_base_conductance_w_per_k": 0.10617537507755465,
+          "cores": {
+            "0": {
+              "thermal_capacitance_j_per_k": 0.16079458381559808,
+              "ambient_resistance_k_per_w": 4.600540619448225
+            }
+          }
+        },
+        "18": {
+          "device_class": "server",
+          "coupling_base_conductance_w_per_k": 0.0758264714201513,
+          "cores": {
+            "0": {
+              "thermal_capacitance_j_per_k": 0.14604803213569825,
+              "ambient_resistance_k_per_w": 4.23297355303178
+            }
+          }
+        },
+        "19": {
+          "device_class": "server",
+          "coupling_base_conductance_w_per_k": 0.10299614231089801,
+          "cores": {
+            "0": {
+              "thermal_capacitance_j_per_k": 0.12666263721001714,
+              "ambient_resistance_k_per_w": 4.634873285603563
+            }
+          }
+        },
+        "20": {
+          "device_class": "server",
+          "coupling_base_conductance_w_per_k": 0.09790049610922272,
+          "cores": {
+            "0": {
+              "thermal_capacitance_j_per_k": 0.17000599961442986,
+              "ambient_resistance_k_per_w": 4.490511921615617
+            }
+          }
+        },
+        "21": {
+          "device_class": "server",
+          "coupling_base_conductance_w_per_k": 0.10478952681183827,
+          "cores": {
+            "0": {
+              "thermal_capacitance_j_per_k": 0.1288237833254916,
+              "ambient_resistance_k_per_w": 5.377115282417829
+            }
+          }
+        },
+        "22": {
+          "device_class": "server",
+          "coupling_base_conductance_w_per_k": 0.09559899941652603,
+          "cores": {
+            "0": {
+              "thermal_capacitance_j_per_k": 0.1632347571442124,
+              "ambient_resistance_k_per_w": 5.562196722457684
+            }
+          }
+        },
+        "23": {
+          "device_class": "server",
+          "coupling_base_conductance_w_per_k": 0.09596160598577907,
+          "cores": {
+            "0": {
+              "thermal_capacitance_j_per_k": 0.13807724739574562,
+              "ambient_resistance_k_per_w": 5.719918944581192
+            }
+          }
+        },
+        "24": {
+          "device_class": "server",
+          "coupling_base_conductance_w_per_k": 0.07807607142920915,
+          "cores": {
+            "0": {
+              "thermal_capacitance_j_per_k": 0.12181269149095299,
+              "ambient_resistance_k_per_w": 4.457736025921037
+            }
+          }
+        },
+        "25": {
+          "device_class": "server",
+          "coupling_base_conductance_w_per_k": 0.08297067568841604,
+          "cores": {
+            "0": {
+              "thermal_capacitance_j_per_k": 0.16017080784010743,
+              "ambient_resistance_k_per_w": 5.238997875371223
+            }
+          }
+        }
+      }
+    }
+  },
+  "experiment_settings": {
+    "intra_device_policy": "ready_FIFO_shortest_finish_queue_nonpreemptive",
+    "dvfs": {
+      "policy": "fixed",
+      "decision_epoch_s": 0.001,
+      "switch_latency_s": 0.0,
+      "overrun_policy": "device_maximum_until_overruns_complete",
+      "level_id": 2
+    },
+    "device_classes": {
+      "vehicle": {
+        "lp_cores": 1,
+        "hp_cores": 0,
+        "thermal": {
+          "max_temperature_c": 46.2,
+          "balance_temperature_c": 45.6
+        }
+      },
+      "server": {
+        "lp_cores": 0,
+        "hp_cores": 1,
+        "thermal": {
+          "max_temperature_c": 46.5,
+          "balance_temperature_c": 46.0
+        }
+      }
+    },
+    "step_s": 0.001,
+    "upload_radius_m": 5.0,
+    "random_candidates": "vehicle and covered RSUs",
+    "transfer_types": [
+      "task_upload",
+      "edge_data"
+    ],
+    "implicit_result_return_delay": false
+  },
+  "evidence": [
+    {
+      "trial": "local-01",
+      "files_sha256": {
+        "trace.json": "97addc200e190828d099e8d562f233384cfb315bef4a86039ee375b504d83a3d",
+        "jobs.csv": "fe640a1f266b32c652441ad8f3bfac43535ddc8bc707b3b72974ea5dea6e805c",
+        "transfers.csv": "2ff4c966920c7c1683a273a1abd445c4c936ba25bf3ad80c01398b990bfbf4c0",
+        "clock-pairs.csv": "4da726619736d2c556369c23fb4a9a7ada8f1875a49b089b4e6966fcb32a2344",
+        "protocol.jsonl": "1b939ea34aea7461d8e928fe9d6f359a77297a37199ce8d0a4b3afab486386e7",
+        "run.json": "e45c62967fc46af7c03e9e58750b7773aa71092d6f3cd102b9f70aec7992f98b",
+        "validation.json": "47067e59211f730a789e7ce549c4844f118ac4212eaa05ff313eec418816d9d5"
+      }
+    },
+    {
+      "trial": "offload-01",
+      "files_sha256": {
+        "trace.json": "1d4b83dafd31795c7422bb354858f8eafa0a093aba2065dc6f0df7f003cd5df1",
+        "jobs.csv": "2447e1a09a943af5f26204af66f3fdd69298b5f14fd2313ac1e87e58f6efd6e0",
+        "transfers.csv": "3656d7ee5930f844270facc2e5a4871502b4c7cc43b498283399c6feb785c4f0",
+        "clock-pairs.csv": "5fdd1f0fde90ff9a55f6ec9f0239861229041935e41e40a554f252d9b42f27e4",
+        "protocol.jsonl": "8169bdf787380152efed318592ec1d4f3434039305e4b646e06cf614b8298982",
+        "run.json": "e064031168f7a0d10183a6a35924d0abb532787cf94919d2ec85d5adc3435642",
+        "validation.json": "47067e59211f730a789e7ce549c4844f118ac4212eaa05ff313eec418816d9d5"
+      }
+    },
+    {
+      "trial": "random-01",
+      "files_sha256": {
+        "trace.json": "c1c0f0c96f416bad206a1f62f3cce921e0654afb816616ec8ebd28b80840bd7d",
+        "jobs.csv": "850b0c1c522c3db16d88e0932f9e40e37cd0695fb37a5844e9eb01d9c68412a4",
+        "transfers.csv": "e204a4a24dc2bc46a1bd0c7bea8c0610b40abc1e37b6f9638b7150d62041e3f7",
+        "clock-pairs.csv": "3837366f2e20b4d178eb58fbf4762c78eafddd6b0caa8263c18d791dc4e0be3f",
+        "protocol.jsonl": "3e8dbda84bf83ef8a8e37ad2516ded8703be6c3ef754c92760ffb62a497c7e59",
+        "run.json": "d41182d8fc2691131136c06b04ecec9fab0ff456b23091bd53b343c27e341447",
+        "validation.json": "47067e59211f730a789e7ce549c4844f118ac4212eaa05ff313eec418816d9d5"
+      }
+    }
+  ],
+  "uncertainty": "Sample SD is undefined for one run; no error bars or confidence claim.",
+  "response_censoring": "Completed jobs only; unfinished jobs retained separately.",
+  "deadline_denominator": "All completed jobs plus unfinished jobs whose absolute deadlines have passed by the observation cutoff.",
+  "thermal_denominator": "All 26 modeled devices, including idle devices, in every run."
+}

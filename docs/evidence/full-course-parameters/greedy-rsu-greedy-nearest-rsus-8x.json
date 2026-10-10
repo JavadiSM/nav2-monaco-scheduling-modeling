@@ -1,0 +1,27 @@
+{
+  "source": "artifacts/full-course-20261010/media/greedy-rsu-sim-8x.gif",
+  "source_sha256": "ffcd1f2fe0f7299d20c7e55482ced569cc81124ce88af634c401da7b049a8eec",
+  "source_bytes": 29318061,
+  "source_frames": 680,
+  "source_dimensions": [
+    1280,
+    720
+  ],
+  "source_duration_s": 34.0,
+  "publication_file": "docs/media/greedy-nearest-rsus-8x.gif",
+  "publication_sha256": "cbd6207f2a09691a371fc47382936627951148f31888b01213a55ca15b62714b",
+  "publication_bytes": 11767495,
+  "playback_speed": 1.0,
+  "width": 1280,
+  "sampled_fps": 20,
+  "palette_colors": 96,
+  "dither": "none",
+  "full_interval_preserved": true,
+  "frames": 680,
+  "duration_s": 34.0,
+  "dimensions": [
+    1280,
+    720
+  ],
+  "size_reduction_percent": 59.86264234868739
+}

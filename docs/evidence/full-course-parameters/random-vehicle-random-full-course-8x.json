@@ -1,0 +1,27 @@
+{
+  "source": "artifacts/full-course-20261010/media/random-vehicle-sim-8x.gif",
+  "source_sha256": "f74942df70f29e8d047fd19d40488cd043445c6c52bcd3ccd43d8078bb8e1873",
+  "source_bytes": 60472665,
+  "source_frames": 681,
+  "source_dimensions": [
+    1440,
+    540
+  ],
+  "source_duration_s": 34.05,
+  "publication_file": "docs/media/random-full-course-8x.gif",
+  "publication_sha256": "3536dca21c9e5621922f84b8b7ad40d7ef468d060b3d5a9c09fb06addf870ba5",
+  "publication_bytes": 35584207,
+  "playback_speed": 1.0,
+  "width": 1440,
+  "sampled_fps": 20,
+  "palette_colors": 96,
+  "dither": "none",
+  "full_interval_preserved": true,
+  "frames": 681,
+  "duration_s": 34.05,
+  "dimensions": [
+    1440,
+    540
+  ],
+  "size_reduction_percent": 41.15654238158679
+}

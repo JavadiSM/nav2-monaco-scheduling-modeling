@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "README_and_guide_links": 4,
+  "PDF_pages": 3,
+  "frozen_hashes_unchanged": true,
+  "publication_GIF_count": 8,
+  "obsolete_publication_files_archived": 10,
+  "RSU_direct_frame_comparison": {
+    "false_cooling_pixels": 0,
+    "missing_cooling_pixels": 0
+  },
+  "report_refresh_verified_unix_s": 1791608139.7961075
+}

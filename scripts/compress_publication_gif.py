@@ -17,7 +17,7 @@ def main():
     parser.add_argument('source', nargs='?', type=Path,
                         default=ROOT / 'artifacts/dual-view/dual-view.gif')
     parser.add_argument('--output', type=Path,
-                        default=ROOT / 'docs/media/dual-view-4x.gif')
+                        default=ROOT / 'artifacts/publication/compact-4x.gif')
     parser.add_argument('--speed', type=float, default=4.)
     parser.add_argument('--width', type=int, default=896)
     parser.add_argument('--fps', type=int, default=10)
@@ -73,7 +73,7 @@ def main():
         width=args.width, sampled_fps=args.fps, palette_colors=args.colors,
         dither=args.dither, full_interval_preserved=True, **stats)
     evidence['size_reduction_percent'] = 100 * (1 - evidence['publication_bytes'] / evidence['source_bytes'])
-    manifest = ROOT/'docs/evidence/gif-compression.json' if output == (ROOT/'docs/media/dual-view-4x.gif').resolve() else output.with_suffix('.json')
+    manifest = output.with_suffix('.json')
     manifest.write_text(json.dumps(evidence, indent=2)+'\n')
     print(json.dumps(evidence, indent=2), flush=True)
 

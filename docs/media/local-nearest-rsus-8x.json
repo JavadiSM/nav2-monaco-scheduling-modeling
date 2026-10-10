@@ -1,0 +1,27 @@
+{
+  "source": "artifacts/full-course-20261010/media/local-rsu-sim-8x.gif",
+  "source_sha256": "ef6f146accb8ac97cee011280d04fcde48d0a1c0d7fbd0f453694885ca0faf3f",
+  "source_bytes": 27737647,
+  "source_frames": 682,
+  "source_dimensions": [
+    1280,
+    720
+  ],
+  "source_duration_s": 34.1,
+  "publication_file": "docs/media/local-nearest-rsus-8x.gif",
+  "publication_sha256": "19e5ecf32e763b8bb309a72c590bd4680da3f2f183e154fa37bae51089fc1906",
+  "publication_bytes": 5920379,
+  "playback_speed": 1.0,
+  "width": 1280,
+  "sampled_fps": 20,
+  "palette_colors": 96,
+  "dither": "none",
+  "full_interval_preserved": true,
+  "frames": 682,
+  "duration_s": 34.1,
+  "dimensions": [
+    1280,
+    720
+  ],
+  "size_reduction_percent": 78.6557994627302
+}

@@ -179,7 +179,7 @@ def load_platform(path=None, *, device_classes=('vehicle', 'server')):
     data = json.loads(path.read_text())
     types = {name: CoreType.from_dict(cfg) for name, cfg in data['core_types'].items()}
     devices = {}
-    rng = random.Random(data['physical_seed'])
+    rng = random.SystemRandom()
     for device_id, name in enumerate(device_classes):
         cfg = data['device_classes'][name]
         spec = ThermalSpec(**{**data['thermal'], **cfg.get('thermal', {})})
@@ -201,4 +201,18 @@ def load_platform(path=None, *, device_classes=('vehicle', 'server')):
                                   max_temperature_c=spec.max_temperature_c,
                                   balance_temperature_c=spec.balance_temperature_c)
         devices[device_id] = Processor(device_id, name, cores, spec, rng.uniform(*spec.coupling_base_conductance_range_w_per_k))
+    realized=data.get('realized_physical_parameters',{})
+    for device_id,device in devices.items():
+        row=realized.get(str(device_id))
+        if row is None:continue
+        if row['device_class']!=device.device_class or len(row['cores'])!=len(device.cores):raise ValueError('Physical realization does not match device class')
+        device.coupling_base_conductance_w_per_k=row['coupling_base_conductance_w_per_k']
+        for cid,core in device.cores.items():
+            values=row['cores'][str(cid)]
+            core.thermal_capacitance_j_per_k=values['thermal_capacitance_j_per_k']
+            core.ambient_resistance_k_per_w=values['ambient_resistance_k_per_w']
     return devices
+
+
+def physical_realization(devices):
+    return {str(did):dict(device_class=d.device_class,coupling_base_conductance_w_per_k=d.coupling_base_conductance_w_per_k,cores={str(cid):dict(thermal_capacitance_j_per_k=c.thermal_capacitance_j_per_k,ambient_resistance_k_per_w=c.ambient_resistance_k_per_w) for cid,c in d.cores.items()}) for did,d in devices.items()}

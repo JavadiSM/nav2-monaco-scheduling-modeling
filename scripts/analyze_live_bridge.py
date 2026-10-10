@@ -18,6 +18,11 @@ def main():
     p=argparse.ArgumentParser();p.add_argument('trial',type=Path);p.add_argument('--output',type=Path,default=ROOT/'docs/figures/live-bridge');args=p.parse_args()
     trial=args.trial.resolve();out=args.output;out.mkdir(parents=True,exist_ok=True)
     t=json.loads((trial/'trace.json').read_text());jobs={j['job_id']:j for j in t['jobs']};dt=t['step_s'];step_ns=round(dt*1e9);end=round(t['sim_seconds']/dt)
+    if t.get('schema',1)>=4:
+        from scripts.analyze_placement_trial import analyze
+        stats,edge_errors=analyze(trial);out.mkdir(parents=True,exist_ok=True)
+        (out/'validation.json').write_text(json.dumps(dict(passed=not edge_errors,errors=edge_errors,metrics=stats),indent=2)+'\n')
+        print(json.dumps(stats,indent=2));return bool(edge_errors)
     dual=t.get('schema',1)>=2
     fifo=t.get('scheduling_policy_id',ReadyFIFOOldestIdle.name)==ReadyFIFOOldestIdle.name
     piecewise=t.get('execution_accounting')=='piecewise_DVFS_equivalent_work'

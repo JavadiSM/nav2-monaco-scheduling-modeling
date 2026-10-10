@@ -1,0 +1,27 @@
+{
+  "source": "artifacts/full-course-20261010/media/offload-vehicle-sim-8x.gif",
+  "source_sha256": "ed5cfa33291c8b2e9ede5ac49a3ae11d2a22344e5d9cb442b9eb4c18c63f8e95",
+  "source_bytes": 55786228,
+  "source_frames": 688,
+  "source_dimensions": [
+    1440,
+    540
+  ],
+  "source_duration_s": 34.4,
+  "publication_file": "docs/media/offload-full-course-8x.gif",
+  "publication_sha256": "01a191b9801b0980bb4aa9b78614e4f71e8ee80ad6a3623e0704b337df6f0d47",
+  "publication_bytes": 31612176,
+  "playback_speed": 1.0,
+  "width": 1440,
+  "sampled_fps": 20,
+  "palette_colors": 96,
+  "dither": "none",
+  "full_interval_preserved": true,
+  "frames": 688,
+  "duration_s": 34.4,
+  "dimensions": [
+    1440,
+    540
+  ],
+  "size_reduction_percent": 43.333368945468045
+}

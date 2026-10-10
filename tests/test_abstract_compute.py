@@ -9,6 +9,8 @@ import unittest
 from tools.abstract_compute import Job, VirtualScheduler, load_platform
 from tools.abstract_compute.primitives import ExecutionLane
 
+from platform_fixtures import load_platform, LiveEngine
+
 
 class ComputeTests(unittest.TestCase):
     def test_operating_points_and_endpoint_counts(self):
@@ -112,7 +114,7 @@ class ComputeTests(unittest.TestCase):
             self.assertEqual(len(d.resource_options(True)), 21)
 
     def test_random_release_traces_have_no_overlap_or_early_results(self):
-        rng = random.Random(5921)
+        rng = random.SystemRandom()
         for _ in range(40):
             devices = load_platform()
             device_choices = [rng.randrange(2) for _ in range(100)]

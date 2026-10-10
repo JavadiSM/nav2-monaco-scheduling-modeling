@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Show two real Gazebo views and the live scheduler; optionally capture all three."""
-import argparse,json,os,re,signal,subprocess,sys,time,shutil
+import argparse,io,json,os,re,signal,subprocess,sys,time,shutil
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
@@ -8,8 +8,8 @@ from scripts.record_dual_view import windows
 from tools.live_bridge.viewer import TITLE
 
 def main():
-    p=argparse.ArgumentParser();p.add_argument('--trial',type=Path,required=True);p.add_argument('--record',action='store_true');a=p.parse_args();trial=a.trial.resolve();out=trial/'views';out.mkdir(parents=True,exist_ok=True)
-    owned=[];handles=[];recorder=None;result={'scheduler_coupled_to_robot':True,'playback':'8x host recording; simulation clock remains visible','completed':False}
+    p=argparse.ArgumentParser();p.add_argument('--trial',type=Path,required=True);p.add_argument('--record',action='store_true');p.add_argument('--defer-encoding',action='store_true');a=p.parse_args();trial=a.trial.resolve();out=trial/'views';out.mkdir(parents=True,exist_ok=True)
+    owned=[];handles=[];recorder=None;gui_processes=[];result={'scheduler_coupled_to_robot':True,'playback':'8x host recording; simulation clock remains visible','completed':False}
     def start(cmd,label):
         f=(out/(label+'.log')).open('w');handles.append(f);proc=subprocess.Popen(cmd,cwd=ROOT,stdout=f,stderr=subprocess.STDOUT,start_new_session=True);owned.append(proc);return proc
     try:
@@ -25,6 +25,7 @@ def main():
                 if proc.poll() is not None:raise RuntimeError(name+' view exited')
                 time.sleep(.25)
             if name not in ids:raise RuntimeError(name+' view did not open')
+            gui_processes.append(proc)
         deadline=time.monotonic()+45
         while time.monotonic()<deadline:
             q=subprocess.run(['xdotool','search','--name','^'+TITLE+'$'],capture_output=True,text=True)
@@ -57,8 +58,11 @@ def main():
             for label,size in (('chase','1600x900'),('overview','1600x900'),('gantt','1280x720')):cmd+=['-thread_queue_size','512','-f','x11grab','-framerate','3','-window_id',ids[label],'-video_size',size,'-i',os.environ['DISPLAY']]
             graph="[0:v]setpts=PTS-STARTPTS,scale=640:360[c];[1:v]setpts=PTS-STARTPTS,scale=640:360[o];[2:v]setpts=PTS-STARTPTS[g];[c][o]vstack[left];[left][g]hstack,scale=1440:540,drawtext=text='LIVE bridge | 8x host playback':x=8:y=8:fontsize=18:fontcolor=white:box=1:boxcolor=black@0.8,setpts=PTS/8,split[a][b];[a]palettegen=max_colors=128:stats_mode=single[p];[b][p]paletteuse=new=1:dither=bayer:bayer_scale=4"
             cmd+=['-filter_complex_threads','1','-filter_complex',graph,'-r','12','-fps_mode','cfr','-loop','0',str(out/'live-three-view.gif')]
+            result['capture_host_monotonic_ns']=time.monotonic_ns()
             recorder=start(cmd,'capture');time.sleep(.5)
             if recorder.poll() is not None:raise RuntimeError('Three-view capture did not start')
+        start([sys.executable,str(ROOT/'scripts/throttle_gui_rendering.py'),'--trial',str(trial)]+[value for proc in gui_processes for value in ('--pid',str(proc.pid))],'render-throttle')
+        result['render_throttle_after_active_SIM_s']=60
         (trial/'views-ready').touch()
         while not (trial/'trace.json').exists():
             if any(p.poll() is not None for p in owned):raise RuntimeError('A presentation process exited early')
@@ -72,6 +76,18 @@ def main():
                 if proc is not recorder and proc.poll() is None:
                     try:os.killpg(proc.pid,signal.SIGINT)
                     except ProcessLookupError:pass
+            if a.defer_encoding:
+                from PIL import Image
+                raw=out/'live-three-view.gif'
+                with Image.open(io.BytesIO(raw.read_bytes())) as picture:
+                    result['size']=picture.size;result['frames']=picture.n_frames
+                    if picture.n_frames<2:raise RuntimeError('Capture has fewer than two frames')
+                    picture.seek(picture.n_frames//2);picture.convert('RGB').save(trial/'three-view-preview.png')
+                archive=ROOT/'.private/media-backups/live-bridge'/(trial.name+'.gif')
+                if archive.exists():raise RuntimeError('Raw recording archive already exists')
+                archive.parent.mkdir(parents=True,exist_ok=True);shutil.move(raw,archive)
+                result.update(raw_gif_archive=str(archive.relative_to(ROOT)),encoding_deferred=True,completed=True)
+                return
             from PIL import Image
             with Image.open(out/'live-three-view.gif') as im:
                 result['size']=im.size;frames=0
@@ -82,7 +98,7 @@ def main():
                     except EOFError:break
                 result['frames']=frames
                 if frames<2:raise RuntimeError('Capture has fewer than two frames')
-            target=ROOT/'artifacts/videos/live-fifo-single-8x.gif';target.parent.mkdir(parents=True,exist_ok=True)
+            cfg=json.loads((trial/'trial-config.json').read_text());target=ROOT/'artifacts/videos'/('live-'+cfg.get('placement','local')+'-'+trial.name+'-8x.gif' if cfg.get('edge_enabled') else 'live-fifo-single-8x.gif');target.parent.mkdir(parents=True,exist_ok=True)
             # The capture already has 8x host timing; compression preserves that speed.
             with (out/'compression.log').open('w') as log:
                 subprocess.run([sys.executable,str(ROOT/'scripts/compress_publication_gif.py'),str(out/'live-three-view.gif'),'--output',str(target),'--speed','1','--width','1440','--fps','12','--colors','96','--dither','none'],stdout=log,stderr=subprocess.STDOUT,check=True,timeout=150)

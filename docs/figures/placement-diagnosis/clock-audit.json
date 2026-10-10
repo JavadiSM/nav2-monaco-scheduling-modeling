@@ -1,0 +1,32 @@
+{
+  "rate_decorator": "RateController hz=1.0",
+  "installed_header": "/opt/ros/jazzy/include/nav2_behavior_tree/plugins/decorator/rate_controller.hpp",
+  "installed_binary": "/opt/ros/jazzy/lib/libnav2_rate_controller_bt_node.so",
+  "binary_sha256": "304f2167ab6137c234c6dedeb7e5a1550637a385909fdef0842eee48a66dc94c",
+  "clock_type": "std::chrono::high_resolution_clock, resolved to std::chrono::_V2::system_clock::now in installed binary",
+  "call_instruction": "RateController::tick address 0x10500 calls system_clock::now@plt",
+  "adapter_has_clock_gettime_definition": false,
+  "adapter_has_system_clock_now_override": false,
+  "existing_clock_validation": "Gazebo physics_ns == modeled hardware_ns; does not validate this internal decorator clock",
+  "diagnosis": "HOST-clock leakage is confirmed by installed code/binary and absence of an override. Its precise share in total workload differences is not identified by these three runs.",
+  "per_trial_evidence_sha256": {
+    "local": {
+      "trace.json": "97addc200e190828d099e8d562f233384cfb315bef4a86039ee375b504d83a3d",
+      "metrics.json": "976dafc1a860be49a713891724a8c1a95d1f4cd9345f24ebc699d837d5d2317e",
+      "jobs.csv": "fe640a1f266b32c652441ad8f3bfac43535ddc8bc707b3b72974ea5dea6e805c",
+      "transfers.csv": "2ff4c966920c7c1683a273a1abd445c4c936ba25bf3ad80c01398b990bfbf4c0"
+    },
+    "offload": {
+      "trace.json": "1d4b83dafd31795c7422bb354858f8eafa0a093aba2065dc6f0df7f003cd5df1",
+      "metrics.json": "37ca3657e3ba892f3940467e3bbf70aef0f7ecf6c843049ae83adb0145ceef9a",
+      "jobs.csv": "2447e1a09a943af5f26204af66f3fdd69298b5f14fd2313ac1e87e58f6efd6e0",
+      "transfers.csv": "3656d7ee5930f844270facc2e5a4871502b4c7cc43b498283399c6feb785c4f0"
+    },
+    "random": {
+      "trace.json": "c1c0f0c96f416bad206a1f62f3cce921e0654afb816616ec8ebd28b80840bd7d",
+      "metrics.json": "6667434d12586c03e6568dfc131fb34ac5d62433af260dad26b4ae2965068887",
+      "jobs.csv": "850b0c1c522c3db16d88e0932f9e40e37cd0695fb37a5844e9eb01d9c68412a4",
+      "transfers.csv": "e204a4a24dc2bc46a1bd0c7bea8c0610b40abc1e37b6f9638b7150d62041e3f7"
+    }
+  }
+}

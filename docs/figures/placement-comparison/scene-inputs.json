@@ -1,0 +1,60 @@
+{
+  "files": [
+    {
+      "path": "scenarios/monaco/LICENSE.upstream",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "unchanged_from_HEAD": true
+    },
+    {
+      "path": "scenarios/monaco/NOTICE.md",
+      "sha256": "417debd1be53963d27bd668b214f9ebc8a09829edf1cca73d206f1e09a5bc1c2",
+      "unchanged_from_HEAD": true
+    },
+    {
+      "path": "scenarios/monaco/layout.png",
+      "sha256": "4e42146eb480919d547b36705798495d775e87b9007a73f53155d3bf372360bc",
+      "unchanged_from_HEAD": true
+    },
+    {
+      "path": "scenarios/monaco/map.pgm",
+      "sha256": "5e08c8cd1724c5876f7855ba51dd60519a4422e11543f67b7687e993de881e3c",
+      "unchanged_from_HEAD": true
+    },
+    {
+      "path": "scenarios/monaco/map.yaml",
+      "sha256": "dcde78558e024b2bf2713be6eba59efef8be475c81c308674934e19070417a98",
+      "unchanged_from_HEAD": true
+    },
+    {
+      "path": "scenarios/monaco/nav2_params.yaml",
+      "sha256": "af600b86b37ebfa96faf020070d207e7b987679394b8f3f19ea0a06d1c775813",
+      "unchanged_from_HEAD": true
+    },
+    {
+      "path": "scenarios/monaco/navigate_through_poses.xml",
+      "sha256": "82475c2a954c5aa5236d422f9a20b1b4000c7a8478d6645424a4f3b3efd058b6",
+      "unchanged_from_HEAD": true
+    },
+    {
+      "path": "scenarios/monaco/racecar.sdf",
+      "sha256": "8d6d048a3a5873ab09dfbdb20a21ed2a0d1b588f6d2a48fcc97e869850940b02",
+      "unchanged_from_HEAD": true
+    },
+    {
+      "path": "scenarios/monaco/racecar.urdf",
+      "sha256": "03336beec8558bc67f2d1879bcd0fe0da0fecce8e284c8211454f156ed627ce0",
+      "unchanged_from_HEAD": true
+    },
+    {
+      "path": "scenarios/monaco/scenario.json",
+      "sha256": "c2e3dc1766e8bbace80e858c152dc7f05009f9e633826213c7f0463036728754",
+      "unchanged_from_HEAD": true
+    },
+    {
+      "path": "scenarios/monaco/world.sdf",
+      "sha256": "522b78113568f250d56e96f71b3638e2c9418605e29f909c6c771296549cdf3f",
+      "unchanged_from_HEAD": true
+    }
+  ],
+  "unchanged_from_HEAD": true
+}

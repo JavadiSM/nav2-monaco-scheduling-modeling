@@ -1,7 +1,7 @@
 {
   "radius_m": 5,
-  "communication_cost_s": 0,
-  "active_offloading": false,
+  "communication_cost_model": "piecewise distance",
+  "active_offloading": true,
   "evaluated_centreline_points": 1461,
   "uncovered_centreline_points": 0,
   "minimum_visible_servers": 1,

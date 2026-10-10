@@ -4,6 +4,8 @@ from tools.abstract_compute.task_model import load_tasks
 from tools.live_bridge.engine import LiveEngine
 import test_live_bridge as legacy_tests
 
+from platform_fixtures import load_platform, LiveEngine
+
 
 class DualBudgetTests(unittest.TestCase):
     def test_every_current_task_is_HI_with_mean_and_max(self):

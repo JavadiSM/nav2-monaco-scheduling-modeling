@@ -1,0 +1,99 @@
+{
+  "debug-calibration-02": {
+    "odometry_distance_m": 0.14781851998744122,
+    "action_status": 6,
+    "error": "Nav2 course failed; status=6, error=",
+    "ordered_targets_passed": 0
+  },
+  "debug-host-replan": {
+    "odometry_distance_m": 3.4540812670544194,
+    "action_status": null,
+    "error": "Interrupted.",
+    "ordered_targets_passed": 0
+  },
+  "debug-fixed-clock": {
+    "odometry_distance_m": 3.457242953414188,
+    "action_status": null,
+    "error": "Interrupted.",
+    "ordered_targets_passed": 0
+  },
+  "fixed_TF_buffers": {
+    "0x7f2464002370": {
+      "samples": 411,
+      "median_lag_s": 0.0,
+      "max_lag_s": 0.001,
+      "p95_lag_s": 0.0
+    },
+    "0x7f2494002920": {
+      "samples": 411,
+      "median_lag_s": 0.0,
+      "max_lag_s": 0.0,
+      "p95_lag_s": 0.0
+    },
+    "0x7f24a40040c0": {
+      "samples": 411,
+      "median_lag_s": 0.0,
+      "max_lag_s": 0.001,
+      "p95_lag_s": 0.0
+    },
+    "0x7f24c0002bc0": {
+      "samples": 411,
+      "median_lag_s": 0.0,
+      "max_lag_s": 0.001,
+      "p95_lag_s": 0.0
+    },
+    "0x7f2468002370": {
+      "samples": 411,
+      "median_lag_s": 0.0,
+      "max_lag_s": 0.001,
+      "p95_lag_s": 0.0
+    },
+    "0x7f2440002370": {
+      "samples": 411,
+      "median_lag_s": 0.0,
+      "max_lag_s": 0.001,
+      "p95_lag_s": 0.0
+    },
+    "0x7f249c002390": {
+      "samples": 411,
+      "median_lag_s": 0.0,
+      "max_lag_s": 0.021,
+      "p95_lag_s": 0.002
+    },
+    "0x7f2478002370": {
+      "samples": 411,
+      "median_lag_s": 0.0,
+      "max_lag_s": 0.001,
+      "p95_lag_s": 0.0
+    },
+    "0x7f2438010ee0": {
+      "samples": 307,
+      "median_lag_s": 0.0,
+      "max_lag_s": 0.001,
+      "p95_lag_s": 0.0
+    }
+  },
+  "native_rate_test": {
+    "first": 1,
+    "host_pause": 1,
+    "sim_999ms": 1,
+    "sim_1000ms": 2,
+    "passed": true
+  },
+  "fixed_validation": {
+    "passed": true,
+    "errors": [],
+    "checks": [
+      "work integral",
+      "thermal pauses",
+      "exact output gates",
+      "device admission",
+      "ground-truth pose age",
+      "parent data arrivals",
+      "FIFO core queues",
+      "shortest predicted finish",
+      "physics/hardware clocks"
+    ]
+  },
+  "unit_tests_passed": 93
+}

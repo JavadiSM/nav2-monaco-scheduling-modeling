@@ -12,6 +12,8 @@ from tools.abstract_compute.power import PowerModel
 from tools.abstract_compute.thermal import ThermalModel
 from tools.abstract_compute.thermal_scheduler import ThermalScheduler
 
+from platform_fixtures import load_platform, LiveEngine
+
 
 class ThermalTests(unittest.TestCase):
     def hot_platform(self):
@@ -23,19 +25,18 @@ class ThermalTests(unittest.TestCase):
                 core.max_temperature_c=55.6;core.balance_temperature_c=55.45
         return devices
 
-    def test_seeded_physical_realizations_stay_in_ranges(self):
-        a, b = load_platform(), load_platform()
+    def test_sampled_physical_realizations_stay_in_ranges(self):
+        a = load_platform()
         for did, device in a.items():
             for cid, core in device.cores.items():
-                self.assertEqual(core.thermal_capacitance_j_per_k, b[did].cores[cid].thermal_capacitance_j_per_k)
-                self.assertEqual(core.ambient_resistance_k_per_w, b[did].cores[cid].ambient_resistance_k_per_w)
                 low, high = core.core_type.thermal_capacitance_range_j_per_k
                 self.assertTrue(low <= core.thermal_capacitance_j_per_k <= high)
                 low, high = core.core_type.ambient_resistance_range_k_per_w
                 self.assertTrue(low <= core.ambient_resistance_k_per_w <= high)
 
     def test_initial_temperature_is_independent_of_ambient_and_reset(self):
-        data=json.loads((Path(__file__).resolve().parents[1]/'config/abstract_compute.json').read_text())
+        from platform_fixtures import configuration
+        data=configuration()
         data['thermal']['ambient_temperature_c']=40.
         data['thermal']['initial_temperature_c']=55.
         with tempfile.TemporaryDirectory() as folder:
@@ -98,7 +99,11 @@ class ThermalTests(unittest.TestCase):
         starts = [e for e in runtime.cooling_events if e['kind'] == 'cooling_start' and e['device_id'] == 0]
         ends = [e for e in runtime.cooling_events if e['kind'] == 'cooling_end' and e['device_id'] == 0]
         self.assertGreater(len(starts), 0)
-        self.assertEqual(len(starts), len(ends))
+        open_interval=any(c.thermal_forced_idle for c in runtime.devices[0].cores.values())
+        self.assertEqual(len(starts),len(ends)+int(open_interval))
+        if open_interval:
+            self.assertLessEqual(starts[-1]['time_s'],max(r['finish_s'] for r in results)+1e-9)
+            self.assertTrue(all(s['end_s']<=starts[-1]['time_s']+1e-9 for s in runtime.work_segments if s['device_id']==0))
         for start, end in zip(starts, ends):
             self.assertEqual(start['affected_core_ids'], [0, 1])
             self.assertLess(start['time_s'], end['time_s'])

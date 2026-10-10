@@ -1,0 +1,143 @@
+{
+  "schema_version": 2,
+  "units": "s",
+  "work_units": "normalized Mcycles",
+  "C_basis": "HI observed maximum at the declared reference normalization",
+  "deadline_reference": {
+    "core": "Cortex-A15",
+    "frequency_mhz": 2000.0,
+    "eta": 1.8
+  },
+  "formula": "D_i = uniform(1.1,1.3) * W_HI / (f_A15_max * eta_A15)",
+  "excluded_costs": [
+    "queueing",
+    "communication",
+    "thermal effects",
+    "cooling"
+  ],
+  "relative_to": "actual callback arrival",
+  "period_policy": "unchanged activation period in seconds",
+  "tasks": {
+    "amcl_scan_callback": {
+      "C_HI_reference_s": 0.0066592,
+      "W_HI_mcycles": 6.659199999999999,
+      "reference_frequency_mhz": 1000.0,
+      "reference_eta": 1.0,
+      "T_i_s": null,
+      "release_rate_hz": null,
+      "ideal_A15_max_HI_s": 0.0018497777777777777,
+      "uniform_factor": 1.1143733658235693,
+      "D_i_s": 0.0020613430882478645
+    },
+    "bt_tick": {
+      "C_HI_reference_s": 0.003204,
+      "W_HI_mcycles": 3.2039999999999997,
+      "reference_frequency_mhz": 1000.0,
+      "reference_eta": 1.0,
+      "T_i_s": 0.01,
+      "release_rate_hz": 100.0,
+      "ideal_A15_max_HI_s": 0.00089,
+      "uniform_factor": 1.164012933232387,
+      "D_i_s": 0.0010359715105768244
+    },
+    "collision_check": {
+      "C_HI_reference_s": 0.0006928,
+      "W_HI_mcycles": 0.6928000000000001,
+      "reference_frequency_mhz": 1000.0,
+      "reference_eta": 1.0,
+      "T_i_s": null,
+      "release_rate_hz": null,
+      "ideal_A15_max_HI_s": 0.00019244444444444447,
+      "uniform_factor": 1.147543356845595,
+      "D_i_s": 0.00022083834378406342
+    },
+    "control_iteration": {
+      "C_HI_reference_s": 0.00799,
+      "W_HI_mcycles": 7.99,
+      "reference_frequency_mhz": 1000.0,
+      "reference_eta": 1.0,
+      "T_i_s": 0.05,
+      "release_rate_hz": 20.0,
+      "ideal_A15_max_HI_s": 0.0022194444444444445,
+      "uniform_factor": 1.184970443684983,
+      "D_i_s": 0.002629976068067504
+    },
+    "controller_path_install": {
+      "C_HI_reference_s": 0.0003289,
+      "W_HI_mcycles": 0.3289,
+      "reference_frequency_mhz": 1000.0,
+      "reference_eta": 1.0,
+      "T_i_s": null,
+      "release_rate_hz": null,
+      "ideal_A15_max_HI_s": 9.136111111111112e-05,
+      "uniform_factor": 1.2286139308605073,
+      "D_i_s": 0.00011224753385000581
+    },
+    "global_costmap_update": {
+      "C_HI_reference_s": 0.0008246,
+      "W_HI_mcycles": 0.8246,
+      "reference_frequency_mhz": 1000.0,
+      "reference_eta": 1.0,
+      "T_i_s": 1.0,
+      "release_rate_hz": 1.0,
+      "ideal_A15_max_HI_s": 0.00022905555555555556,
+      "uniform_factor": 1.1294582097598826,
+      "D_i_s": 0.0002587086777133331
+    },
+    "local_costmap_update": {
+      "C_HI_reference_s": 0.0008336,
+      "W_HI_mcycles": 0.8336,
+      "reference_frequency_mhz": 1000.0,
+      "reference_eta": 1.0,
+      "T_i_s": 0.2,
+      "release_rate_hz": 5.0,
+      "ideal_A15_max_HI_s": 0.00023155555555555557,
+      "uniform_factor": 1.1951555348057397,
+      "D_i_s": 0.0002767449038372402
+    },
+    "mppi_noise_generation": {
+      "C_HI_reference_s": 0.0040807,
+      "W_HI_mcycles": 4.080699999999999,
+      "reference_frequency_mhz": 1000.0,
+      "reference_eta": 1.0,
+      "T_i_s": null,
+      "release_rate_hz": null,
+      "ideal_A15_max_HI_s": 0.0011335277777777776,
+      "uniform_factor": 1.214895390960347,
+      "D_i_s": 0.0013771176727477464
+    },
+    "planning_request": {
+      "C_HI_reference_s": 0.0337007,
+      "W_HI_mcycles": 33.7007,
+      "reference_frequency_mhz": 1000.0,
+      "reference_eta": 1.0,
+      "T_i_s": null,
+      "release_rate_hz": null,
+      "ideal_A15_max_HI_s": 0.009361305555555555,
+      "uniform_factor": 1.2133210760368962,
+      "D_i_s": 0.01135826932977684
+    },
+    "velocity_command_callback": {
+      "C_HI_reference_s": 5.97e-05,
+      "W_HI_mcycles": 0.0597,
+      "reference_frequency_mhz": 1000.0,
+      "reference_eta": 1.0,
+      "T_i_s": null,
+      "release_rate_hz": null,
+      "ideal_A15_max_HI_s": 1.6583333333333334e-05,
+      "uniform_factor": 1.1982365563656254,
+      "D_i_s": 1.9870756226396622e-05
+    },
+    "velocity_smoothing_tick": {
+      "C_HI_reference_s": 0.0001349,
+      "W_HI_mcycles": 0.1349,
+      "reference_frequency_mhz": 1000.0,
+      "reference_eta": 1.0,
+      "T_i_s": 0.05,
+      "release_rate_hz": 20.0,
+      "ideal_A15_max_HI_s": 3.747222222222222e-05,
+      "uniform_factor": 1.1998371215353674,
+      "D_i_s": 4.4960563248644736e-05
+    }
+  }
+}

@@ -96,8 +96,8 @@ void hold_commit(pthread_mutex_t* m){for(auto p:held_commits)if(p==m)return;held
 bool held(pthread_mutex_t* m){for(auto p:held_commits)if(p==m)return true;return false;}
 thread_local std::unordered_map<pthread_mutex_t*,unsigned> borrowed_holds;
 std::mutex types_mutex;
-std::unordered_map<const rcl_publisher_t*,const rosidl_message_type_support_t*> publisher_types;
-std::unordered_map<const rcl_service_t*,const rosidl_message_type_support_t*> response_types;
+std::unordered_map<const void*,const rosidl_message_type_support_t*> publisher_types;
+std::unordered_map<const void*,const rosidl_message_type_support_t*> response_types;
 struct Blob {
  rmw_serialized_message_t data=rmw_get_zero_initialized_serialized_message();
  Blob(const void* message,const rosidl_message_type_support_t* ts){
@@ -242,22 +242,24 @@ extern "C" live::Path live_navfn(void* self,const live::Pose& a,const live::Pose
  return fn(self,a,b,std::move(cancel));}
 extern "C" rcl_ret_t rcl_publisher_init(rcl_publisher_t* publisher,const rcl_node_t* node,const rosidl_message_type_support_t* ts,const char* topic,const rcl_publisher_options_t* options){
  static auto fn=(decltype(&rcl_publisher_init))live::symbol("librcl.so","rcl_publisher_init");auto ret=fn(publisher,node,ts,topic,options);
- if(ret==RCL_RET_OK){bool old=live::internal;live::internal=true;{std::lock_guard<std::mutex> g(live::types_mutex);live::publisher_types[publisher]=ts;}live::internal=old;}return ret;
+ if(ret==RCL_RET_OK){bool old=live::internal;live::internal=true;{std::lock_guard<std::mutex> g(live::types_mutex);live::publisher_types[publisher->impl]=ts;}live::internal=old;}return ret;
 }
 extern "C" rcl_ret_t rcl_service_init(rcl_service_t* service,const rcl_node_t* node,const rosidl_service_type_support_t* ts,const char* name,const rcl_service_options_t* options){
  static auto fn=(decltype(&rcl_service_init))live::symbol("librcl.so","rcl_service_init");auto ret=fn(service,node,ts,name,options);
- if(ret==RCL_RET_OK){bool old=live::internal;live::internal=true;{std::lock_guard<std::mutex> g(live::types_mutex);live::response_types[service]=ts->response_typesupport;}live::internal=old;}return ret;
+ if(ret==RCL_RET_OK){bool old=live::internal;live::internal=true;{std::lock_guard<std::mutex> g(live::types_mutex);live::response_types[service->impl]=ts->response_typesupport;}live::internal=old;}return ret;
 }
 extern "C" rcl_ret_t rcl_publish(const rcl_publisher_t* p,const void* m,rmw_publisher_allocation_t* allocation){
  static auto fn=(decltype(&rcl_publish))live::symbol("librcl.so","rcl_publish");static auto name=(decltype(&rcl_publisher_get_topic_name))live::symbol("librcl.so","rcl_publisher_get_topic_name");
+ if(live::internal)return fn(p,m,allocation);
  auto topic=name(p);bool final_command=topic&&!strcmp(strrchr(topic,'/')?strrchr(topic,'/')+1:topic,"cmd_vel");
  if(live::job&&!live::flushing){
   live::MeterPause pause;bool old=live::internal;live::internal=true;
-  const rosidl_message_type_support_t* ts=nullptr;{std::lock_guard<std::mutex> g(live::types_mutex);auto i=live::publisher_types.find(p);if(i!=live::publisher_types.end())ts=i->second;}
-  auto bytes=std::make_shared<live::Blob>(m,ts);auto key=live::message_key(topic,m);auto jid=live::job;
-  live::pending_outputs.push_back([p,bytes,key,jid,final_command]{
+  const rosidl_message_type_support_t* ts=nullptr;{std::lock_guard<std::mutex> g(live::types_mutex);auto i=live::publisher_types.find(p->impl);if(i!=live::publisher_types.end())ts=i->second;}
+  if(!ts){fprintf(stderr,"Live bridge: missing output type for %s (job %llu)\n",topic?topic:"?",(unsigned long long)live::job);live::fail("publisher type registration missing");}
+  auto bytes=std::make_shared<live::Blob>(m,ts);auto key=live::message_key(topic,m);auto jid=live::job;auto publisher=*p;
+  live::pending_outputs.push_back([publisher,bytes,key,jid,final_command]{
    static auto publish=(decltype(&rcl_publish_serialized_message))live::symbol("librcl.so","rcl_publish_serialized_message");
-   auto begin=live::epoch();if(key)live::rpc(live::PUBLISH_BEGIN,jid,key,begin);auto ret=publish(p,&bytes->data,nullptr);auto end=live::epoch();
+   auto begin=live::epoch();if(key)live::rpc(live::PUBLISH_BEGIN,jid,key,begin);auto ret=publish(&publisher,&bytes->data,nullptr);auto end=live::epoch();
    if(ret!=RCL_RET_OK)live::fail("buffered publisher failed");
    live::rpc(live::PUBLISH,jid,key,begin,end,final_command,strtoull(getenv("NAV2_LIVE_DEVICE"),nullptr,10));
   });live::internal=old;return RCL_RET_OK;
@@ -273,9 +275,9 @@ extern "C" rcl_ret_t rcl_send_response(const rcl_service_t* service,rmw_request_
  static auto fn=(decltype(&rcl_send_response))live::symbol("librcl.so","rcl_send_response");
  if(live::job&&!live::flushing){
   live::MeterPause pause;bool old=live::internal;live::internal=true;
-  const rosidl_message_type_support_t* ts=nullptr;{std::lock_guard<std::mutex> g(live::types_mutex);auto i=live::response_types.find(service);if(i!=live::response_types.end())ts=i->second;}
-  auto copy=std::make_shared<live::ResponseCopy>(m,ts);auto request=*id;auto jid=live::job;
-  live::pending_outputs.push_back([service,request,copy,jid]()mutable{if(fn(service,&request,copy->message)!=RCL_RET_OK)live::fail("buffered service response failed");live::rpc(live::PUBLISH,jid);});
+  const rosidl_message_type_support_t* ts=nullptr;{std::lock_guard<std::mutex> g(live::types_mutex);auto i=live::response_types.find(service->impl);if(i!=live::response_types.end())ts=i->second;}
+  auto copy=std::make_shared<live::ResponseCopy>(m,ts);auto request=*id;auto jid=live::job;auto service_copy=*service;
+  live::pending_outputs.push_back([service_copy,request,copy,jid]()mutable{if(fn(&service_copy,&request,copy->message)!=RCL_RET_OK)live::fail("buffered service response failed");live::rpc(live::PUBLISH,jid);});
   live::internal=old;return RCL_RET_OK;
  }
  return fn(service,id,m);
@@ -309,7 +311,7 @@ extern "C" void live_path_result(void* self,const live::Path& path){static auto 
  if(live::job){live::MeterPause pause;auto key=live::path_key(path),jid=live::job;live::pending_outputs.push_back([key,jid]{live::rpc(live::PUBLISH,jid,key);});}fn(self,path);
 }
 
-__attribute__((constructor)) static void live_debug_signals(){if(getenv("NAV2_LIVE_DEBUG")){struct sigaction action{};action.sa_handler=[](int sig){const char* text="Live adapter native abort stack:\n";write(2,text,strlen(text));void* frames[48];int n=backtrace(frames,48);backtrace_symbols_fd(frames,n,2);_exit(128+sig);};sigemptyset(&action.sa_mask);sigaction(SIGABRT,&action,nullptr);}}
+__attribute__((constructor)) static void live_debug_signals(){if(getenv("NAV2_LIVE_DEBUG")){struct sigaction action{};action.sa_handler=[](int sig){const char* text="Live adapter native abort stack:\n";write(2,text,strlen(text));void* frames[48];int n=backtrace(frames,48);backtrace_symbols_fd(frames,n,2);_exit(128+sig);};sigemptyset(&action.sa_mask);sigaction(SIGABRT,&action,nullptr);std::thread([action]()mutable{while(true){sigaction(SIGSEGV,&action,nullptr);timespec t{0,100000000};nanosleep(&t,nullptr);}}).detach();}}
 
 extern "C" rcl_ret_t rcl_timer_fini(rcl_timer_t* timer){static auto fn=(decltype(&rcl_timer_fini))live::symbol("librcl.so","rcl_timer_fini");libc_mutex_lock(&live::timer_mutex);auto ret=fn(timer);libc_mutex_unlock(&live::timer_mutex);return ret;}
 

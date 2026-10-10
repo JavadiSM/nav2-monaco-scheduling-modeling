@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Record actual ROS odometry/commands with their simulation clock, without publishing."""
-import argparse,csv,time,math
+import argparse,csv,time,math,struct,sys
 from pathlib import Path
 import rclpy
 from rclpy.node import Node
@@ -9,14 +9,31 @@ from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Twist
 from rosgraph_msgs.msg import Clock
 from lifecycle_msgs.srv import GetState
+from tf2_msgs.msg import TFMessage
+from sensor_msgs.msg import LaserScan
 import json
 
 def main():
     parser=argparse.ArgumentParser();parser.add_argument('--output',type=Path,required=True);parser.add_argument('--ready-file',type=Path);parser.add_argument('--vehicles',type=int,default=1);args=parser.parse_args()
+    sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
+    from tools.live_bridge.broker import runtime_paths
+    clock_path=runtime_paths(args.output.parent)[1]
+    timing=(args.output.parent/'native-timing.csv').open('w',newline='',buffering=1);tw=csv.writer(timing);tw.writerow(['host_mono_ns','broker_sim_ns','observer_clock_ns','topic','message_stamp_ns','frame_id','child_frame_id'])
+    def native(topic,stamp,frame='',child=''):
+        try:broker=struct.unpack('<Q',clock_path.read_bytes()[:8])[0]
+        except (OSError,struct.error):broker=0
+        tw.writerow([time.monotonic_ns(),broker,sim[0],topic,stamp,frame,child])
     rclpy.init();node=Node('live_bridge_observer');sim=[0];subs=[];previous={};distances={};last_write=[0.]
     with args.output.open('w',newline='',buffering=1) as output:
         writer=csv.writer(output);writer.writerow(['host_mono_ns','sim_ns','device','topic','x','y','vx','wz'])
-        subs.append(node.create_subscription(Clock,'/clock',lambda m:sim.__setitem__(0,m.clock.sec*10**9+m.clock.nanosec),10))
+        def clock(m):
+            value=m.clock.sec*10**9+m.clock.nanosec;previous=sim[0];sim[0]=value
+            if value//10000000!=previous//10000000 or value<previous:native('/clock',value)
+        subs.append(node.create_subscription(Clock,'/clock',clock,10))
+        def transforms(m):
+            for t in m.transforms:native('/tf',t.header.stamp.sec*10**9+t.header.stamp.nanosec,t.header.frame_id,t.child_frame_id)
+        subs.append(node.create_subscription(TFMessage,'/tf',transforms,100))
+        subs.append(node.create_subscription(LaserScan,'/scan',lambda m:native('/scan',m.header.stamp.sec*10**9+m.header.stamp.nanosec,m.header.frame_id),qos_profile_sensor_data))
         for device,color in enumerate(('red','blue','white','green')[:args.vehicles]):
             ns='' if color=='red' else '/'+color
             def odom(m,d=device):
@@ -52,5 +69,5 @@ def main():
             node.create_timer(.5,check_ready)
         try:rclpy.spin(node)
         except KeyboardInterrupt:pass
-        finally:node.destroy_node();rclpy.try_shutdown()
+        finally:timing.close();node.destroy_node();rclpy.try_shutdown()
 if __name__=='__main__':main()

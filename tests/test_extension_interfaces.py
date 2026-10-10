@@ -16,7 +16,8 @@ class ReverseFastest(ReadyFIFOOldestIdle):
 
 class ExtensionInterfaceTests(unittest.TestCase):
     def test_custom_policy_replaces_FIFO_and_core_order_and_DVFS(self):
-        e=LiveEngine(scheduling_policy=ReverseFastest())
+        from platform_fixtures import LiveEngine as MulticoreEngine
+        e=MulticoreEngine(scheduling_policy=ReverseFastest())
         ids=[e.arrive(0,'control_iteration') for _ in range(3)]
         for j in ids:e.stage(j,0,dispatch=False)
         e.dispatch()
@@ -67,7 +68,7 @@ class ExtensionInterfaceTests(unittest.TestCase):
 
     def test_device_class_specific_thermal_parameters(self):
         devices=load_platform()
-        for did,cores,tmax,balance in ((0,2,46.2,45.6),(1,4,46.5,46.0)):
+        for did,cores,tmax,balance in ((0,1,46.2,45.6),(1,1,46.5,46.0)):
             d=devices[did];self.assertEqual(len(d.cores),cores)
             self.assertEqual((d.thermal_spec.max_temperature_c,d.thermal_spec.balance_temperature_c),(tmax,balance))
             for c in d.cores.values():self.assertEqual((c.max_temperature_c,c.balance_temperature_c,c.initial_temperature_c),(tmax,balance,45.))
@@ -89,7 +90,7 @@ class RoadsideLayoutTests(unittest.TestCase):
         self.assertEqual({r.processor.processor_id for r in resources.values()},set(range(1,len(endpoints)+1)))
         for endpoint in endpoints:
             r=resources[endpoint['id']];self.assertEqual(r.position_xy,(endpoint['x'],endpoint['y']))
-            self.assertEqual([c.core_type.family for c in r.processor.cores.values()],['ARM_LP','ARM_LP','ARM_HP','ARM_HP'])
+            self.assertEqual([c.core_type.family for c in r.processor.cores.values()],['ARM_HP'])
             self.assertTrue(all(c.max_temperature_c==46.5 and c.balance_temperature_c==46.0 for c in r.processor.cores.values()))
 
 if __name__=='__main__':unittest.main()

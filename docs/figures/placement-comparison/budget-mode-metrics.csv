@@ -1,0 +1,7 @@
+policy,budget_mode,jobs,deadline_evaluable,deadline_met,deadline_meet_rate
+local,LO,16836,16834,8654,0.5140786503504812
+local,HI,1482,1482,0,0.0
+offload,LO,10936,10936,4450,0.40691294806144845
+offload,HI,1027,1027,0,0.0
+random,LO,20168,20168,9491,0.4705969853232844
+random,HI,2181,2181,0,0.0

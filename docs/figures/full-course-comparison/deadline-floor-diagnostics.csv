@@ -1,0 +1,5 @@
+policy,replicate,trial,evaluated_jobs,sub_step_deadline_jobs,upload_only_impossible,optimistic_service_impossible,upload_plus_service_impossible,reaction_service_impossible,upload_plus_reaction_service_impossible,sealed_budget_jobs
+local,1,comparison-01-local-attempt-01,50131,16109,0,42246,42246,42350,42350,50131
+random,1,comparison-01-random-attempt-04,56752,17922,42024,32176,54175,45955,54253,56752
+offload,1,comparison-01-offload-attempt-01,32416,11400,32180,16769,32318,26750,32325,32415
+greedy,1,comparison-01-greedy-attempt-01,57718,18164,17550,41381,50190,48057,50285,57717

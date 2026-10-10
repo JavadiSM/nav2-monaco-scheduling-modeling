@@ -49,7 +49,7 @@ class Lap(Node):
         p = msg.pose.pose.position
         self.pose = [p.x, p.y]
         self.poses.append(self.pose)
-        self.pose_samples.append({'wall_time': time.time(), 'x': p.x, 'y': p.y})
+        self.pose_samples.append({'wall_time': time.time(),'host_monotonic_ns':time.monotonic_ns(),'sim_ns':self.get_clock().now().nanoseconds, 'x': p.x, 'y': p.y})
         if self.targets and self.ordered_targets_passed < len(self.targets):
             target = self.targets[self.ordered_targets_passed]
             if math.dist(self.pose, [target['x'], target['y']]) <= 0.70:
@@ -58,7 +58,7 @@ class Lap(Node):
     def on_odom(self, msg):
         p = msg.pose.pose.position
         self.path.append([p.x, p.y])
-        self.velocity_samples.append({'wall_time': time.time(), 'vx': msg.twist.twist.linear.x, 'wz': msg.twist.twist.angular.z})
+        self.velocity_samples.append({'wall_time': time.time(),'host_monotonic_ns':time.monotonic_ns(),'sim_ns':self.get_clock().now().nanoseconds,'x':p.x,'y':p.y, 'vx': msg.twist.twist.linear.x, 'wz': msg.twist.twist.angular.z})
 
     def on_scan(self, msg):
         self.scans += int(any(math.isfinite(v) and msg.range_min <= v <= msg.range_max for v in msg.ranges))
@@ -133,6 +133,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--fleet-color', choices=('red','blue','white','green'))
     parser.add_argument('--namespace', default='')
+    parser.add_argument('--stop-bridge-at-finish', action='store_true')
     parser.add_argument('--bridge-ready-file',type=Path,help='Optional gate after initialization, before sending the mission.')
     parser.add_argument('--start-offset', type=float, default=0.)
     parser.add_argument('--robot-name', default='racecar')
@@ -174,7 +175,7 @@ def main():
             if moved.returncode or 'data: true' not in moved.stdout:
                 raise RuntimeError('Gazebo test repositioning failed.')
             report['test_initial_checkpoint'] = args.from_checkpoint
-            node.until(lambda: False, 1)
+            if not args.stop_bridge_at_finish:node.until(lambda: False, 1)
         initial = PoseWithCovarianceStamped()
         initial.header.frame_id = 'map'
         p = scene['start']
@@ -216,7 +217,11 @@ def main():
             device=('red','blue','white','green').index(args.fleet_color or 'red')
             start_socket.sendall(PACKET.pack(START_READY,device,0,0,0,0,0))
             reply=PACKET.unpack(start_socket.recv(PACKET.size));report['common_start_sim_ns']=reply[2]
-            report['scheduler']='live_local_FIFO_oldest_idle_core'
+            report['scheduler']='live_bridge_configured'
+            settings_file=args.bridge_ready_file.parent/'trial-config.json'
+            if settings_file.exists():
+                settings=json.loads(settings_file.read_text())
+                report.update(scheduler=settings['policy'],placement=settings.get('placement','local'),communication_enabled=bool(settings.get('edge_enabled',False)))
         report['goal_send_mono_ns'] = time.monotonic_ns()
         report['goal_send_epoch_ns'] = time.time_ns()
         future = node.action.send_goal_async(goal, feedback_callback=node.feedback)
@@ -242,7 +247,7 @@ def main():
         report['nav2_error_message'] = message.result.error_msg
         if message.status != GoalStatus.STATUS_SUCCEEDED or message.result.error_code:
             raise RuntimeError(f'Nav2 course failed; status={message.status}, error={message.result.error_msg}')
-        node.until(lambda: False, 1)
+        if not args.stop_bridge_at_finish:node.until(lambda: False, 1)
         report['final_estimated_pose'] = node.pose
         report['final_goal_error_m'] = math.dist(node.pose, [targets[-1]['x'], targets[-1]['y']])
         distances = [min(math.dist(p, [cp['x'], cp['y']]) for p in node.poses) for cp in targets]
@@ -252,6 +257,13 @@ def main():
         if report['final_goal_error_m'] > 0.40 or any(distance > 0.70 for distance in distances) or node.ordered_targets_passed != len(targets):
             raise RuntimeError('Action succeeded but checkpoint proximity verification failed.')
         report['passed'] = True
+        if args.stop_bridge_at_finish:
+            _,clock_path=runtime_paths(output.parent)
+            import struct
+            report['action_result_broker_sim_ns']=struct.unpack('<Q',clock_path.read_bytes()[:8])[0]
+            report['completion_sim_s']=(report['action_result_broker_sim_ns']-report['common_start_sim_ns'])/1e9
+            request={'reason':'full course completed','action_result_sim_ns':report['action_result_broker_sim_ns'],'completion_sim_s':report['completion_sim_s'],'ordered_targets_passed':node.ordered_targets_passed}
+            temp=output.parent/'stop-requested.tmp';temp.write_text(json.dumps(request)+'\n');temp.replace(output.parent/'stop-requested.json')
         report['success_wall_time'] = time.time()
         node.show_markers(min(len(scene['checkpoints']), args.from_checkpoint + len(targets)))
     except (Exception, KeyboardInterrupt) as error:

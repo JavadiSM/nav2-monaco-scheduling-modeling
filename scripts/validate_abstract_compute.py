@@ -19,7 +19,7 @@ def main():
     result = unittest.TextTestRunner(verbosity=2).run(suite)
     report = {'tests_run': result.testsRun, 'failures': len(result.failures),
               'errors': len(result.errors), 'passed': result.wasSuccessful(),
-              'seeded_invariant_test_jobs': 4500, 'ros_connected': False,
+              'sampled_invariant_test_jobs': 4500, 'ros_connected': False,
               'task_graph_connected': True, 'live_ros_result_gating': False, 'execution_clock': 'virtual seconds'}
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, indent=2) + '\n')

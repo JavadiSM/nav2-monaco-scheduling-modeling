@@ -2,13 +2,15 @@
 
 Local repository: `nav2-monaco-scheduling-modeling`
 
-A ROS 2 / Nav2 simulation foundation for scheduling experiments. The current scene is an open circuit inspired by Monaco: one moving car visits 19 turn-entry checkpoints, then a finish gate. Nineteen static blue cabinets with antennas mark edge-server locations. The simulator runs on Ubuntu 24.04 / WSL2 with ROS 2 Jazzy, Gazebo Harmonic and RViz.
+A ROS 2 / Nav2 simulation foundation for scheduling experiments. The current scene is an open circuit inspired by Monaco: one moving car visits 19 turn-entry checkpoints, then a finish gate. Twenty-five static blue cabinets with antennas mark edge-server locations. The simulator runs on Ubuntu 24.04 / WSL2 with ROS 2 Jazzy, Gazebo Harmonic and RViz.
 
 ## Current implementation
 
 The track is designed in this repository from a rough Monaco outline. The car uses the ready-made TurtleBot3 differential-drive dynamics, sensors and upstream Nav2 algorithms, with a racecar appearance. It is not an Ackermann racing-vehicle physics model. The ordered checkpoint mission uses Nav2's existing `NavigateThroughPoses` action. All checkpoints and the finish are sent as one continuous mission; intermediate gates are pass-through targets. The track uses four iterations of Chaikin corner rounding, preserving straight stretches while smoothing turns.
 
-There is no custom scheduler connected to ROS, mixed-criticality mode switching, remote worker or task offloading yet. Parked edge cars are static Gazebo models. `config/edge_communication.yaml` reserves communication parameters without activating them. Native ROS dependencies are not, by themselves, a formally specified real-time DAG with WCETs, job deadlines and criticality levels.
+The [live bridge](live-bridge.en.md) connects actual Nav2 callback jobs to virtual A7/A15 scheduling and gates their outputs at modeled completion. Physics and modeled hardware share a 1 ms clock. The vehicle has one A7 and each RSU has one A15. Four placement baselines share FIFO / shortest predicted finish-time queues: local, random, nearest-covered-RSU offload and minimum-temperature greedy. Parameters are calibrated once and frozen for comparison. All current task families have HI criticality; synthetic LO tasks and a complete mixed-criticality policy remain future work. RSUs are modeled execution resources; native callback computation still runs on the host laptop.
+
+The [current full-course comparison](full-course-comparison.en.md) completed three calibration laps and one balanced comparison block before the fixed cutoff. Each accepted policy run reached all 20 targets and passed its scheduling audit. See the repository README for current recordings and results.
 
 ## Install
 
@@ -91,19 +93,19 @@ git push -u origin main
 
 ## Task abstraction investigation
 
-The [Persian technical study](task-abstraction-study.fa.md) separates existing frequencies, triggers and timing fields from unmeasured CPU demand and proposes a causal job DAG and controlled virtual-time result delivery for modeled CPUs. [The inspection inventory](evidence/task-abstraction-inventory.json) preserves configuration hashes and a read-only runtime graph snapshot. The original inventory is a pre-measurement snapshot. Instrumented task profiling and a standalone dependency-safe FIFO scheduler are implemented; CPU target calibration and ROS result gating remain deferred. The [English real-time report](task-model.en.md), [PDF](task-model.en.pdf), [task statistics](evidence/task-characterization-table.csv), [per-run statistics](evidence/task-characterization-per-run.csv), and [profiling protocol](task-profiling.en.md) separate configured activation contracts from measured CPU demand and empirical intervals. The final campaign stopped before the authorized 09:00 Tehran cutoff on 2026-10-09: 59 main-cohort attempts produced 57 successful full laps, one navigation abort and one intentional cutoff truncation. The [cutoff audit](evidence/task-campaign-finalization.json) verifies shutdown and unchanged scenario hashes; the [incident record](evidence/task-campaign-incidents.json) separates navigation failure from administrative truncation.
+The [Persian technical study](task-abstraction-study.fa.md) separates existing frequencies, triggers and timing fields from unmeasured CPU demand and proposes a causal job DAG and controlled virtual-time result delivery for modeled CPUs. [The inspection inventory](evidence/task-abstraction-inventory.json) preserves configuration hashes and a read-only runtime graph snapshot. The original inventory is a pre-measurement snapshot. Instrumented task profiling and a standalone dependency-safe FIFO scheduler are implemented; The original profiling campaign predates the live bridge; current CPU-demand calibration and ROS result gating are documented in the full-course comparison. The [English real-time report](task-model.en.md), [PDF](task-model.en.pdf), [task statistics](evidence/task-characterization-table.csv), [per-run statistics](evidence/task-characterization-per-run.csv), and [profiling protocol](task-profiling.en.md) separate configured activation contracts from measured CPU demand and empirical intervals. The final campaign stopped before the authorized 09:00 Tehran cutoff on 2026-10-09: 59 main-cohort attempts produced 57 successful full laps, one navigation abort and one intentional cutoff truncation. The [cutoff audit](evidence/task-campaign-finalization.json) verifies shutdown and unchanged scenario hashes; the [incident record](evidence/task-campaign-incidents.json) separates navigation failure from administrative truncation.
 
 The scheduling inputs are now [extracted parameters](extracted-parameters.en.md) ([PDF](extracted-parameters.en.pdf), [CSV](evidence/extracted-parameters.csv), [JSON](evidence/extracted-parameters.json)). The user-selected model WCET is the exact inverse empirical CDF at 95%, computed from all jobs of 57 complete missions; it is an assumed budget, not a certified bound. New diagrams use seconds and show C for every primary task and nominal T for periodic tasks. The [book-style model DAG](figures/extracted-parameters/book-style-task-dag.svg) declares atomic result delivery; the [measured dependency graph](figures/extracted-parameters/verified-job-dependencies.svg) removes CPU-order edges. Unlisted infrastructure remains pass-through background work for the initial scheduler. Reproduce without simulation: `python3 scripts/extract_task_parameters.py`.
 
 ## Independent virtual compute validation
 
-The [standalone heterogeneous compute model](abstract-compute.en.md) has configurable Cortex-A7/A15 operating points, one A7 plus one A15 per vehicle, and two of each per server. Its independent scheduler supports readiness, per-core serial execution and device-wide thermal cooling with retained work. Power and temperature are modeled without energy reporting or aging. The extracted task budgets and selected job graph now feed a standalone local FIFO replay. The [live bridge](live-bridge.en.md) now applies local FIFO budgets and result gating to actual Nav2 arrivals; offloading remains a future step.
+The [standalone heterogeneous compute model](abstract-compute.en.md) supports configurable Cortex-A7/A15 operating points. The current live experiment uses one A7 per vehicle and one A15 per RSU. Its independent scheduler supports readiness, per-core serial execution and device-wide thermal cooling with retained work. Power and temperature are modeled without energy reporting or aging. The extracted task budgets and selected job graph now feed a standalone local FIFO replay. The [live bridge](live-bridge.en.md) applies the frozen dual budgets, dependency-safe scheduling, task placement, communication and thermal gating to actual Nav2 arrivals.
 
 Run `python3 scripts/validate_abstract_compute.py` for tests and `python3 scripts/demo_abstract_compute.py` for the synthetic power/cooling demonstration. The [metric circuit map](figures/metric-map/circuit-dimensions.png) and [endpoint coordinates](evidence/metric-map-locations.csv) support subsequent coverage design.
 
 ## Frozen circuit and actual simulation
 
-The accepted circuit has a **50.45 × 22.30 m map**, **1.30 m road width** and approximately **125.96 m centreline**. One vehicle visits nineteen checkpoints and the finish. Nineteen blue cabinets mark edge locations. The map, world, checkpoints and Nav2 settings are pinned and checked before launch. Only server visuals were updated; map, route, collision geometry and navigation settings remain unchanged.
+The accepted circuit has a **50.45 × 22.30 m map**, **1.30 m road width** and approximately **125.96 m centreline**. One vehicle visits nineteen checkpoints and the finish. Twenty-five blue cabinets mark edge locations, including start/finish and infill endpoints. The map, world, checkpoints and Nav2 settings are pinned and checked before launch. RSU visuals and additional endpoints are recorded separately; the circuit map, route and navigation settings are shared across comparison runs.
 
 ![Metric circuit map](figures/metric-map/circuit-dimensions.png)
 
@@ -111,25 +113,25 @@ Earlier actual Gazebo scene, before the server cabinet visual update:
 
 ![Actual Gazebo scene](media/real-scene.png)
 
-The current full-course two-camera recording: approximately 0.75 m behind the vehicle on the left, and the original fixed overview on the right. The moving vehicle follows upstream Nav2; the offline FIFO replay below is not yet connected to robot result delivery.
+The current full-course recording combines an approximately 0.75 m chase camera, the original overview and the connected live Gantt. Temperature and actual modeled execution bars are updated from scheduling events.
 
-**4× playback — displayed four times faster than the recorded run.**
+**8× simulation-time playback — displayed eight times faster than simulation time.**
 
-![Third-person and overview cameras](media/dual-view-4x.gif)
+![Local chase, overview and connected scheduling](media/local-full-course-8x.gif)
 
-To repeat the full-course two-camera capture, with no other Gazebo run active:
+To run a new coupled full-course experiment, with no other Gazebo run active:
 
 ```bash
 source scripts/environment.sh
-python3 scripts/record_dual_view.py --full-course --timeout 1200
-python3 scripts/compress_publication_gif.py
+python3 scripts/build_live_bridge.py
+python3 scripts/run_live_bridge.py --placement local --full-course --seconds 1200 --views --output artifacts/live-bridge/new-local-full-course
 ```
 
-The full-speed recording remains under ignored `artifacts/dual-view/`. Only the compact 4× GIF is published. Optional local speed variants use `python3 scripts/make_gif_speed_variants.py artifacts/dual-view/dual-view.gif`; their default output is ignored `artifacts/gif-speed-variants/`.
+Choose a new output directory for every trial. The [full-course report](full-course-comparison.en.md) explains the frozen calibration, comparison protocol, actual achieved repetition count and retained failure evidence. The README contains all four vehicle recordings followed by four recordings of their currently nearest RSUs. Original recordings and runtime logs stay in ignored local archives.
 
-## Local task scheduling baseline
+## Historical standalone task replay
 
-Eleven extracted task families use the chosen **95%-ECDF assumed WCET**. Periodic releases preserve their nominal time periods; aperiodic arrivals are explicit. The vehicle has one A7 and one A15. A job enters ready FIFO only after its release and completion of all selected parent jobs; dispatch selects the available core that became idle earliest. Power, temperature and whole-device cooling are enabled.
+This independent historical replay uses eleven task families and the earlier **95%-ECDF assumed WCET**; it does not describe the current live calibration. Periodic releases preserve their nominal time periods; aperiodic arrivals are explicit. The vehicle has one A7 and one A15. A job enters ready FIFO only after its release and completion of all selected parent jobs; dispatch selects the available core that became idle earliest. Power, temperature and whole-device cooling are enabled.
 
 ![Local FIFO Gantt detail](figures/task-fifo/local-fifo-detail.png)
 
@@ -142,7 +144,7 @@ python3 scripts/demo_task_fifo.py
 python3 -m unittest discover -s tests -v
 ```
 
-Communication eligibility uses a **5 m radius** with **0 s modeled cost** inside coverage. This is an ideal model choice. The initial baseline executes locally; transport and offloading remain inactive.
+The historical replay used a zero-cost communication hook. Current placement uses a **5 m task-upload radius** and separate distance-based upload and parent-data delays; see [extension interfaces](scheduling-interfaces.en.md).
 
 ![Five-metre edge coverage](figures/metric-map/edge-coverage-5m.png)
 

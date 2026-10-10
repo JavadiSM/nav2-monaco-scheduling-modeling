@@ -1,0 +1,9 @@
+{
+  "source_trial": "/mnt/c/Users/Asus/Documents/ChatGPT/Ros2/artifacts/full-course-20261010/comparison-01-greedy-attempt-01",
+  "source": "actual broker events",
+  "clock": "SIM",
+  "speed": 8,
+  "frame_sim_interval_s": 0.4,
+  "frame_playback_interval_s": 0.05,
+  "frames": 680
+}

@@ -1,0 +1,379 @@
+{
+  "schema_version": 2,
+  "core_types": {
+    "A7": {
+      "name": "Cortex-A7",
+      "family": "ARM_LP",
+      "eta": 1.0,
+      "frequency_range_mhz": [
+        800,
+        1600
+      ],
+      "l": 5,
+      "voltage_range_v": [
+        0.9,
+        1.1
+      ],
+      "power": {
+        "reference_active_range_w": [
+          0.2,
+          0.5
+        ],
+        "reference_intercept_w": 0.15,
+        "reference_activity_slope_w": 0.4,
+        "leakage_ref_w": 0.05,
+        "leakage_gamma_per_k": 0.015,
+        "idle_w": 0.05,
+        "cooling_power_w": 0.005,
+        "dvfs_scaling_mode": "voltage_frequency",
+        "effective_switching_capacitance_f": null
+      },
+      "thermal": {
+        "capacitance_range_j_per_k": [
+          0.08,
+          0.12
+        ],
+        "ambient_resistance_range_k_per_w": [
+          5.0,
+          7.0
+        ]
+      },
+      "max_voltage_v": 1.1
+    },
+    "A15": {
+      "name": "Cortex-A15",
+      "family": "ARM_HP",
+      "eta": 1.8,
+      "frequency_range_mhz": [
+        1000,
+        2000
+      ],
+      "l": 5,
+      "voltage_range_v": [
+        1.1,
+        1.3
+      ],
+      "power": {
+        "reference_active_range_w": [
+          0.8,
+          2.0
+        ],
+        "reference_intercept_w": 0.55,
+        "reference_activity_slope_w": 1.55,
+        "leakage_ref_w": 0.15,
+        "leakage_gamma_per_k": 0.02,
+        "idle_w": 0.15,
+        "cooling_power_w": 0.015,
+        "dvfs_scaling_mode": "voltage_frequency",
+        "effective_switching_capacitance_f": null
+      },
+      "thermal": {
+        "capacitance_range_j_per_k": [
+          0.12,
+          0.18
+        ],
+        "ambient_resistance_range_k_per_w": [
+          4.0,
+          6.0
+        ]
+      },
+      "max_voltage_v": 1.3
+    }
+  },
+  "device_classes": {
+    "vehicle": {
+      "lp_cores": 1,
+      "hp_cores": 0,
+      "thermal": {
+        "max_temperature_c": 46.2,
+        "balance_temperature_c": 45.6
+      }
+    },
+    "server": {
+      "lp_cores": 0,
+      "hp_cores": 1,
+      "thermal": {
+        "max_temperature_c": 46.5,
+        "balance_temperature_c": 46.0
+      }
+    }
+  },
+  "scheduler_policy": "ready_hi_then_plan_rank_nonpreemptive",
+  "thermal": {
+    "ambient_temperature_c": 45.0,
+    "reference_temperature_c": 35.0,
+    "max_temperature_c": 46.2,
+    "balance_temperature_c": 45.6,
+    "thermal_epoch_ms": 100.0,
+    "coupling_base_conductance_range_w_per_k": [
+      0.07,
+      0.11
+    ],
+    "coupling_distance_attenuation": 0.8,
+    "control_epoch_s": 0.005,
+    "initial_temperature_c": 45.0
+  },
+  "thermal_configuration_status": "confirmed",
+  "realized_physical_parameters": {
+    "0": {
+      "device_class": "vehicle",
+      "coupling_base_conductance_w_per_k": 0.0926847944020137,
+      "cores": {
+        "0": {
+          "thermal_capacitance_j_per_k": 0.09217271277113633,
+          "ambient_resistance_k_per_w": 6.589969927711021
+        }
+      }
+    },
+    "1": {
+      "device_class": "server",
+      "coupling_base_conductance_w_per_k": 0.09914912075805934,
+      "cores": {
+        "0": {
+          "thermal_capacitance_j_per_k": 0.13339661905039563,
+          "ambient_resistance_k_per_w": 4.195924313568161
+        }
+      }
+    },
+    "2": {
+      "device_class": "server",
+      "coupling_base_conductance_w_per_k": 0.07918437908296078,
+      "cores": {
+        "0": {
+          "thermal_capacitance_j_per_k": 0.1269705345033204,
+          "ambient_resistance_k_per_w": 5.942150995924379
+        }
+      }
+    },
+    "3": {
+      "device_class": "server",
+      "coupling_base_conductance_w_per_k": 0.08148800484130429,
+      "cores": {
+        "0": {
+          "thermal_capacitance_j_per_k": 0.1563142512726126,
+          "ambient_resistance_k_per_w": 5.434716779172464
+        }
+      }
+    },
+    "4": {
+      "device_class": "server",
+      "coupling_base_conductance_w_per_k": 0.0885067037664351,
+      "cores": {
+        "0": {
+          "thermal_capacitance_j_per_k": 0.14429194003095275,
+          "ambient_resistance_k_per_w": 4.531222478627855
+        }
+      }
+    },
+    "5": {
+      "device_class": "server",
+      "coupling_base_conductance_w_per_k": 0.08478288168769997,
+      "cores": {
+        "0": {
+          "thermal_capacitance_j_per_k": 0.12763948155009522,
+          "ambient_resistance_k_per_w": 4.4472052153944865
+        }
+      }
+    },
+    "6": {
+      "device_class": "server",
+      "coupling_base_conductance_w_per_k": 0.09791216256727342,
+      "cores": {
+        "0": {
+          "thermal_capacitance_j_per_k": 0.14538165470942443,
+          "ambient_resistance_k_per_w": 4.667380580258863
+        }
+      }
+    },
+    "7": {
+      "device_class": "server",
+      "coupling_base_conductance_w_per_k": 0.07093848546026138,
+      "cores": {
+        "0": {
+          "thermal_capacitance_j_per_k": 0.1342974594225927,
+          "ambient_resistance_k_per_w": 4.307118942898389
+        }
+      }
+    },
+    "8": {
+      "device_class": "server",
+      "coupling_base_conductance_w_per_k": 0.07417445373927592,
+      "cores": {
+        "0": {
+          "thermal_capacitance_j_per_k": 0.13870129272255266,
+          "ambient_resistance_k_per_w": 5.737080479512089
+        }
+      }
+    },
+    "9": {
+      "device_class": "server",
+      "coupling_base_conductance_w_per_k": 0.09712838162581956,
+      "cores": {
+        "0": {
+          "thermal_capacitance_j_per_k": 0.1546377354796804,
+          "ambient_resistance_k_per_w": 5.2428578626681235
+        }
+      }
+    },
+    "10": {
+      "device_class": "server",
+      "coupling_base_conductance_w_per_k": 0.10904544608355403,
+      "cores": {
+        "0": {
+          "thermal_capacitance_j_per_k": 0.13169178553318217,
+          "ambient_resistance_k_per_w": 5.1152769325940195
+        }
+      }
+    },
+    "11": {
+      "device_class": "server",
+      "coupling_base_conductance_w_per_k": 0.09978446510338225,
+      "cores": {
+        "0": {
+          "thermal_capacitance_j_per_k": 0.16551504718654786,
+          "ambient_resistance_k_per_w": 5.976629918339408
+        }
+      }
+    },
+    "12": {
+      "device_class": "server",
+      "coupling_base_conductance_w_per_k": 0.07339418155228453,
+      "cores": {
+        "0": {
+          "thermal_capacitance_j_per_k": 0.16924148304768127,
+          "ambient_resistance_k_per_w": 4.770430339276771
+        }
+      }
+    },
+    "13": {
+      "device_class": "server",
+      "coupling_base_conductance_w_per_k": 0.08067513374074255,
+      "cores": {
+        "0": {
+          "thermal_capacitance_j_per_k": 0.15540251530964888,
+          "ambient_resistance_k_per_w": 5.398349419603656
+        }
+      }
+    },
+    "14": {
+      "device_class": "server",
+      "coupling_base_conductance_w_per_k": 0.1048352116031782,
+      "cores": {
+        "0": {
+          "thermal_capacitance_j_per_k": 0.16745781330481913,
+          "ambient_resistance_k_per_w": 4.841159647746701
+        }
+      }
+    },
+    "15": {
+      "device_class": "server",
+      "coupling_base_conductance_w_per_k": 0.10265665019176849,
+      "cores": {
+        "0": {
+          "thermal_capacitance_j_per_k": 0.15460283178597917,
+          "ambient_resistance_k_per_w": 4.351751077595052
+        }
+      }
+    },
+    "16": {
+      "device_class": "server",
+      "coupling_base_conductance_w_per_k": 0.07426037491299456,
+      "cores": {
+        "0": {
+          "thermal_capacitance_j_per_k": 0.12432477600743,
+          "ambient_resistance_k_per_w": 5.847686587442121
+        }
+      }
+    },
+    "17": {
+      "device_class": "server",
+      "coupling_base_conductance_w_per_k": 0.10185445903790898,
+      "cores": {
+        "0": {
+          "thermal_capacitance_j_per_k": 0.15632514163076902,
+          "ambient_resistance_k_per_w": 4.160313657707073
+        }
+      }
+    },
+    "18": {
+      "device_class": "server",
+      "coupling_base_conductance_w_per_k": 0.1012643359683213,
+      "cores": {
+        "0": {
+          "thermal_capacitance_j_per_k": 0.16078175136116205,
+          "ambient_resistance_k_per_w": 4.846188231701826
+        }
+      }
+    },
+    "19": {
+      "device_class": "server",
+      "coupling_base_conductance_w_per_k": 0.09810878369940475,
+      "cores": {
+        "0": {
+          "thermal_capacitance_j_per_k": 0.14424568563062493,
+          "ambient_resistance_k_per_w": 4.498805095186108
+        }
+      }
+    },
+    "20": {
+      "device_class": "server",
+      "coupling_base_conductance_w_per_k": 0.07722685907150764,
+      "cores": {
+        "0": {
+          "thermal_capacitance_j_per_k": 0.14135677798902518,
+          "ambient_resistance_k_per_w": 5.206212216229965
+        }
+      }
+    },
+    "21": {
+      "device_class": "server",
+      "coupling_base_conductance_w_per_k": 0.07072232661970504,
+      "cores": {
+        "0": {
+          "thermal_capacitance_j_per_k": 0.1575020468290882,
+          "ambient_resistance_k_per_w": 5.236685651802478
+        }
+      }
+    },
+    "22": {
+      "device_class": "server",
+      "coupling_base_conductance_w_per_k": 0.10095070704786674,
+      "cores": {
+        "0": {
+          "thermal_capacitance_j_per_k": 0.16046857183800478,
+          "ambient_resistance_k_per_w": 5.389976876636135
+        }
+      }
+    },
+    "23": {
+      "device_class": "server",
+      "coupling_base_conductance_w_per_k": 0.08832462383884102,
+      "cores": {
+        "0": {
+          "thermal_capacitance_j_per_k": 0.17269662098884342,
+          "ambient_resistance_k_per_w": 5.4670277268695795
+        }
+      }
+    },
+    "24": {
+      "device_class": "server",
+      "coupling_base_conductance_w_per_k": 0.10954797196123003,
+      "cores": {
+        "0": {
+          "thermal_capacitance_j_per_k": 0.1684975265539781,
+          "ambient_resistance_k_per_w": 5.413277670299593
+        }
+      }
+    },
+    "25": {
+      "device_class": "server",
+      "coupling_base_conductance_w_per_k": 0.07318813071012527,
+      "cores": {
+        "0": {
+          "thermal_capacitance_j_per_k": 0.17025379489203898,
+          "ambient_resistance_k_per_w": 5.2582233562866385
+        }
+      }
+    }
+  }
+}

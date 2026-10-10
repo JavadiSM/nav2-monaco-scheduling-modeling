@@ -1,4 +1,4 @@
-"""Lockstep broker for real callback arrivals, staged outputs and local devices."""
+"""Lockstep broker for real callback arrivals, staged outputs and heterogeneous devices."""
 import argparse,csv,json,mmap,os,selectors,socket,struct,subprocess,time,traceback,hashlib
 from dataclasses import asdict
 from pathlib import Path
@@ -16,7 +16,8 @@ class Broker:
         self.out=Path(out).resolve();self.out.mkdir(parents=True,exist_ok=True)
         config_file=self.out/'trial-config.json'
         self.config=json.loads((config_file if config_file.exists() else Path(__file__).resolve().parents[2]/'config/live_bridge.json').read_text())
-        vehicles=vehicles or self.config['vehicle_count'];self.seconds=seconds;self.engine=LiveEngine(vehicles,self.config['step_ns'],self.out/'hardware-config.json' if (self.out/'hardware-config.json').exists() else None,dual_budget=self.config.get('budget_policy')=='actual_CPU_mean_LO_observed_max_HI',task_parameters=self.out/'task-parameters.json' if (self.out/'task-parameters.json').exists() else None,dvfs_selector=configured_selector(self.config) if dvfs_selector is None else dvfs_selector,scheduling_policy=configured_scheduler(self.config) if scheduling_policy is None else scheduling_policy);self.dt=self.engine.dt;self.limit=round((seconds+self.config['bootstrap_sim_s'])/self.dt);self.bootstrap=round((self.config['bootstrap_sim_s'] if bootstrap_s is None else bootstrap_s)/self.dt)
+        if self.config.get('edge_enabled') and 'deadlines' not in self.config:self.config['deadlines']=json.loads((Path(__file__).resolve().parents[2]/self.config['deadline_file']).read_text())
+        vehicles=vehicles or self.config['vehicle_count'];self.seconds=seconds;self.engine=LiveEngine(vehicles,self.config['step_ns'],self.out/'hardware-config.json' if (self.out/'hardware-config.json').exists() else None,dual_budget=self.config.get('budget_policy')=='actual_CPU_mean_LO_observed_max_HI',task_parameters=self.out/'task-parameters.json' if (self.out/'task-parameters.json').exists() else None,dvfs_selector=configured_selector(self.config) if dvfs_selector is None else dvfs_selector,scheduling_policy=configured_scheduler(self.config) if scheduling_policy is None else scheduling_policy,edge_config=self.config if self.config.get('edge_enabled') else None,deadlines=self.config.get('deadlines',{}).get('tasks'),overrun_policy=self.config.get('dvfs',{}).get('overrun_policy','remaining_work_at_maximum_point'),calibration_actual_work=self.config.get('calibration_actual_work',False));self.dt=self.engine.dt;self.limit=round((seconds+self.config['bootstrap_sim_s'])/self.dt);self.bootstrap=round((self.config['bootstrap_sim_s'] if bootstrap_s is None else bootstrap_s)/self.dt)
         self.sockpath,self.clockpath=runtime_paths(self.out)
         # Keep an already mapped clock file nonempty while attaching the broker.
         self.clockfile=self.clockpath.open('r+b' if self.clockpath.exists() else 'w+b')
@@ -31,23 +32,24 @@ class Broker:
         self.engine.event_sink=self.live_event
         self.engine.event('scheduling_policy',policy_id=self.engine.scheduling_policy.name)
         self.start_ready=set();self.start_acked=set();self.origin_tick=None;self.dispatch_started=False;self.barrier_host_start=None
-        self.stepfile=(self.out/'clock-pairs.csv').open('w',newline='');self.stepwriter=csv.writer(self.stepfile);self.stepwriter.writerow(['tick','physics_ns','hardware_ns','real_callbacks_busy'])
+        self.stepfile=(self.out/'clock-pairs.csv').open('w',newline='');self.stepwriter=csv.writer(self.stepfile);self.stepwriter.writerow(['tick','physics_ns','hardware_ns','real_callbacks_busy','host_monotonic_ns','host_epoch_ns'])
         self.stats={'packets':0,'physics_steps':0,'outputs':0,'blocked_outputs':0,'lookup_misses':0,'phase_completion_before_callback_end':0}
         root=Path(__file__).resolve().parents[2]
         self.stepper=subprocess.Popen([str(root/'build/live-bridge/stepper')],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=(self.out/'stepper.log').open('w'),text=True,bufsize=1)
     def live_event(self,row):self.live.write(json.dumps(row)+'\n')
     def start_barrier(self):
         if not self.armed and self.engine.tick>=self.bootstrap:
-            if self.start_ready!=set(self.engine.devices) or not (self.out/'nav2-ready').exists():return
+            if self.start_ready!=self.engine.vehicle_ids or not (self.out/'nav2-ready').exists():return
             if (self.out/'views-required').exists() and not (self.out/'views-ready').exists():return
+            if self.engine.edge_enabled and self.engine.position_ticks[0]!=self.engine.tick:raise RuntimeError('Ground-truth vehicle pose is missing at common start')
             self.armed=True;self.origin_tick=self.engine.tick;self.limit=self.origin_tick+round(self.seconds/self.engine.dt)
             self.clock[:]=struct.pack('<4Q',self.engine.tick*self.engine.step_ns,1,0,self.engine.tick)
             self.engine.event('common_start',origin_tick=self.origin_tick)
             (self.out/'armed').write_text(str(self.origin_tick*self.engine.step_ns)+'\n')
             self.barrier_host_start=time.monotonic()
         if self.armed and not self.dispatch_started:
-            first={j.device for j in self.engine.jobs.values() if j.task=='bt_tick' and j.staged_tick is not None}
-            if self.start_acked==set(self.engine.devices) and first==set(self.engine.devices):
+            first={j.owner_device for j in self.engine.jobs.values() if j.task=='bt_tick' and j.staged_tick is not None}
+            if self.start_acked==self.engine.vehicle_ids and first==self.engine.vehicle_ids:
                 self.dispatch_started=True;self.engine.event('common_dispatch_begin')
             elif time.monotonic()-self.barrier_host_start>60:raise RuntimeError('Synchronized goal/first-BT barrier timed out')
     def reply(self,c,a=0):
@@ -71,7 +73,7 @@ class Broker:
             s['busy']=False;s['wait']=('result',a)
         elif op in (TRIGGER,RESULT_OWNER):
             if not a or a not in self.engine.jobs:raise RuntimeError('Unknown triggering job')
-            device=self.engine.jobs[a].device
+            device=self.engine.jobs[a].owner_device
             self.producers.setdefault((device,b),[]).append((a,0,0))
             self.engine.event('request_trigger' if op==TRIGGER else 'result_owner',job_id=a,signature=b,device_id=device);self.reply(c)
         elif op==END:
@@ -79,16 +81,18 @@ class Broker:
             if j.status!='completed':raise RuntimeError('Actual callback ended before its modeled completion gate')
             if self.engine.dual_budget and b!=j.measured_cpu_ns:raise RuntimeError('Actual CPU measurement changed after budget selection')
             j.outputs_committed=True;j.real_cpu_ns=b;s.update(job=None,busy=False,wait=None);self.engine.event('actual_end',job_id=a,real_cpu_ns=b);self.reply(c)
-        elif op==WAIT:s['busy']=False;self.reply(c)
+        elif op==WAIT:
+            # A mutex wait while committing completed outputs must keep SIM frozen.
+            s['busy']=bool(s['job'] and self.engine.jobs[s['job']].status=='completed');self.reply(c)
         elif op==RESUME:s['busy']=bool(s['job']);self.reply(c)
         elif op==SLEEP:s['busy']=False;s['wait']=('sleep',a)
         elif op==PUBLISH_BEGIN:
             if a and self.engine.jobs[a].status!='completed':raise RuntimeError('Publication opened before selected completion')
-            device=self.engine.jobs[a].device if a else g
+            device=self.engine.jobs[a].owner_device if a else g
             self.producers.setdefault((device,b),[]).append((a,d,None));self.reply(c)
         elif op==PUBLISH:
             if a and self.engine.jobs[a].status!='completed':raise RuntimeError('Output before model completion')
-            device=self.engine.jobs[a].device if a else g
+            device=self.engine.jobs[a].owner_device if a else g
             values=self.producers.setdefault((device,b),[])
             pending=next((i for i,v in enumerate(values) if v==(a,d,None)),None)
             if pending is None:values.append((a,d,e))
@@ -99,7 +103,7 @@ class Broker:
             self.stats['outputs']+=1;self.engine.event('publication',job_id=a,device_id=device,final_command=bool(f),signature=b,source_begin_ns=d,source_end_ns=e);self.reply(c)
         elif op==DEVICE_GATE:s['busy']=False;s['wait']=('device',a)
         elif op==START_READY:
-            if a not in self.engine.devices:raise RuntimeError('Unknown mission device')
+            if a not in self.engine.vehicle_ids:raise RuntimeError('Unknown mission device')
             self.start_ready.add(a);s['wait']=('start',a)
         elif op==START_ACK:
             if not self.armed or a not in self.start_ready:raise RuntimeError('Mission acknowledgement before common start')
@@ -139,21 +143,33 @@ class Broker:
         self.stepper.stdin.write('step '+' '.join(map(str,self.expected_commands))+'\n');self.stepper.stdin.flush()
         line=self.stepper.stdout.readline()
         if not line:raise RuntimeError('Gazebo stepper exited: '+str(self.stepper.poll()))
-        actual=int(line);expected=(self.engine.tick+1)*self.engine.step_ns
+        fields=line.split();actual=int(fields[0]);expected=(self.engine.tick+1)*self.engine.step_ns
         if actual!=expected:raise RuntimeError(f'Physics/model clock mismatch: {actual} != {expected}')
+        if len(fields)>=4:
+            pose_tick=round(int(fields[1])/self.engine.step_ns)
+            self.engine.update_position(0,(float(fields[2]),float(fields[3])),pose_tick)
         if self.armed:self.engine.advance()
         else:self.engine.tick+=1
         self.stats['physics_steps']+=1
-        self.stepwriter.writerow([self.engine.tick,actual,self.engine.tick*self.engine.step_ns,0])
+        self.stepwriter.writerow([self.engine.tick,actual,self.engine.tick*self.engine.step_ns,0,time.monotonic_ns(),time.time_ns()])
         self.clock[:]=struct.pack('<4Q',actual,int(self.armed),0,self.engine.tick)
-        if self.engine.tick%max(1,round(.01/self.engine.dt))==0:self.live_event({'kind':'clock','tick':self.engine.tick})
+        if self.engine.tick%max(1,round(.01/self.engine.dt))==0:self.live_event({'kind':'clock','tick':self.engine.tick,'position_xy':self.engine.positions.get(0),'host_monotonic_ns':time.monotonic_ns()})
         self.release()
+    def cutoff_quiescent(self,now):
+        committed=all(j.finish_tick is None or j.outputs_committed for j in self.engine.jobs.values())
+        return committed and not any(s['busy'] for s in self.clients.values()) and now-self.last_activity>=self.config['settle_quiet_host_s']
+
     def run(self):
-        start=time.monotonic();last_progress=start;last_report=-1
+        start=time.monotonic();last_progress=start;last_report=-1;cutoff_started=None
         try:
-            while (not self.armed or self.engine.tick<self.limit or any(s['busy'] for s in self.clients.values()) or time.monotonic()-self.last_activity<self.config['settle_quiet_host_s']) and not self.stop:
+            while (cutoff_started is not None or not self.armed or self.engine.tick<self.limit or any(s['busy'] for s in self.clients.values()) or time.monotonic()-self.last_activity<self.config['settle_quiet_host_s']) and not self.stop:
                 if (self.out/'stop-requested.json').exists():
-                    self.stop_request=json.loads((self.out/'stop-requested.json').read_text());self.stop_reason=self.stop_request['reason'];break
+                    now=time.monotonic()
+                    if cutoff_started is None:
+                        self.stop_request=json.loads((self.out/'stop-requested.json').read_text());self.stop_reason=self.stop_request['reason'];cutoff_started=now
+                        self.engine.event('observation_cutoff',reason=self.stop_reason)
+                    if self.cutoff_quiescent(now):break
+                    if now-cutoff_started>self.config['host_computation_timeout_s']:raise RuntimeError('Completed outputs did not commit at the frozen cutoff')
                 events=self.selector.select(.0005)
                 for key,_ in events:
                     if key.fileobj is self.server:
@@ -170,7 +186,7 @@ class Broker:
                 self.start_barrier();self.release()
                 busy=any(s['busy'] for s in self.clients.values())
                 now=time.monotonic()
-                can_step=(self.dispatch_started and self.engine.tick<self.limit) if self.armed else True
+                can_step=cutoff_started is None and ((self.dispatch_started and self.engine.tick<self.limit) if self.armed else True)
                 if can_step and not busy and now-self.last_activity>=self.config['settle_quiet_host_s']:
                     self.engine.dispatch();self.release()
                     if any(s['busy'] for s in self.clients.values()):continue
@@ -198,7 +214,7 @@ class Broker:
         for j in self.engine.jobs.values():
             row=asdict(j);row['parents']=sorted(j.parents);row['assumed_wcet_s']=j.selected_budget_s
             jobs.append(row)
-        report={'schema':3 if self.engine.dual_budget else 1,'execution_accounting':'piecewise_DVFS_equivalent_work','task_parameters':{name:asdict(spec) for name,spec in self.engine.tasks.items()},'step_s':self.engine.dt,'clock':'SIM','scheduling_policy_id':self.engine.scheduling_policy.name,'policy':self.engine.scheduling_policy.name,'job_source':'actual callback entry','completion':'sealed actual computation then selected LO/HI budget then buffered output release' if self.engine.dual_budget else 'historical Q95 phase gate','origin_tick':self.origin_tick,'race_seconds':(self.engine.tick-self.origin_tick)*self.engine.dt if self.origin_tick is not None else 0.,'sim_seconds':self.engine.tick*self.engine.dt,'host_seconds':host_s,'failure':self.failure,'stop_reason':self.stop_reason,'stop_request':self.stop_request,'hardware_configuration':self.engine.platform_config,'stats':self.stats,'jobs':jobs,'events':self.engine.events,'thermal':self.engine.samples,'config':self.config,'hardware':{d:[{'core_id':c,'type':v.core_type.name,'frequency_mhz':v.dvfs_level().frequency_mhz,'voltage_v':v.dvfs_level().voltage_v,'performance_eta':v.core_type.performance_eta} for c,v in p.cores.items()] for d,p in self.engine.devices.items()}}
+        report={'schema':4 if self.engine.edge_enabled else (3 if self.engine.dual_budget else 1),'placement_policy':self.engine.placement.name,'device_classes':self.engine.device_classes,'endpoint_ids':self.engine.endpoint_ids,'endpoint_positions':self.engine.endpoints,'transfers':self.engine.transfers,'execution_accounting':'piecewise_DVFS_equivalent_work','task_parameters':{name:asdict(spec) for name,spec in self.engine.tasks.items()},'step_s':self.engine.dt,'clock':'SIM','scheduling_policy_id':self.engine.scheduling_policy.name,'policy':self.engine.scheduling_policy.name,'job_source':'actual callback entry','completion':'sealed actual computation then selected LO/HI budget then buffered output release' if self.engine.dual_budget else 'historical Q95 phase gate','origin_tick':self.origin_tick,'race_seconds':(self.engine.tick-self.origin_tick)*self.engine.dt if self.origin_tick is not None else 0.,'sim_seconds':self.engine.tick*self.engine.dt,'host_seconds':host_s,'failure':self.failure,'stop_reason':self.stop_reason,'stop_request':self.stop_request,'hardware_configuration':self.engine.platform_config,'stats':self.stats,'jobs':jobs,'events':self.engine.events,'thermal':self.engine.samples,'config':self.config,'hardware':{d:[{'core_id':c,'type':v.core_type.name,'frequency_mhz':v.dvfs_level().frequency_mhz,'voltage_v':v.dvfs_level().voltage_v,'performance_eta':v.core_type.performance_eta} for c,v in p.cores.items()] for d,p in self.engine.devices.items()}}
         (self.out/'trace.json').write_text(json.dumps(report,indent=2)+'\n')
 def main():
     p=argparse.ArgumentParser();p.add_argument('--output',required=True);p.add_argument('--seconds',type=float,default=30);p.add_argument('--vehicles',type=int);p.add_argument('--bootstrap',type=float);a=p.parse_args()
